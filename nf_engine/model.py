@@ -80,6 +80,15 @@ class PlayerView:
     military_colony_count: int
     production_colony_count: int
     windfall_colony_count: int
+    novelty_colony_count: int
+    rare_colony_count: int
+    genes_colony_count: int
+    alien_colony_count: int
     goods_count: int
+    novelty_goods_count: int
+    rare_goods_count: int
+    genes_goods_count: int
+    alien_goods_count: int
     vp_chips: int
+    military: int
 

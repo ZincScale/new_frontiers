@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from .model import Action, SettleKind, WorldKind
 
@@ -77,6 +77,7 @@ class AIPlayer:
         if not affordable:
             return None
         s = self.strategy
+        view = game.player_view(player)
 
         def value(tile):
             val = tile.vp + tile.spaces
@@ -88,6 +89,13 @@ class AIPlayer:
             val += tile.powers.settle_discount * s.settle_weight
             if tile.large:
                 val += 3
+            if tile.score_bonus:
+                projected = replace(
+                    view,
+                    development_count=view.development_count + 1,
+                    large_development_count=view.large_development_count + int(tile.large),
+                )
+                val += tile.score_bonus(projected)
             return val
 
         return max(affordable, key=value)
@@ -103,9 +111,9 @@ class AIPlayer:
                 val += s.economy_bias
             if game is not None and player is not None:
                 if world.settle_kind is SettleKind.MILITARY:
-                    gap = max(0, world.cost_or_defense - game.military_strength(player))
+                    gap = max(0, game.military_target_defense(world) - game.military_strength(player))
                     val -= gap * (2 + s.military_bias)
-                    val -= game.military_logistics_cost(world)
+                    val -= game.military_logistics_cost(world, player)
                 else:
                     gap = max(0, game.civilian_settle_cost(player, world) - player.credits)
                     val -= gap * 2
@@ -127,7 +135,7 @@ class AIPlayer:
             if world.settle_kind is SettleKind.MILITARY:
                 val += s.military_bias * 2
                 val += game.total_powers(player).military_settle_vp
-                val -= game.military_logistics_cost(world)
+                val -= game.military_logistics_cost(world, player)
             if world.kind in (WorldKind.PRODUCTION, WorldKind.WINDFALL):
                 val += s.economy_bias * 2
             val -= world.colonists
@@ -144,4 +152,3 @@ class AIPlayer:
             if pick <= running:
                 return item
         return next(iter(scores))
-

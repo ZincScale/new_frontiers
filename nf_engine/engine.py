@@ -35,6 +35,10 @@ class GameConfig:
     colonists_per_player: int = 20
     max_rounds: int = 80
     explore_draw: int = 7
+    development_space_limit: int = 10
+    max_develop_discount: int = 1
+    military_overmatch_per_logistics_discount: int = 2
+    military_defense_bonus: int = 0
     military_logistics: bool = True
 
 
@@ -130,6 +134,7 @@ class Game:
             cost = self.development_cost(player, choice, selector_bonus=(player is selector))
             player.credits -= cost
             player.developments.append(choice)
+            self.development_market.remove(choice)
 
     def action_explore(self, selector: Player):
         for player in self.players:
@@ -188,14 +193,22 @@ class Game:
         built = {tile.id for tile in player.developments}
         return [
             tile for tile in self.development_market
-            if tile.id not in built and self.development_cost(player, tile, selector_bonus) <= player.credits
+            if tile.id not in built
+            and self.development_cost(player, tile, selector_bonus) <= player.credits
+            and self.can_add_development(player, tile)
         ]
 
     def development_cost(self, player: Player, tile: DevelopmentTile, selector_bonus: bool = False):
-        discount = self.total_powers(player).develop_discount
+        discount = min(self.total_powers(player).develop_discount, self.config.max_develop_discount)
         if selector_bonus:
             discount += 1
         return max(0, tile.cost - discount)
+
+    def development_spaces(self, player: Player):
+        return sum(tile.spaces for tile in player.developments)
+
+    def can_add_development(self, player: Player, tile: DevelopmentTile):
+        return self.development_spaces(player) + tile.spaces <= self.config.development_space_limit
 
     def settle_candidates(self, player: Player):
         return [world for world in player.explored_worlds if self.can_settle(player, world)]
@@ -205,21 +218,30 @@ class Game:
             return False
         if world.settle_kind is SettleKind.CIVILIAN:
             return player.credits >= self.civilian_settle_cost(player, world)
-        return self.military_strength(player) >= world.cost_or_defense and player.credits >= self.military_logistics_cost(world)
+        return self.military_strength(player) >= self.military_target_defense(world) and player.credits >= self.military_logistics_cost(world, player)
 
     def civilian_settle_cost(self, player: Player, world: WorldTile):
         return max(0, world.cost_or_defense - self.total_powers(player).settle_discount)
 
-    def military_logistics_cost(self, world: WorldTile):
+    def military_target_defense(self, world: WorldTile):
+        return world.cost_or_defense + self.config.military_defense_bonus
+
+    def military_logistics_cost(self, world: WorldTile, player: Player | None = None):
         if not self.config.military_logistics:
             return 0
         if world.cost_or_defense >= 6:
-            return 3
-        if world.cost_or_defense >= 4:
-            return 2
-        if world.cost_or_defense >= 2:
-            return 1
-        return 0
+            cost = 3
+        elif world.cost_or_defense >= 4:
+            cost = 2
+        elif world.cost_or_defense >= 2:
+            cost = 1
+        else:
+            cost = 0
+
+        if player is not None and self.config.military_overmatch_per_logistics_discount > 0:
+            overmatch = max(0, self.military_strength(player) - self.military_target_defense(world))
+            cost -= overmatch // self.config.military_overmatch_per_logistics_discount
+        return max(0, cost)
 
     def military_strength(self, player: Player):
         return self.total_powers(player).military
@@ -264,13 +286,21 @@ class Game:
             "colonists": player.colonists,
             "vp_chips": player.vp_chips,
             "developments": len(player.developments),
-            "dev_spaces": sum(tile.spaces for tile in player.developments),
+            "dev_spaces": self.development_spaces(player),
             "colonies": len(player.colonies),
             "military": self.military_strength(player),
             "goods": len(player.goods),
         }
 
     def player_view(self, player: Player):
+        colonies_by_good = {good: 0 for good in Good}
+        goods_by_type = {good: 0 for good in Good}
+        for colony in player.colonies:
+            if colony.good:
+                colonies_by_good[colony.good] += 1
+        for good in player.goods.values():
+            goods_by_type[good] += 1
+
         return PlayerView(
             development_count=len(player.developments),
             large_development_count=sum(1 for tile in player.developments if tile.large),
@@ -278,8 +308,17 @@ class Game:
             military_colony_count=sum(1 for tile in player.colonies if tile.settle_kind is SettleKind.MILITARY),
             production_colony_count=sum(1 for tile in player.colonies if tile.kind is WorldKind.PRODUCTION),
             windfall_colony_count=sum(1 for tile in player.colonies if tile.kind is WorldKind.WINDFALL),
+            novelty_colony_count=colonies_by_good[Good.NOVELTY],
+            rare_colony_count=colonies_by_good[Good.RARE],
+            genes_colony_count=colonies_by_good[Good.GENES],
+            alien_colony_count=colonies_by_good[Good.ALIEN],
             goods_count=len(player.goods),
+            novelty_goods_count=goods_by_type[Good.NOVELTY],
+            rare_goods_count=goods_by_type[Good.RARE],
+            genes_goods_count=goods_by_type[Good.GENES],
+            alien_goods_count=goods_by_type[Good.ALIEN],
             vp_chips=player.vp_chips,
+            military=self.military_strength(player),
         )
 
     def tie_breaker(self, player: Player):
@@ -291,7 +330,7 @@ class Game:
         if self.colonist_supply < 5:
             return True
         for player in self.players:
-            if sum(tile.spaces for tile in player.developments) > 10:
+            if self.development_spaces(player) >= self.config.development_space_limit:
                 return True
             if len(player.colonies) > 7:
                 return True
@@ -302,7 +341,7 @@ class Game:
         if world.settle_kind is SettleKind.CIVILIAN:
             player.credits -= self.civilian_settle_cost(player, world)
         else:
-            player.credits -= self.military_logistics_cost(world)
+            player.credits -= self.military_logistics_cost(world, player)
         player.explored_worlds.remove(world)
         player.colonies.append(world)
         if world.kind is WorldKind.WINDFALL and world.good:
@@ -340,4 +379,3 @@ class Game:
         if player_index in self.priority:
             self.priority.remove(player_index)
         self.priority.insert(0, player_index)
-

@@ -31,6 +31,36 @@ def score_goods(view):
     return view.goods_count * 2
 
 
+def score_novelty(view):
+    return view.novelty_colony_count * 2 + view.novelty_goods_count
+
+
+def score_rare(view):
+    return view.rare_colony_count * 2 + view.rare_goods_count
+
+
+def score_genes(view):
+    return view.genes_colony_count * 2 + view.genes_goods_count
+
+
+def score_alien(view):
+    return view.alien_colony_count * 3 + view.alien_goods_count
+
+
+def score_military_strength(view):
+    return view.military
+
+
+def score_diversity(view):
+    types = [
+        view.novelty_colony_count,
+        view.rare_colony_count,
+        view.genes_colony_count,
+        view.alien_colony_count,
+    ]
+    return sum(1 for count in types if count) * 3
+
+
 def score_vp_chips(view):
     return view.vp_chips // 2
 
@@ -61,13 +91,27 @@ DEVELOPMENTS = [
     DevelopmentTile("consumer_consortium", "Consumer Consortium", 5, 3, 1, powers=Powers(consume_vp_per_good=2)),
     DevelopmentTile("mining_conglomerate", "Mining Conglomerate", 5, 3, 1, powers=Powers(produce_credit=1, trade_bonus=1)),
     DevelopmentTile("military_academy", "Military Academy", 5, 3, 1, powers=Powers(military=2, military_settle_vp=1)),
+    DevelopmentTile("stellar_cartography", "Stellar Cartography", 2, 1, 1, powers=Powers(explore_extra=2)),
+    DevelopmentTile("frontier_station", "Frontier Station", 3, 1, 1, powers=Powers(settle_discount=1, trade_bonus=1)),
+    DevelopmentTile("orbital_shipyards", "Orbital Shipyards", 3, 2, 1, powers=Powers(military=1, settle_discount=1)),
+    DevelopmentTile("xenoarchaeology", "Xenoarchaeology", 3, 2, 1, powers=Powers(explore_extra=1, consume_credit_per_good=1)),
+    DevelopmentTile("colonial_labor_unions", "Colonial Labor Unions", 4, 2, 1, powers=Powers(produce_credit=1, settle_discount=1)),
+    DevelopmentTile("survey_drones", "Survey Drones", 4, 2, 1, powers=Powers(explore_extra=2, settle_discount=1)),
+    DevelopmentTile("peacekeeping_fleet", "Peacekeeping Fleet", 4, 2, 1, powers=Powers(military=2, trade_bonus=1)),
+    DevelopmentTile("merchant_exchange", "Merchant Exchange", 4, 2, 1, powers=Powers(trade_bonus=2, consume_credit_per_good=1)),
+    DevelopmentTile("biofoundries", "Biofoundries", 4, 2, 1, powers=Powers(consume_vp_per_good=1, produce_credit=1)),
+    DevelopmentTile("alien_embassy", "Alien Embassy", 5, 3, 1, powers=Powers(explore_extra=2, trade_bonus=1)),
+    DevelopmentTile("starry_sky_lanes", "Starry Sky Lanes", 5, 3, 1, powers=Powers(explore_extra=1, settle_discount=2)),
+    DevelopmentTile("advanced_replicators", "Advanced Replicators", 5, 3, 1, powers=Powers(develop_discount=1, produce_credit=1)),
+    DevelopmentTile("hyperlane_consulate", "Hyperlane Consulate", 5, 3, 1, powers=Powers(settle_discount=1, consume_vp_per_good=1)),
+    DevelopmentTile("astrocartel_brokers", "Astrocartel Brokers", 5, 3, 1, powers=Powers(trade_bonus=1, consume_credit_per_good=1, produce_credit=1)),
     # Large developments, the board-game analogue of RFTG 6-cost developments.
     DevelopmentTile("galactic_imperium", "Galactic Imperium", 9, 0, 3, large=True, powers=Powers(military=2, military_settle_vp=1), score_bonus=score_military),
     DevelopmentTile("free_trade_association", "Free Trade Association", 9, 0, 3, large=True, powers=Powers(trade_bonus=2), score_bonus=score_goods),
     DevelopmentTile("galactic_federation", "Galactic Federation", 9, 0, 3, large=True, powers=Powers(develop_discount=1), score_bonus=score_developments),
     DevelopmentTile("merchant_guild", "Merchant Guild", 9, 0, 3, large=True, powers=Powers(trade_bonus=1, consume_credit_per_good=1), score_bonus=score_production),
     DevelopmentTile("mining_league", "Mining League", 9, 0, 3, large=True, powers=Powers(produce_credit=2), score_bonus=score_production),
-    DevelopmentTile("new_galactic_order", "New Galactic Order", 9, 0, 3, large=True, powers=Powers(military=3), score_bonus=score_military),
+    DevelopmentTile("new_galactic_order", "New Galactic Order", 9, 0, 3, large=True, powers=Powers(military=3), score_bonus=score_military_strength),
     DevelopmentTile("pan_galactic_league", "Pan-Galactic League", 9, 0, 3, large=True, powers=Powers(explore_extra=2), score_bonus=score_colonies),
     DevelopmentTile("galactic_renaissance", "Galactic Renaissance", 9, 0, 3, large=True, powers=Powers(develop_discount=1, consume_credit_per_good=1), score_bonus=score_developments),
     DevelopmentTile("galactic_survey_seti", "Galactic Survey: SETI", 9, 0, 3, large=True, powers=Powers(explore_extra=3), score_bonus=score_large_developments),
@@ -128,6 +172,29 @@ WORLDS = [
     WorldTile("alien_robot_sentry", "Alien Robot Sentry", WorldKind.WINDFALL, SettleKind.MILITARY, 5, 2, 4, Good.ALIEN, powers=Powers(military=1)),
     WorldTile("alien_ruins", "Alien Ruins", WorldKind.WINDFALL, SettleKind.MILITARY, 6, 2, 6, Good.ALIEN),
     WorldTile("lost_alien_battle_fleet", "Lost Alien Battle Fleet", WorldKind.WINDFALL, SettleKind.MILITARY, 7, 3, 7, Good.ALIEN, powers=Powers(military=2)),
+    # Starry/frontier-space analogue worlds for a deeper exploration bag.
+    WorldTile("aurora_habitat", "Aurora Habitat", WorldKind.PRODUCTION, SettleKind.CIVILIAN, 2, 1, 1, Good.NOVELTY, powers=Powers(explore_extra=1)),
+    WorldTile("festival_moon", "Festival Moon", WorldKind.WINDFALL, SettleKind.CIVILIAN, 2, 1, 1, Good.NOVELTY, powers=Powers(consume_vp_per_good=1)),
+    WorldTile("artisan_ring", "Artisan Ring", WorldKind.PRODUCTION, SettleKind.CIVILIAN, 3, 1, 2, Good.NOVELTY, powers=Powers(consume_credit_per_good=1)),
+    WorldTile("glimmer_cloud", "Glimmer Cloud", WorldKind.WINDFALL, SettleKind.CIVILIAN, 3, 1, 2, Good.RARE, powers=Powers(trade_bonus=1)),
+    WorldTile("deep_core_mines", "Deep Core Mines", WorldKind.PRODUCTION, SettleKind.CIVILIAN, 5, 2, 4, Good.RARE, powers=Powers(produce_credit=1)),
+    WorldTile("crystal_archive", "Crystal Archive", WorldKind.WINDFALL, SettleKind.CIVILIAN, 5, 2, 4, Good.RARE, powers=Powers(explore_extra=2)),
+    WorldTile("nebula_nursery", "Nebula Nursery", WorldKind.PRODUCTION, SettleKind.CIVILIAN, 4, 1, 2, Good.GENES, powers=Powers(produce_credit=1)),
+    WorldTile("living_city", "Living City", WorldKind.PRODUCTION, SettleKind.CIVILIAN, 5, 2, 4, Good.GENES, powers=Powers(consume_vp_per_good=1)),
+    WorldTile("stasis_vault", "Stasis Vault", WorldKind.WINDFALL, SettleKind.CIVILIAN, 4, 1, 3, Good.GENES, powers=Powers(explore_extra=1)),
+    WorldTile("alien_star_nest", "Alien Star Nest", WorldKind.PRODUCTION, SettleKind.CIVILIAN, 6, 3, 6, Good.ALIEN, powers=Powers(explore_extra=1, trade_bonus=1)),
+    WorldTile("precursor_gate", "Precursor Gate", WorldKind.WINDFALL, SettleKind.CIVILIAN, 6, 2, 5, Good.ALIEN, powers=Powers(settle_discount=1)),
+    WorldTile("silent_observatory", "Silent Observatory", WorldKind.GRAY, SettleKind.CIVILIAN, 4, 1, 3, powers=Powers(explore_extra=2)),
+    WorldTile("frontier_bazaar", "Frontier Bazaar", WorldKind.GRAY, SettleKind.CIVILIAN, 3, 1, 2, powers=Powers(trade_bonus=1, consume_credit_per_good=1)),
+    WorldTile("terraforming_outpost", "Terraforming Outpost", WorldKind.GRAY, SettleKind.CIVILIAN, 4, 2, 3, powers=Powers(settle_discount=2)),
+    WorldTile("skyline_colony", "Skyline Colony", WorldKind.GRAY, SettleKind.CIVILIAN, 5, 2, 4, powers=Powers(consume_vp_per_good=1)),
+    WorldTile("privateer_moon", "Privateer Moon", WorldKind.WINDFALL, SettleKind.MILITARY, 3, 1, 3, Good.NOVELTY, powers=Powers(trade_bonus=1)),
+    WorldTile("siege_foundry", "Siege Foundry", WorldKind.PRODUCTION, SettleKind.MILITARY, 4, 1, 3, Good.RARE, powers=Powers(military=1, produce_credit=1)),
+    WorldTile("sentient_barrens", "Sentient Barrens", WorldKind.WINDFALL, SettleKind.MILITARY, 5, 2, 5, Good.GENES, powers=Powers(military=1)),
+    WorldTile("void_dragon_lair", "Void Dragon Lair", WorldKind.WINDFALL, SettleKind.MILITARY, 7, 3, 7, Good.ALIEN, powers=Powers(military=2, trade_bonus=1)),
+    WorldTile("border_fortress", "Border Fortress", WorldKind.GRAY, SettleKind.MILITARY, 4, 1, 4, powers=Powers(military=2)),
+    WorldTile("command_planet", "Command Planet", WorldKind.GRAY, SettleKind.MILITARY, 6, 2, 6, powers=Powers(military=2, military_settle_vp=1)),
+    WorldTile("armada_graveyard", "Armada Graveyard", WorldKind.GRAY, SettleKind.MILITARY, 5, 2, 5, powers=Powers(explore_extra=1, military=1)),
     # Military gray/rebel worlds.
     WorldTile("rebel_outpost", "Rebel Outpost", WorldKind.GRAY, SettleKind.MILITARY, 2, 1, 2, powers=Powers(military=1)),
     WorldTile("rebel_base", "Rebel Base", WorldKind.GRAY, SettleKind.MILITARY, 4, 1, 4, powers=Powers(military=2)),

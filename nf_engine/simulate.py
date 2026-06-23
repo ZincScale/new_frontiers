@@ -17,6 +17,7 @@ def main():
     parser.add_argument("--games", type=int, default=10)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--no-military-logistics", action="store_true", help="Disable the modified military logistics cost.")
+    parser.add_argument("--military-defense-bonus", type=int, default=0, help="Increase military world defense requirements by this amount.")
     parser.add_argument(
         "--players",
         nargs="+",
@@ -25,7 +26,10 @@ def main():
     )
     args = parser.parse_args()
 
-    config = GameConfig(military_logistics=not args.no_military_logistics)
+    config = GameConfig(
+        military_logistics=not args.no_military_logistics,
+        military_defense_bonus=args.military_defense_bonus,
+    )
 
     wins = Counter()
     appearances = Counter()
@@ -50,6 +54,7 @@ def main():
     print(f"Games: {args.games}")
     print(f"Players: {', '.join(args.players)}")
     print(f"Military logistics: {config.military_logistics}")
+    print(f"Military defense bonus: {config.military_defense_bonus}")
     print(f"Average rounds: {sum(rounds) / len(rounds):.1f}")
     print()
     print("Wins")
@@ -80,4 +85,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
