@@ -1,32 +1,91 @@
-# New Frontiers-Style Strategy Prototype
+# Dice-Galaxy Full Game Prototype
 
-This repository contains a small simulation engine for a New Frontiers-inspired
-board game prototype. It uses Race for the Galaxy concepts as ancestry, but it
-models board-game components: a Race for the Galaxy-template catalog of
-50 public development tiles and 82 world tiles, explored worlds, colonists,
-credits, goods, VP chips, priority, capped development discounts, a 10-space development display, and action selection.
+This repository contains a Python rules prototype for a small-box dice galaxy
+game with a generic die-face upgrade system.
 
-The current focus is balance exploration, especially a modified military model
-where conquest is strong but no longer free:
+The design goal is to add federation identity without changing the base game's
+component burden:
 
-- Military worlds still require enough military strength.
-- Military worlds still require colonists.
-- Excess military strength reduces logistics costs: every 2 military above the target defense reduces logistics by 1 credit.
-- Defense 2-3 worlds cost 1 credit in logistics before overmatch discounts.
-- Defense 4-5 worlds cost 2 credits in logistics before overmatch discounts.
-- Defense 6+ worlds cost 3 credits in logistics before overmatch discounts.
+- keep the original dice;
+- add a planet deck and shared planet market;
+- add a generic market of upgrade cards;
+- limit each player to three upgrades;
+- tie each upgrade to one die face;
+- use Rival Empire profiles and difficulty cards for solo variety.
 
-Run a sample simulation:
+The prototype is intentionally compact. It is meant to verify the full Python
+game loop before pivoting the implementation to C# and Blazor for online play.
+
+## Rules Draft
+
+See `docs/tiny_galaxies_upgrade_rules.md`.
+
+## Print And Play
+
+Open `pnp/print-and-play.html` in a browser and print at 100% scale. The PnP
+package includes upgrade cards, Rival Empire profiles, difficulty cards, and
+reference cards.
+
+## Current Content
+
+- 36 planet cards.
+- 12 generic upgrade cards.
+- 4 internal empire strategy profiles for simulation.
+- 4 Rival Empire profiles.
+- Planet market scales as players + 2, capped at 6.
+- 3-card upgrade market.
+- 3-upgrade limit.
+- Empire level track with increasing dice, ships, and VP.
+- Resource cap, planet surface landings, ships on orbit tracks, free reroll,
+  and converter hooks.
+- Seat-rotated simulator output with play-pattern metrics such as colonies,
+  active presence, and zero-colony finish rate.
+
+## Run a Simulation
 
 ```bash
-python3 -m nf_engine.simulate --games 20 --players balanced military economy builder
+python3 -m tiny_galaxies.simulate --games 20
 ```
 
-Run the simpler physical-table house rule instead:
+Run the baseline model without the upgrade-card expansion:
 
 ```bash
-python3 -m nf_engine.simulate --games 20 --no-military-logistics --military-defense-bonus 1 --players balanced military economy builder
+python3 -m tiny_galaxies.simulate --games 20 --no-upgrades
 ```
 
-The engine is intentionally compact and incomplete as a product, but complete
-enough to run automated AI-vs-AI games and compare broad strategy incentives.
+Try four asymmetrical empires:
+
+```bash
+python3 -m tiny_galaxies.simulate --games 20 --players frontier_union:mobility star_cartel:economy archive_compact:culture settlement_charter:colonizer
+```
+
+The simulator rotates player order by default. Use `--fixed-seats` only when
+debugging seat-order effects.
+
+Run the Rival Empire solo simulator:
+
+```bash
+python3 -m tiny_galaxies.solo_simulate --games 100 --profile all --difficulty standard
+```
+
+The solo simulator uses the regular Galaxy mat side for the automated opponent
+and explicit difficulty cards: `training`, `standard`, `advanced`, and
+`expert`.
+
+Override Rival starting values for tuning:
+
+```bash
+python3 -m tiny_galaxies.solo_simulate --games 100 --profile all --difficulty standard --rival-vp 2 --rival-energy 2 --rival-culture 1
+```
+
+Sweep multiple values:
+
+```bash
+python3 -m tiny_galaxies.solo_simulate --games 100 --profile all --difficulty standard --sweep-vp 0,2,4 --sweep-culture 1,2
+```
+
+## Run Tests
+
+```bash
+python3 -m pytest
+```

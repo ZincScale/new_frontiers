@@ -1,6 +1,6 @@
 [project]
-name = "rftg"
+name = "dice-galaxy-upgrades"
 version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.14"
+description = "Digital prototype for a small-box dice-galaxy upgrade module"
+requires-python = ">=3.9"
 dependencies = []
