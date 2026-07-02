@@ -15,6 +15,7 @@ Open the desired HTML file in a browser and print at 100% scale.
 
 - 4 Phase Battery player boards
 - 9 quick-reference cards
+- 11 solo Rival reference / phase cards
 - printable max markers and setup strips
 
 The card layout uses poker-size-ish cards sized to fit 9 per letter page.

@@ -1,5 +1,6 @@
 from roll_galaxy.engine import BatteryConfig, BatteryGame
 from roll_galaxy.model import BuildSlot, DieColor, Phase, Tile, TileKind
+from roll_galaxy.solo import BatterySoloGame
 from roll_galaxy.tiles import HOME_WORLDS, NON_START_TILES, START_FACTION_PAIRS
 
 
@@ -213,3 +214,56 @@ def test_yellow_alien_mode_produces_only_on_alien_world():
     assert game.produce(player, DieColor.YELLOW)
 
     assert player.goods[0].world is alien
+
+
+def test_solo_rival_phase_adds_selected_phase_for_player():
+    game = BatterySoloGame(strategy="builder", seed=15)
+    game.phase_deck = [Phase.SHIP]
+
+    report = game.play_round()
+
+    assert report.rival_phase is Phase.SHIP
+    assert Phase.SHIP in report.selected
+    assert report.rival_score >= game.difficulty.starting_score
+
+
+def test_solo_rival_explore_banks_insight_for_next_build():
+    game = BatterySoloGame(seed=16)
+
+    game.resolve_rival_phase(Phase.EXPLORE)
+
+    assert game.rival.insight == 1
+
+    before_score = game.rival.score
+    before_pool = game.game.vp_pool
+    game.resolve_rival_phase(Phase.DEVELOP)
+
+    assert game.rival.insight == 0
+    assert game.rival.tableau == 4
+    assert game.rival.score == before_score + 3
+    assert game.game.vp_pool == before_pool - 3
+
+
+def test_solo_rival_ship_scores_goods_or_minimum_raid():
+    game = BatterySoloGame(seed=17)
+    before_score = game.rival.score
+
+    game.resolve_rival_phase(Phase.SHIP)
+
+    assert game.rival.score == before_score + 2
+
+    game.rival.goods = 3
+    game.resolve_rival_phase(Phase.SHIP)
+
+    assert game.rival.goods == 0
+    assert game.rival.score == before_score + 8
+
+
+def test_solo_game_returns_human_and_rival_scores():
+    game = BatterySoloGame(strategy="balanced", seed=18)
+
+    scores, reports = game.play()
+
+    assert {name for name, _score, _summary in scores} == {"You", "Rival"}
+    assert reports
+    assert game.end_reason() in {"vp_pool", "human_tableau", "rival_tableau", "round_limit"}

@@ -539,6 +539,127 @@ Red max 4 = you own 4 Military dice.
 Blue max 3 = you own 3 Novelty dice.
 ```
 
+## Solo Mode: Rival Phase Deck
+
+Solo mode uses the normal Phase Battery rules for you and a lightweight Rival
+that supplies extra selected phases, drains the VP chip pool, and races your
+score.
+
+Additional components:
+
+- one Rival score marker;
+- one Rival tableau marker;
+- one Rival Goods marker;
+- one Rival Insight marker;
+- five Rival phase cards: Explore, Develop, Settle, Produce, Ship.
+
+Setup:
+
+1. Set up your player area normally.
+2. Use a 24 VP chip pool.
+3. Set the Rival tableau marker to 3.
+4. Set Rival Goods to 0.
+5. Set Rival Insight to 0.
+6. Choose a difficulty and set the Rival starting score:
+
+```text
+Training  6
+Standard 10
+Advanced 12
+Expert   14
+```
+
+Shuffle the five Rival phase cards into a face-down Rival phase deck.
+
+Solo round structure:
+
+1. Select your phase normally.
+2. Reveal the top Rival phase card. If the deck is empty, shuffle all five
+   Rival phase cards to form a new deck first.
+3. The selected phases this round are your selected phase plus the Rival phase.
+4. Resolve selected phases in normal Roll order. You may spend pips in any
+   selected phase.
+5. Resolve the Rival phase.
+6. Manage Empire normally.
+
+The Rival never spends pips, never has Credits, never builds real tiles, and
+never uses tile powers. Only track the four Rival values: score, tableau, Goods,
+and Insight.
+
+Rival phase effects:
+
+```text
+Explore:  Rival gains 1 Insight, max 3.
+Develop:  Rival tableau +1. Rival scores 2 VP chips.
+Settle:   Rival tableau +1. Rival scores 2 VP chips.
+Produce:  Rival Goods +1, max 4.
+Ship:     Rival Ships all Goods for 2 VP chips each.
+```
+
+If the Rival Ships with 0 Goods, it scores 2 VP chips anyway.
+
+If the Rival has at least 1 Insight when it Develops or Settles, spend 1 Insight
+and the Rival scores +1 VP chip for that Develop or Settle.
+
+Rival scoring:
+
+- Rival VP chips come from the shared VP chip pool.
+- If the VP chip pool is empty, finish the round and end the game.
+- The Rival's final score is its starting score plus VP chips it scored.
+
+Solo end conditions:
+
+- the VP chip pool is exhausted;
+- your tableau reaches 12 or more tile squares;
+- the Rival tableau marker reaches 12;
+- the round limit is reached, if using the simulator.
+
+Finish the round, then compare your final score to the Rival score.
+
+Solo example:
+
+```text
+Standard Rival starts at 10 VP.
+Rival tableau starts at 3.
+Rival Goods 0.
+Rival Insight 0.
+
+You select Settle.
+Rival reveals Produce.
+
+Selected phases: Settle, Produce.
+
+You spend Red pips during Settle.
+You spend Green pips during Produce if able.
+
+Rival resolves Produce: Rival Goods 0 -> 1.
+```
+
+Later:
+
+```text
+Rival has 2 Goods.
+Rival reveals Ship.
+
+Rival Ships both Goods.
+Rival scores 4 VP chips.
+Rival Goods 2 -> 0.
+```
+
+Current solo simulation with the recommended defaults:
+
+```text
+Average length: about 11-13 rounds
+Standard difficulty: roughly even for production/ship strategies, easier for
+build-heavy strategies
+```
+
+Run:
+
+```bash
+python3 -m roll_galaxy.solo --games 100 --strategy balanced --difficulty standard
+```
+
 ## Full Round Example
 
 Initial tracks:
