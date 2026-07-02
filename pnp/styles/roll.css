@@ -1,0 +1,314 @@
+@page {
+  size: letter;
+  margin: 0.25in;
+}
+
+:root {
+  --ink: #17191f;
+  --muted: #5c6572;
+  --line: #2b3038;
+  --paper: #f7f3e9;
+  --blue: #2f6fad;
+  --brown: #8a6541;
+  --red: #b7463d;
+  --green: #3f8a5a;
+  --purple: #7352a3;
+  --yellow: #d7aa28;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #ddd7ca;
+  color: var(--ink);
+  font-family: "Aptos", "Segoe UI", Arial, sans-serif;
+  line-height: 1.2;
+}
+
+.sheet {
+  width: 8in;
+  min-height: 10.5in;
+  margin: 0 auto;
+  page-break-after: always;
+}
+
+.sheet:last-child {
+  page-break-after: auto;
+}
+
+.board-sheet {
+  display: grid;
+  grid-template-rows: repeat(2, 4.95in);
+  gap: 0.22in;
+}
+
+.battery-board {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  border-radius: 0.08in;
+  background: var(--paper);
+}
+
+.battery-board header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.14in 0.18in 0.1in;
+  border-bottom: 1px solid rgba(43, 48, 56, 0.35);
+  background: #303744;
+  color: #fff;
+}
+
+.battery-board h1,
+.battery-board p,
+.ref-card h2,
+.marker-panel h2,
+.setup-panel h2 {
+  margin: 0;
+}
+
+.battery-board h1 {
+  font-size: 20pt;
+  letter-spacing: 0;
+}
+
+.battery-board header p {
+  font-size: 11pt;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tracks {
+  display: grid;
+  gap: 0.07in;
+  padding: 0.16in 0.18in;
+}
+
+.track {
+  display: grid;
+  grid-template-columns: 1.05in 0.72in 1fr;
+  align-items: center;
+  gap: 0.08in;
+}
+
+.phase {
+  font-size: 13pt;
+  font-weight: 900;
+}
+
+.color {
+  font-size: 8pt;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.spaces {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.045in;
+}
+
+.spaces b {
+  display: grid;
+  min-height: 0.34in;
+  place-items: center;
+  border: 1.5px solid var(--line);
+  border-radius: 0.04in;
+  background: #fff;
+  font-size: 12pt;
+}
+
+.blue .color,
+.blue .phase { color: var(--blue); }
+.brown .color,
+.brown .phase { color: var(--brown); }
+.red .color,
+.red .phase { color: var(--red); }
+.green .color,
+.green .phase { color: var(--green); }
+.purple .color,
+.purple .phase { color: var(--purple); }
+.yellow .color,
+.yellow .phase { color: #8a6400; }
+
+.blue .spaces b { border-color: var(--blue); }
+.brown .spaces b { border-color: var(--brown); }
+.red .spaces b { border-color: var(--red); }
+.green .spaces b { border-color: var(--green); }
+.purple .spaces b { border-color: var(--purple); }
+.yellow .spaces b { border-color: var(--yellow); }
+
+.battery-board footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  gap: 0.06in;
+  padding: 0.1in 0.18in 0.14in;
+  border-top: 1px solid rgba(43, 48, 56, 0.25);
+  color: var(--muted);
+  font-size: 8.8pt;
+  font-weight: 800;
+}
+
+.reference-sheet {
+  display: grid;
+  grid-template-columns: repeat(3, 2.45in);
+  grid-auto-rows: 3.2in;
+  gap: 0.12in;
+  align-content: start;
+}
+
+.ref-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1.5px solid var(--line);
+  border-radius: 0.08in;
+  background: var(--paper);
+}
+
+.ref-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.05in;
+  padding: 0.08in 0.1in;
+  background: #303744;
+  color: #fff;
+}
+
+.ref-card h2 {
+  font-size: 12pt;
+}
+
+.ref-card header span {
+  align-self: center;
+  padding: 0.02in 0.05in;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 0.04in;
+  font-size: 6.2pt;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.ref-card ul,
+.ref-card ol {
+  margin: 0;
+  padding: 0.1in 0.14in 0.1in 0.25in;
+  font-size: 8.5pt;
+}
+
+.ref-card li {
+  margin-bottom: 0.04in;
+}
+
+.ref-card p {
+  margin: 0;
+  padding: 0.1in 0.12in 0;
+  font-size: 8.4pt;
+}
+
+.ref-card .note,
+.ref-card .example {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.map {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.045in 0.08in;
+  margin: 0;
+  padding: 0.1in 0.12in;
+  font-size: 8.3pt;
+}
+
+.map dt {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.map dd {
+  margin: 0;
+  font-weight: 900;
+}
+
+.marker-sheet {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 0.25in;
+}
+
+.marker-panel,
+.setup-panel {
+  border: 1.5px solid var(--line);
+  border-radius: 0.08in;
+  background: var(--paper);
+  padding: 0.16in;
+}
+
+.marker-panel header,
+.setup-panel header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.14in;
+}
+
+.marker-panel p,
+.setup-panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 8.5pt;
+  font-weight: 800;
+}
+
+.marker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 0.7in);
+  gap: 0.12in;
+}
+
+.marker {
+  display: grid;
+  width: 0.7in;
+  height: 0.7in;
+  place-items: center;
+  border: 1.5px solid var(--line);
+  border-radius: 0.06in;
+  background: #fff;
+  font-size: 8pt;
+  font-weight: 900;
+}
+
+.marker.blue { border-color: var(--blue); color: var(--blue); }
+.marker.brown { border-color: var(--brown); color: var(--brown); }
+.marker.red { border-color: var(--red); color: var(--red); }
+.marker.green { border-color: var(--green); color: var(--green); }
+.marker.purple { border-color: var(--purple); color: var(--purple); }
+.marker.yellow { border-color: var(--yellow); color: #8a6400; }
+
+.setup-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.08in;
+}
+
+.setup-grid span {
+  padding: 0.08in;
+  border: 1px solid rgba(43, 48, 56, 0.35);
+  border-radius: 0.05in;
+  background: #fff;
+  font-size: 8.5pt;
+  font-weight: 900;
+  text-align: center;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+}

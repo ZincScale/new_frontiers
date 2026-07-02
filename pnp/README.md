@@ -1,21 +1,31 @@
-# Galactic Federation Upgrade Module PnP
+# Print And Play
 
-Open `print-and-play.html` in a browser and print at 100% scale.
+Open the desired HTML file in a browser and print at 100% scale.
 
 ## Contents
+
+### Tiny Galaxy Upgrade Module
 
 - 12 upgrade cards
 - 4 Rival Empire profile cards
 - 4 Rival difficulty cards
 - 7 reference / solo procedure cards
 
+### Roll Phase Battery Variant
+
+- 4 Phase Battery player boards
+- 9 quick-reference cards
+- printable max markers and setup strips
+
 The card layout uses poker-size-ish cards sized to fit 9 per letter page.
 Sleeve with spare cards for playtesting.
 
 ## Files
 
-- `print-and-play.html`: printable card sheets.
+- `print-and-play.html`: Tiny Galaxy printable card sheets.
+- `roll-phase-battery.html`: Roll phase battery boards and references.
 - `styles/cards.css`: print layout and card styling.
+- `styles/roll.css`: Roll phase battery print layout.
 - `assets/source/upgrade-art-sheet.png`: 12-panel representative upgrade art.
 - `assets/source/upgrade-art-sheet-v1.png`: earlier 6-panel art sheet kept for reference.
 - `assets/source/rival-art-sheet.png`: representative rival art.
@@ -29,6 +39,9 @@ as balance changes.
 - Print at actual size / 100%.
 - Turn off "fit to page" if your print dialog shrinks the layout.
 - Cut along the card borders or crop marks.
+
+For the Roll boards, put the colored die on the current pip value and a marker
+on the max pip value.
 
 ## Current Solo Tuning
 
