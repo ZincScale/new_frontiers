@@ -7,21 +7,21 @@ from statistics import mean
 from typing import Optional
 
 from .engine import BatteryConfig, BatteryGame
-from .model import PHASE_ORDER, Phase
+from .model import PHASE_ORDER, Phase, Tile, TileKind
 
 
 @dataclass(frozen=True)
 class SoloDifficulty:
     name: str
     starting_score: int
-    vp_pool: int = 24
+    vp_pool: int = 30
 
 
 SOLO_DIFFICULTIES: dict[str, SoloDifficulty] = {
-    "training": SoloDifficulty("training", 6),
-    "standard": SoloDifficulty("standard", 10),
-    "advanced": SoloDifficulty("advanced", 12),
-    "expert": SoloDifficulty("expert", 14),
+    "training": SoloDifficulty("training", 8),
+    "standard": SoloDifficulty("standard", 12),
+    "advanced": SoloDifficulty("advanced", 14),
+    "expert": SoloDifficulty("expert", 16),
 }
 
 
@@ -30,7 +30,7 @@ class RivalState:
     difficulty: SoloDifficulty
     score: int
     vp_chips: int = 0
-    tableau: int = 3
+    virtual_tiles: int = 3
     goods: int = 0
     insight: int = 0
 
@@ -44,7 +44,7 @@ class SoloRoundReport:
     used_pips: int
     human_score: int
     rival_score: int
-    rival_tableau: int
+    rival_virtual_tiles: int
     rival_goods: int
     rival_insight: int
 
@@ -64,6 +64,7 @@ class BatterySoloGame:
         self.rival = RivalState(self.difficulty, score=self.difficulty.starting_score)
         self.phase_deck = list(PHASE_ORDER)
         self.game.rng.shuffle(self.phase_deck)
+        self.rival_claimed_tiles: list[Tile] = []
         self.reports: list[SoloRoundReport] = []
 
     @property
@@ -100,7 +101,7 @@ class BatterySoloGame:
             used,
             self.game.score(self.player),
             self.rival.score,
-            self.rival.tableau,
+            self.rival.virtual_tiles,
             self.rival.goods,
             self.rival.insight,
         )
@@ -117,7 +118,9 @@ class BatterySoloGame:
             return
         if phase in (Phase.DEVELOP, Phase.SETTLE):
             points = 2
-            self.rival.tableau += 1
+            kind = TileKind.DEVELOPMENT if phase is Phase.DEVELOP else TileKind.WORLD
+            if self.claim_rival_tile(kind) is not None:
+                self.rival.virtual_tiles += 1
             if self.rival.insight:
                 points += 1
                 self.rival.insight -= 1
@@ -133,6 +136,14 @@ class BatterySoloGame:
             return
         raise ValueError(f"unknown phase: {phase}")
 
+    def claim_rival_tile(self, kind: TileKind) -> Optional[Tile]:
+        for index, tile in enumerate(self.game.tile_bag):
+            if tile.kind is kind:
+                self.rival_claimed_tiles.append(tile)
+                del self.game.tile_bag[index]
+                return tile
+        return None
+
     def score_rival(self, points: int):
         scored = min(points, self.game.vp_pool)
         self.rival.vp_chips += scored
@@ -144,17 +155,13 @@ class BatterySoloGame:
             return True
         if self.game.vp_pool <= 0:
             return True
-        if len(self.player.tableau) >= self.game.config.target_tableau_squares:
-            return True
-        return self.rival.tableau >= self.game.config.target_tableau_squares
+        return len(self.player.tableau) >= self.game.config.target_tableau_squares
 
     def end_reason(self) -> str:
         if self.game.vp_pool <= 0:
             return "vp_pool"
         if len(self.player.tableau) >= self.game.config.target_tableau_squares:
             return "human_tableau"
-        if self.rival.tableau >= self.game.config.target_tableau_squares:
-            return "rival_tableau"
         if self.game.round_number >= self.game.config.max_rounds:
             return "round_limit"
         return "in_progress"
@@ -165,10 +172,11 @@ class BatterySoloGame:
         rival_summary = {
             "difficulty": self.difficulty.name,
             "rounds": self.game.round_number,
-            "tableau": self.rival.tableau,
+            "virtual_tiles": self.rival.virtual_tiles,
             "credits": 0,
             "goods": self.rival.goods,
             "insight": self.rival.insight,
+            "claimed_tiles": len(self.rival_claimed_tiles),
             "vp_chips": self.rival.vp_chips,
             "starting_score": self.difficulty.starting_score,
             "end_reason": self.end_reason(),

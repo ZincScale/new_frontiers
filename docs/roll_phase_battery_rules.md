@@ -11,6 +11,25 @@ Core rule:
 
 There is no Roll Dice step, no Assign Dice step, no Dice Cup, and no Citizenry.
 
+## Current Design Decision
+
+The recommended minimal ruleset is:
+
+- dice colors become deterministic phase batteries;
+- each track has current pips and max pips;
+- gaining a die increases that color's max and current pips by 1;
+- Credits recharge spent pips during Manage Empire;
+- White remains wild;
+- Yellow is Alien-specific by default.
+
+The goal is not to make a new Roll for the Galaxy game. It is to keep phase
+selection, tile building, goods, shipping, credits, VP chips, and tableau
+scoring intact while removing the roll-and-reassign luck layer.
+
+For the first playtest, do not add free recharge, tile-specific retuning, or a
+new dummy-player system. Those are tuning knobs after the core battery loop is
+tested at the table.
+
 ## Components
 
 Use all normal Roll for the Galaxy components except the Dice Cups.
@@ -548,7 +567,7 @@ score.
 Additional components:
 
 - one Rival score marker;
-- one Rival tableau marker;
+- one Rival claimed-tile row;
 - one Rival Goods marker;
 - one Rival Insight marker;
 - five Rival phase cards: Explore, Develop, Settle, Produce, Ship.
@@ -556,17 +575,17 @@ Additional components:
 Setup:
 
 1. Set up your player area normally.
-2. Use a 24 VP chip pool.
-3. Set the Rival tableau marker to 3.
+2. Use a 30 VP chip pool.
+3. The Rival starts with 3 virtual starting tiles.
 4. Set Rival Goods to 0.
 5. Set Rival Insight to 0.
 6. Choose a difficulty and set the Rival starting score:
 
 ```text
-Training  6
-Standard 10
-Advanced 12
-Expert   14
+Training  8
+Standard 12
+Advanced 14
+Expert   16
 ```
 
 Shuffle the five Rival phase cards into a face-down Rival phase deck.
@@ -579,22 +598,34 @@ Solo round structure:
 3. The selected phases this round are your selected phase plus the Rival phase.
 4. Resolve selected phases in normal Roll order. You may spend pips in any
    selected phase.
-5. Resolve the Rival phase.
+5. Resolve only the revealed Rival phase card's Rival effect.
 6. Manage Empire normally.
 
 The Rival never spends pips, never has Credits, never builds real tiles, and
-never uses tile powers. Only track the four Rival values: score, tableau, Goods,
-and Insight.
+never uses tile powers. It does claim tiles from the bag to keep the tile mix
+moving. Only track the four Rival values: score, claimed tiles, Goods, and
+Insight.
 
-Rival phase effects:
+Important: the Rival effect happens only for the Rival phase card revealed this
+round. Your selected phase can let you act, but it does not make the Rival claim
+tiles, gain Goods, gain Insight, or score.
+
+Rival card effects:
 
 ```text
 Explore:  Rival gains 1 Insight, max 3.
-Develop:  Rival tableau +1. Rival scores 2 VP chips.
-Settle:   Rival tableau +1. Rival scores 2 VP chips.
+Develop:  Rival claims 1 Development tile. Rival scores 2 VP chips.
+Settle:   Rival claims 1 World tile. Rival scores 2 VP chips.
 Produce:  Rival Goods +1, max 4.
 Ship:     Rival Ships all Goods for 2 VP chips each.
 ```
+
+When the Rival claims a tile, draw the first matching tile from the bag and
+place it face down in a Rival row. Do not read or resolve the tile. If no
+matching tile remains in the bag, the Rival still scores.
+
+The Rival's claimed tiles do not trigger the 12-tile tableau end condition. They
+exist to churn the tile bag and to show how much pressure the Rival has applied.
 
 If the Rival Ships with 0 Goods, it scores 2 VP chips anyway.
 
@@ -611,7 +642,6 @@ Solo end conditions:
 
 - the VP chip pool is exhausted;
 - your tableau reaches 12 or more tile squares;
-- the Rival tableau marker reaches 12;
 - the round limit is reached, if using the simulator.
 
 Finish the round, then compare your final score to the Rival score.
@@ -619,8 +649,8 @@ Finish the round, then compare your final score to the Rival score.
 Solo example:
 
 ```text
-Standard Rival starts at 10 VP.
-Rival tableau starts at 3.
+Standard Rival starts at 12 VP.
+Rival has 3 virtual starting tiles.
 Rival Goods 0.
 Rival Insight 0.
 
@@ -633,6 +663,17 @@ You spend Red pips during Settle.
 You spend Green pips during Produce if able.
 
 Rival resolves Produce: Rival Goods 0 -> 1.
+Rival does not claim a World, because the Rival card was Produce, not Settle.
+```
+
+Later:
+
+```text
+Rival reveals Develop.
+
+Draw one Development tile from the bag.
+Place it face down in the Rival row.
+Rival scores 2 VP chips.
 ```
 
 Later:
@@ -764,9 +805,22 @@ The current Python prototype uses the spreadsheet in this directory:
 Current simulation result with real start tiles and all tracks at `2/2`:
 
 ```text
-Average length: about 12-13 rounds
+Four players: average length about 13 rounds
+Two players: average length about 19 rounds
 Estimated table time: 45-60 minutes for experienced players
 ```
+
+In a 200-game four-player sweep with Balanced, Builder, Settler, and Shipper
+strategies, Alien-mode Yellow averaged 13.1 rounds. Wins were close among
+Balanced, Builder, and Settler; Shipper lagged in the current heuristic
+simulator. Yellow-as-Ship averaged 13.2 rounds with nearly identical strategy
+results, so Alien-mode remains the recommended default for theme and tile
+identity.
+
+Solo Standard is intentionally close but not perfectly flat across strategies:
+Balanced won 62%, Builder 68.5%, Settler 77.5%, Producer 42.5%, and Shipper
+45% in 200-game sweeps with the current heuristic player. Treat those as
+simulation guideposts, not final balance data.
 
 Run:
 
