@@ -551,12 +551,34 @@ Finish the round, then score normally:
 - World and Development VP;
 - 6-cost Development bonuses, converted as closely as possible.
 
-For a 6-cost Development bonus that refers to dice you own, count max pips:
+For a 6-cost Development bonus that refers to dice you own, count color
+presence, not max pips.
+
+Max pips are phase capacity. They are not extra physical dice for scoring.
+
+Use this conversion:
+
+- A color track with max above 0 counts as one die of that color.
+- A color track never counts as more than one die, no matter how high its max
+  is.
+- Blue, Brown, Red, Green, Purple, and White usually count as present from
+  setup.
+- Yellow counts only if you have gained at least one Alien Technology pip.
+- If a bonus counts total dice owned, count present color tracks, maximum 7.
+- If a bonus counts dice of a specific color, that color contributes either 0
+  or 1.
+
+Examples:
 
 ```text
-Red max 4 = you own 4 Military dice.
-Blue max 3 = you own 3 Novelty dice.
+Red max 4 = you own 1 Military die for bonus scoring.
+Blue max 3 = you own 1 Novelty die for bonus scoring.
+Yellow max 0 = you own 0 Alien Technology dice for bonus scoring.
+Yellow max 2 = you own 1 Alien Technology die for bonus scoring.
 ```
+
+This keeps color-identity bonuses meaningful without letting battery capacity
+double as an end-game scoring multiplier.
 
 ## Solo Mode: Challenge Deck
 
