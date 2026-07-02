@@ -28,7 +28,7 @@ reference cards.
 
 ## Current Content
 
-- 36 planet cards.
+- 40 base-game planet cards, sourced from `bgg161447.pdf`.
 - 12 generic upgrade cards.
 - 4 internal empire strategy profiles for simulation.
 - 4 Rival Empire profiles.

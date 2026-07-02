@@ -425,7 +425,6 @@ class UpgradeGame:
         player.vp += planet.vp
         self.claimed_planets.append(planet)
         self._turn_claims.append(planet)
-        self.apply_claim_planet_ability(player, planet)
         if player.rival_profile:
             self.apply_rival_pressure(player, planet)
         if planet in self.planet_market:
@@ -734,12 +733,213 @@ class UpgradeGame:
     def use_colony_power(self, player: Player):
         if not player.colonies:
             return False
-        colony = max(player.colonies, key=lambda planet: self.surface_value(player, planet))
-        self.resolve_surface_effect(player, colony)
-        return True
+        colony = max(player.colonies, key=lambda planet: self.colony_power_value(player, planet))
+        return self.resolve_colony_power(player, colony)
 
     def use_colony_power_available(self, player: Player):
         return bool(player.colonies)
+
+    def colony_power_value(self, player: Player, planet: PlanetCard):
+        value = planet.vp
+        value += sum(2 for tag in planet.tags if tag in player.strategy)
+        if "colonize" in planet.tags and player.missions:
+            value += 6
+        if "upgrade" in planet.tags and self.can_upgrade_empire(player):
+            value += 5
+        if "energy" in planet.tags and player.energy < self.config.resource_cap:
+            value += 3
+        if "culture" in planet.tags and player.culture < self.config.resource_cap:
+            value += 3
+        if "attack" in planet.tags and self.best_opponent_mission([opponent for opponent in self.players if opponent is not player]):
+            value += 2
+        return value
+
+    def resolve_colony_power(self, player: Player, planet: PlanetCard):
+        ability = planet.ability
+        if ability == "gain_1_energy":
+            self.gain_resource(player, Resource.ENERGY, 1)
+        elif ability == "gain_1_culture":
+            self.gain_resource(player, Resource.CULTURE, 1)
+        elif ability == "gain_2_energy":
+            self.gain_resource(player, Resource.ENERGY, 2)
+        elif ability == "gain_2_culture":
+            self.gain_resource(player, Resource.CULTURE, 2)
+        elif ability == "gain_2_energy_others_1":
+            self.gain_resource(player, Resource.ENERGY, 2)
+            for opponent in [opponent for opponent in self.players if opponent is not player]:
+                self.gain_resource(opponent, Resource.ENERGY, 1)
+        elif ability == "gain_2_culture_others_1":
+            self.gain_resource(player, Resource.CULTURE, 2)
+            for opponent in [opponent for opponent in self.players if opponent is not player]:
+                self.gain_resource(opponent, Resource.CULTURE, 1)
+        elif ability == "advance_economy_1":
+            return self.advance_mission(player, DieFace.ECONOMY, 1)
+        elif ability == "advance_diplomacy_1":
+            return self.advance_mission(player, DieFace.DIPLOMACY, 1)
+        elif ability == "advance_any_1":
+            return self.advance_any_mission(player, 1)
+        elif ability == "spend_2_energy_advance_economy_2":
+            if player.energy < 2:
+                return False
+            self.spend_resource(player, Resource.ENERGY, 2)
+            return self.advance_mission(player, DieFace.ECONOMY, 2)
+        elif ability == "spend_2_culture_advance_diplomacy_2":
+            if player.culture < 2:
+                return False
+            self.spend_resource(player, Resource.CULTURE, 2)
+            return self.advance_mission(player, DieFace.DIPLOMACY, 2)
+        elif ability == "spend_energy_gain_2_culture":
+            if player.energy < 1:
+                return False
+            self.spend_resource(player, Resource.ENERGY, 1)
+            self.gain_resource(player, Resource.CULTURE, 2)
+        elif ability == "convert_culture_to_energy":
+            amount = player.culture
+            player.culture = 0
+            self.gain_resource(player, Resource.ENERGY, amount)
+        elif ability == "convert_energy_to_culture":
+            amount = player.energy
+            player.energy = 0
+            self.gain_resource(player, Resource.CULTURE, amount)
+        elif ability == "discard_2_dice_gain_2_each":
+            self.gain_resource(player, Resource.ENERGY, 2)
+            self.gain_resource(player, Resource.CULTURE, 2)
+        elif ability == "gain_culture_for_landed":
+            self.gain_resource(player, Resource.CULTURE, player.available_ships)
+        elif ability == "steal_1_energy":
+            return self.steal_resource(player, Resource.ENERGY, 1)
+        elif ability == "steal_1_culture":
+            return self.steal_resource(player, Resource.CULTURE, 1)
+        elif ability.startswith("regress_enemy") or ability in (
+            "spend_2_culture_regress_enemy_2",
+            "spend_2_energy_regress_two_enemies_1",
+        ):
+            amount = 2 if ability == "spend_2_culture_regress_enemy_2" else 1
+            if ability == "spend_2_culture_regress_enemy_2":
+                if player.culture < 2:
+                    return False
+                self.spend_resource(player, Resource.CULTURE, 2)
+            if ability == "spend_2_energy_regress_two_enemies_1":
+                if player.energy < 2:
+                    return False
+                self.spend_resource(player, Resource.ENERGY, 2)
+            return self.regress_best_opponent_mission(player, amount)
+        elif ability == "upgrade_empire_mixed":
+            return self.upgrade_empire_mixed(player, 0)
+        elif ability == "lowest_empire_upgrade_discount":
+            if not self.lowest_empire_level(player):
+                return False
+            return self.upgrade_empire_mixed(player, 1)
+        elif ability == "spend_culture_move_2":
+            if player.culture < 1:
+                return False
+            self.spend_resource(player, Resource.CULTURE, 1)
+            self.move_ship(player)
+            self.move_ship(player)
+        elif ability == "displace_ship_gain_level_resource":
+            if not player.missions:
+                return False
+            mission = self.best_mission(player, player.missions)
+            gain = max(1, mission.progress)
+            player.missions.remove(mission)
+            self.recover_ship(player)
+            self.gain_resource(player, Resource.ENERGY if player.energy <= player.culture else Resource.CULTURE, gain)
+        elif ability == "regress_own_then_advance_other":
+            progressed = [mission for mission in player.missions if mission.progress > 0]
+            if not progressed or len(player.missions) < 2:
+                return False
+            source = min(progressed, key=lambda mission: mission.progress)
+            source.progress -= 1
+            targets = [mission for mission in player.missions if mission is not source]
+            return self.advance_specific_mission(player, self.best_mission(player, targets), 1)
+        elif ability == "others_advance_then_you_advance_2":
+            for opponent in [opponent for opponent in self.players if opponent is not player]:
+                self.advance_any_mission(opponent, 1)
+            return self.advance_any_mission(player, 2)
+        elif ability == "cycle_unoccupied_planet":
+            return self.cycle_unoccupied_planet()
+        elif ability == "perform_any_action_free_follow":
+            return self.perform_best_colony_action(player)
+        elif ability == "use_uncolonized_planet":
+            return self.perform_best_colony_action(player)
+        elif ability == "repeat_activated_die":
+            previous_faces = [face for face in player.dice_used if face is not DieFace.COLONY]
+            if not previous_faces:
+                return False
+            self.use_die(player, max(previous_faces, key=lambda face: self.face_priority(player, face)))
+        elif ability in ("reroll_inactive_dice", "set_inactive_die", "follow_gain_energy", "follow_gain_culture", "follow_tax_2_culture", "move_track_equal_level"):
+            return False
+        elif ability in ("pay_culture_use_player_colony", "pay_energy_use_player_colony"):
+            resource = Resource.CULTURE if ability == "pay_culture_use_player_colony" else Resource.ENERGY
+            if (resource is Resource.CULTURE and player.culture < 1) or (resource is Resource.ENERGY and player.energy < 1):
+                return False
+            self.spend_resource(player, resource, 1)
+            return self.perform_best_colony_action(player)
+        else:
+            return False
+        return True
+
+    def perform_best_colony_action(self, player: Player):
+        if player.missions and self.advance_any_mission(player, 1):
+            return True
+        if player.energy < self.config.resource_cap:
+            self.gain_resource(player, Resource.ENERGY, 1)
+            return True
+        if player.culture < self.config.resource_cap:
+            self.gain_resource(player, Resource.CULTURE, 1)
+            return True
+        return False
+
+    def steal_resource(self, player: Player, resource: Resource, amount: int):
+        opponents = [opponent for opponent in self.players if opponent is not player]
+        if not opponents:
+            return False
+        target = max(opponents, key=lambda opponent: opponent.energy if resource is Resource.ENERGY else opponent.culture)
+        if resource is Resource.ENERGY and target.energy > 0:
+            target.energy = max(0, target.energy - amount)
+            self.gain_resource(player, Resource.ENERGY, amount)
+            return True
+        if resource is Resource.CULTURE and target.culture > 0:
+            target.culture = max(0, target.culture - amount)
+            self.gain_resource(player, Resource.CULTURE, amount)
+            return True
+        return False
+
+    def regress_best_opponent_mission(self, player: Player, amount: int):
+        target = self.best_opponent_mission([opponent for opponent in self.players if opponent is not player])
+        if target is None:
+            return False
+        target.progress = max(0, target.progress - amount)
+        return True
+
+    def lowest_empire_level(self, player: Player):
+        return player.empire_level < min(opponent.empire_level for opponent in self.players if opponent is not player)
+
+    def upgrade_empire_mixed(self, player: Player, discount: int):
+        step = self.empire_step(player.empire_level)
+        if step.upgrade_cost is None:
+            return False
+        cost = max(0, step.upgrade_cost - discount)
+        if player.energy + player.culture < cost:
+            return False
+        spend_energy = min(player.energy, cost)
+        player.energy -= spend_energy
+        player.culture -= cost - spend_energy
+        player.empire_level += 1
+        ship_gain = self.empire_step(player.empire_level).ships - self.empire_step(player.empire_level - 1).ships
+        if ship_gain > 0:
+            self.recover_ship(player, ship_gain)
+        return True
+
+    def cycle_unoccupied_planet(self):
+        occupied = {mission.planet for player in self.players for mission in player.missions}
+        occupied.update(planet for player in self.players for planet in player.landed)
+        candidates = [planet for planet in self.planet_market if planet not in occupied]
+        if not candidates:
+            return False
+        self.planet_market.remove(min(candidates, key=lambda planet: planet.vp))
+        self._refill_planets()
+        return True
 
     def empire_step(self, level: int):
         return EMPIRE_TRACK[min(max(level, 1), max(EMPIRE_TRACK))]

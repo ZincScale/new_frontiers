@@ -7,7 +7,8 @@ energy, culture, and colony tracks. The digital prototype lives in
 
 ## Components
 
-- 36 planet cards.
+- 40 base-game planet cards, sourced from the local `bgg161447.pdf` planet
+  guide.
 - 12 generic upgrade cards.
 - 4 Rival Empire profile cards.
 - 4 Rival difficulty cards.
@@ -43,8 +44,11 @@ On your turn, roll dice based on your empire level and use each die once.
 Resources are capped at 7.
 
 When your ship reaches the end of a planet's colony track, colonize that planet:
-place it with your colonized planets, score its VP, resolve its ability, return
-the ship to your Galaxy mat, and refill the planet market.
+place it with your colonized planets, score its VP, return the ship to your
+Galaxy mat, and refill the planet market.
+
+Planet powers are tableau abilities. Use a Utilize Colony die to activate one of
+your colonized planet powers.
 
 ## Dice Control
 

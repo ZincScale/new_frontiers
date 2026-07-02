@@ -215,7 +215,7 @@ RIVAL_DIFFICULTIES = [
 ]
 
 
-PLANETS = [
+PROTOTYPE_PLANETS = [
     PlanetCard(
         "asterion_gate",
         "Asterion Gate",
@@ -613,3 +613,9 @@ PLANETS = [
         ("culture", "score"),
     ),
 ]
+
+
+from .base_planets import BASE_PLANETS
+
+
+PLANETS = BASE_PLANETS

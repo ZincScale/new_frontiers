@@ -29,7 +29,7 @@ def test_upgrade_market_starts_at_three_cards():
 def test_planet_deck_has_full_unique_set():
     planet_ids = [planet.id for planet in PLANETS]
 
-    assert len(PLANETS) == 36
+    assert len(PLANETS) == 40
     assert len(planet_ids) == len(set(planet_ids))
 
 
@@ -230,7 +230,7 @@ def test_emergency_protocol_spends_culture_to_advance_without_matching_face():
     game = UpgradeGame(seed=30)
     player = game.players[0]
     player.culture = 1
-    planet = next(planet for planet in game.planet_market if planet.colonize_face is DieFace.ECONOMY)
+    planet = next(planet for planet in PLANETS if planet.colonize_face is DieFace.ECONOMY and planet.track_length > 2)
     player.available_ships -= 1
     player.missions = [Mission(planet, progress=max(0, planet.track_length - 2))]
 
@@ -244,7 +244,7 @@ def test_emergency_protocol_unavailable_with_matching_progress_face():
     game = UpgradeGame(seed=31)
     player = game.players[0]
     player.culture = 1
-    planet = next(planet for planet in game.planet_market if planet.colonize_face is DieFace.ECONOMY)
+    planet = next(planet for planet in PLANETS if planet.colonize_face is DieFace.ECONOMY and planet.track_length > 2)
     player.available_ships -= 1
     player.missions = [Mission(planet)]
 
@@ -489,7 +489,7 @@ def test_capped_energy_conversion_only_happens_once_per_turn():
 def test_merchant_convoys_turns_capped_energy_into_economy_progress():
     game = UpgradeGame(seed=34)
     player = game.players[0]
-    planet = next(planet for planet in game.planet_market if planet.colonize_face is DieFace.ECONOMY)
+    planet = next(planet for planet in PLANETS if planet.colonize_face is DieFace.ECONOMY and planet.track_length > 2)
     player.upgrades = [upgrade("merchant_convoys")]
     player.energy = game.config.resource_cap
     player.colonies = [PLANETS[0]]
@@ -758,7 +758,8 @@ def test_rival_empire_momentum_advances_colony_track():
         seed=53,
     )
     rival = game.players[1]
-    rival.missions = [Mission(game.planet_market[0], progress=1)]
+    planet = next(planet for planet in PLANETS if planet.track_length > 3)
+    rival.missions = [Mission(planet, progress=1)]
     game._turn_faces = [DieFace.MOVE]
 
     game.apply_rival_momentum(rival)
