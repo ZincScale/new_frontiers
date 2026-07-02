@@ -15,7 +15,7 @@ Open the desired HTML file in a browser and print at 100% scale.
 
 - 4 Phase Battery player boards
 - 9 quick-reference cards
-- 11 solo win-condition / Dummy phase cards
+- 18 solo procedure / campaign / Dummy phase cards
 - printable max markers and setup strips
 
 The card layout uses poker-size-ish cards sized to fit 9 per letter page.
@@ -49,5 +49,5 @@ on the max pip value.
 
 The Roll Phase Battery solo mode uses a fixed 12-round clock with two Dummy
 phase cards per round. Score-only win conditions are Great, Triumphant, and
-Epic. Named win conditions such as Builder, Colonizer, Satisfied Populace, and
-Industrial add Starry Rift-style requirements on top of a lower score floor.
+Epic. Five four-game campaign sheets combine those with named win conditions
+such as Builder, Colonizer, Satisfied Populace, and Industrial.

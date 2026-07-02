@@ -298,3 +298,20 @@ def test_solo_game_returns_human_score_and_win_condition_summary():
     assert "colonizer_success" in scores[0][2]
     assert scores[0][2]["dummy_claimed_tiles"] > 0
     assert game.end_reason() in {"vp_pool", "human_tableau", "round_limit"}
+
+
+def test_solo_campaign_filters_to_campaign_conditions():
+    game = BatterySoloGame(strategy="balanced", seed=21, campaign="outreach")
+
+    scores, _reports = game.play()
+    summary = scores[0][2]
+
+    assert summary["campaign"] == "outreach"
+    assert summary["campaign_name"] == "Outreach"
+    assert {condition.name for condition in game.active_conditions()} == {
+        "great",
+        "colonizer",
+        "builder",
+        "industrial",
+    }
+    assert "epic_success" not in summary

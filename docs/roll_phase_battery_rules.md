@@ -587,7 +587,7 @@ Additional components:
 - five Dummy phase cards: Explore, Develop, Settle, Produce, Ship;
 - one Dummy claimed-tile row;
 - one Dummy Goods marker;
-- one solo win-condition card or campaign sheet.
+- five solo campaign sheets.
 
 Setup:
 
@@ -595,8 +595,13 @@ Setup:
 2. Use a 30 VP chip pool.
 3. Set Dummy Goods to 0.
 4. Shuffle the five Dummy phase cards into a face-down deck.
-5. Choose one win condition to attempt, or use all listed win conditions as a
-   campaign sheet.
+5. Choose one campaign sheet.
+
+Each campaign has four win conditions. Play four games in a row. At the end of
+each game, mark exactly one satisfied condition on the campaign sheet that you
+have not already marked. If you cannot mark a new condition, you lose the
+campaign. If you mark all four conditions after four successive games, you win
+the campaign.
 
 Score-only win conditions:
 
@@ -613,15 +618,43 @@ Great       Score 37+ VP.
 Triumphant  Score 38+ VP.
 Epic        Score 41+ VP.
 Builder     Score 31+ VP and complete 7+ tiles.
-Colonizer   Score 31+ VP and have 10+ tableau tiles.
+Developer   Score 31+ VP and have 4+ Developments.
+Colonizer   Score 31+ VP and have 6+ Worlds.
 Satisfied Populace
             Score 31+ VP and score 10+ VP chips.
 Industrial  Score 31+ VP and have 16+ total max pips.
+Production  Score 31+ VP and have 4+ production Worlds.
+Diverse     Score 31+ VP and have 3+ different World colors.
+Novelty     Score 31+ VP and have 2+ Novelty Worlds.
+Rare Elements
+            Score 31+ VP and have 2+ Rare Worlds.
+Alien Contact
+            Score 31+ VP and have 1+ Alien World.
+Military    Score 31+ VP and have Red max 5.
+Discovery   Score 31+ VP and have Blue max 5.
 ```
 
-If using campaign play, mark at most one satisfied win condition after each
-game. To win a four-game campaign, mark four different win conditions in four
-successive games. For one-off play, simply note every condition you satisfied.
+Campaign sheets:
+
+```text
+Outreach
+Great, Colonizer, Builder, Industrial.
+
+Industrial Base
+Triumphant, Developer, Industrial, Production.
+
+Sector Survey
+Triumphant, Diverse, Novelty, Rare Elements.
+
+Alien Contact
+Epic, Alien Contact, Military, Discovery.
+
+Mastery
+Epic, Novelty, Rare Elements, Military.
+```
+
+For one-off practice, ignore the campaign sheet and simply note every condition
+you satisfied.
 
 Solo round structure:
 
@@ -662,14 +695,16 @@ Solo end conditions:
 - the VP chip pool is exhausted;
 - your tableau reaches 12 or more tile squares.
 
-Finish the round, then check your chosen win condition or campaign sheet. You
-succeed if your final score and tableau meet a listed condition.
+Finish the round, then check your campaign sheet. Mark one satisfied unmarked
+condition. If you cannot mark one, the campaign is lost.
 
 Solo example:
 
 ```text
-Win condition: Builder.
-Target: score 31+ VP and complete 7+ tiles.
+Campaign: Outreach.
+Unmarked conditions: Great, Colonizer, Builder, Industrial.
+You finish with 35 VP, 7 completed tiles, and 15 total max pips.
+You may mark Builder, but not Great or Industrial.
 
 You select Settle.
 Dummy reveals Produce and Develop.
@@ -699,14 +734,14 @@ Current solo simulation with the recommended defaults:
 ```text
 All difficulties use 12 rounds and two Dummy phase cards per round.
 Average Dummy churn: about 19 claimed tiles and 12 drained VP chips.
-For the score-only win conditions with the balanced heuristic, Great is about
-60%, Triumphant about 50%, and Epic about 30%.
+For one-off score-only win conditions with the balanced heuristic, Great is
+about 60%, Triumphant about 50%, and Epic about 30%.
 ```
 
 Run:
 
 ```bash
-python3 -m roll_galaxy.solo --games 100 --strategy balanced --condition all
+python3 -m roll_galaxy.solo --games 100 --strategy balanced --campaign outreach
 ```
 
 ## Full Round Example

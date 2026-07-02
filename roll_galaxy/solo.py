@@ -7,7 +7,7 @@ from statistics import mean
 from typing import Optional
 
 from .engine import BatteryConfig, BatteryGame
-from .model import PHASE_ORDER, Phase, Tile, TileKind
+from .model import PHASE_ORDER, DieColor, Phase, Tile, TileKind
 
 
 @dataclass(frozen=True)
@@ -17,8 +17,17 @@ class SoloWinCondition:
     min_score: int
     min_tableau: int = 0
     min_completed_tiles: int = 0
+    min_developments: int = 0
+    min_worlds: int = 0
+    min_production_worlds: int = 0
+    min_distinct_world_colors: int = 0
+    min_novelty_worlds: int = 0
+    min_rare_worlds: int = 0
+    min_alien_worlds: int = 0
     min_vp_chips: int = 0
     min_max_capacity: int = 0
+    min_blue_capacity: int = 0
+    min_red_capacity: int = 0
 
 
 SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
@@ -26,9 +35,17 @@ SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
     SoloWinCondition("triumphant", "Triumphant", 38),
     SoloWinCondition("epic", "Epic", 41),
     SoloWinCondition("builder", "Builder", 31, min_completed_tiles=7),
-    SoloWinCondition("colonizer", "Colonizer", 31, min_tableau=10),
+    SoloWinCondition("developer", "Developer", 31, min_developments=4),
+    SoloWinCondition("colonizer", "Colonizer", 31, min_worlds=6),
     SoloWinCondition("satisfied_populace", "Satisfied Populace", 31, min_vp_chips=10),
     SoloWinCondition("industrial", "Industrial", 31, min_max_capacity=16),
+    SoloWinCondition("production", "Production", 31, min_production_worlds=4),
+    SoloWinCondition("diverse", "Diverse", 31, min_distinct_world_colors=3),
+    SoloWinCondition("novelty", "Novelty", 31, min_novelty_worlds=2),
+    SoloWinCondition("rare", "Rare Elements", 31, min_rare_worlds=2),
+    SoloWinCondition("alien", "Alien Contact", 31, min_alien_worlds=1),
+    SoloWinCondition("military", "Military", 31, min_red_capacity=5),
+    SoloWinCondition("discovery", "Discovery", 31, min_blue_capacity=5),
 )
 
 SOLO_ROUNDS = 12
@@ -38,6 +55,28 @@ SOLO_VP_POOL = 30
 SOLO_WIN_CONDITION_MAP: dict[str, SoloWinCondition] = {
     condition.name: condition for condition in SOLO_WIN_CONDITIONS
 }
+
+
+@dataclass(frozen=True)
+class SoloCampaign:
+    key: str
+    label: str
+    condition_names: tuple[str, ...]
+
+    @property
+    def conditions(self) -> tuple[SoloWinCondition, ...]:
+        return tuple(SOLO_WIN_CONDITION_MAP[name] for name in self.condition_names)
+
+
+SOLO_CAMPAIGNS: tuple[SoloCampaign, ...] = (
+    SoloCampaign("outreach", "Outreach", ("great", "colonizer", "builder", "industrial")),
+    SoloCampaign("industry", "Industrial Base", ("triumphant", "developer", "industrial", "production")),
+    SoloCampaign("survey", "Sector Survey", ("triumphant", "diverse", "novelty", "rare")),
+    SoloCampaign("contact", "Alien Contact", ("epic", "alien", "military", "discovery")),
+    SoloCampaign("mastery", "Mastery", ("epic", "novelty", "rare", "military")),
+)
+
+SOLO_CAMPAIGN_MAP: dict[str, SoloCampaign] = {campaign.key: campaign for campaign in SOLO_CAMPAIGNS}
 
 
 @dataclass
@@ -67,9 +106,11 @@ class BatterySoloGame:
         seed: Optional[int] = None,
         config: Optional[BatteryConfig] = None,
         condition: str = "all",
+        campaign: Optional[str] = None,
         dummy_count: int = 2,
     ):
         self.condition_filter = condition
+        self.campaign = SOLO_CAMPAIGN_MAP[campaign] if campaign else None
         self.dummy_count = dummy_count
         base_config = config or BatteryConfig()
         solo_config = replace(
@@ -193,6 +234,8 @@ class BatterySoloGame:
         ]
 
     def active_conditions(self) -> tuple[SoloWinCondition, ...]:
+        if self.campaign is not None:
+            return self.campaign.conditions
         if self.condition_filter == "all":
             return SOLO_WIN_CONDITIONS
         return (SOLO_WIN_CONDITION_MAP[self.condition_filter],)
@@ -202,7 +245,10 @@ class BatterySoloGame:
         summary = dict(summary)
         summary["vp_chips"] = self.player.vp_chips
         summary["max_capacity"] = sum(track.maximum for track in self.player.tracks.values())
+        summary.update(self.tableau_summary())
         summary["condition_filter"] = self.condition_filter
+        summary["campaign"] = self.campaign.key if self.campaign else None
+        summary["campaign_name"] = self.campaign.label if self.campaign else None
         satisfied = []
         for condition in self.active_conditions():
             success = self.condition_success_without_summary(condition, summary)
@@ -223,20 +269,51 @@ class BatterySoloGame:
             self.game.score(self.player) >= condition.min_score
             and summary["tableau"] >= condition.min_tableau
             and summary["completed_tiles"] >= condition.min_completed_tiles
+            and summary["developments"] >= condition.min_developments
+            and summary["worlds"] >= condition.min_worlds
+            and summary["production_worlds"] >= condition.min_production_worlds
+            and summary["distinct_world_colors"] >= condition.min_distinct_world_colors
+            and summary["novelty_worlds"] >= condition.min_novelty_worlds
+            and summary["rare_worlds"] >= condition.min_rare_worlds
+            and summary["alien_worlds"] >= condition.min_alien_worlds
             and summary["vp_chips"] >= condition.min_vp_chips
             and summary["max_capacity"] >= condition.min_max_capacity
+            and self.player.tracks[DieColor.BLUE].maximum >= condition.min_blue_capacity
+            and self.player.tracks[DieColor.RED].maximum >= condition.min_red_capacity
         )
+
+    def tableau_summary(self):
+        worlds = [tile for tile in self.player.tableau if tile.kind is TileKind.WORLD]
+        developments = [tile for tile in self.player.tableau if tile.kind is TileKind.DEVELOPMENT]
+        world_colors = {tile.world_color.strip().lower() for tile in worlds if tile.world_color.strip()}
+        return {
+            "developments": len(developments),
+            "worlds": len(worlds),
+            "production_worlds": sum(1 for tile in worlds if tile.produces),
+            "distinct_world_colors": len(world_colors),
+            "novelty_worlds": sum(1 for tile in worlds if "novelty" in tile.tags),
+            "rare_worlds": sum(1 for tile in worlds if "rare_elemental" in tile.tags),
+            "alien_worlds": sum(1 for tile in worlds if "alien_technology" in tile.tags),
+        }
 
     def final_scores(self):
         return [("You", self.game.score(self.player), self.human_summary())]
 
 
-def run_one(strategy: str, seed: int, config: BatteryConfig, condition: str, dummy_count: int):
+def run_one(
+    strategy: str,
+    seed: int,
+    config: BatteryConfig,
+    condition: str,
+    dummy_count: int,
+    campaign: Optional[str] = None,
+):
     game = BatterySoloGame(
         strategy=strategy,
         seed=seed,
         config=config,
         condition=condition,
+        campaign=campaign,
         dummy_count=dummy_count,
     )
     scores, reports = game.play()
@@ -249,6 +326,7 @@ def main():
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--strategy", default="balanced")
     parser.add_argument("--condition", choices=("all", *SOLO_WIN_CONDITION_MAP), default="all")
+    parser.add_argument("--campaign", choices=tuple(SOLO_CAMPAIGN_MAP), default=None)
     parser.add_argument("--dummy-count", type=int, default=2)
     parser.add_argument("--max-track-capacity", type=int, default=6)
     parser.add_argument("--starting-capacity", type=int, default=2)
@@ -276,8 +354,48 @@ def main():
     last_game = None
     last_scores = None
     last_reports = None
+    campaign_wins = 0
+    campaign_marks = Counter()
 
     for index in range(args.games):
+        if args.campaign:
+            marked = set()
+            campaign_win = True
+            for game_index in range(4):
+                game, scores, reports = run_one(
+                    args.strategy,
+                    args.seed + index * 4 + game_index,
+                    config,
+                    args.condition,
+                    args.dummy_count,
+                    args.campaign,
+                )
+                summary = scores[0][2]
+                end_reasons[game.end_reason()] += 1
+                rounds.append(game.game.round_number)
+                human_scores.append(scores[0][1])
+                claimed_tiles.append(summary["dummy_claimed_tiles"])
+                drained_vp.append(summary["dummy_vp_chips_drained"])
+                last_game = game
+                last_scores = scores
+                last_reports = reports
+                unmarked = [
+                    condition
+                    for condition in summary["satisfied_conditions"]
+                    if condition not in marked
+                ]
+                if not unmarked:
+                    campaign_win = False
+                    conditions["loss"] += 1
+                    break
+                chosen = unmarked[0]
+                marked.add(chosen)
+                conditions[chosen] += 1
+                campaign_marks[chosen] += 1
+            if campaign_win and len(marked) == 4:
+                campaign_wins += 1
+            continue
+
         game, scores, reports = run_one(
             args.strategy,
             args.seed + index,
@@ -303,15 +421,20 @@ def main():
     print(f"Games: {args.games}")
     print(f"Strategy: {args.strategy}")
     print(f"Condition filter: {args.condition}")
+    if args.campaign:
+        print(f"Campaign: {SOLO_CAMPAIGN_MAP[args.campaign].label}")
+        print(f"Campaign wins: {campaign_wins / args.games:.1%}")
     print(f"Dummy phase cards: {args.dummy_count}")
     print(f"Average rounds: {mean(rounds):.1f}")
     print(f"Average score: {mean(human_scores):.1f}")
     print(f"Average dummy churn: {mean(claimed_tiles):.1f} tiles, {mean(drained_vp):.1f} VP chips")
     print("Win conditions")
-    for condition in SOLO_WIN_CONDITIONS:
-        if args.condition == "all" or args.condition == condition.name:
-            print(f"  {condition.label}: {conditions[condition.name] / args.games:.1%}")
-    print(f"  No condition: {conditions['loss'] / args.games:.1%}")
+    active_conditions = SOLO_CAMPAIGN_MAP[args.campaign].conditions if args.campaign else SOLO_WIN_CONDITIONS
+    for condition in active_conditions:
+        if args.campaign or args.condition == "all" or args.condition == condition.name:
+            denominator = args.games if not args.campaign else max(1, sum(campaign_marks.values()))
+            print(f"  {condition.label}: {conditions[condition.name] / denominator:.1%}")
+    print(f"  No mark: {conditions['loss'] / args.games:.1%}")
     print("End reasons")
     for reason, count in end_reasons.most_common():
         print(f"  {reason}: {count}")
