@@ -285,14 +285,16 @@ def test_solo_dummy_ship_drains_vp_pool_from_goods_or_minimum_raid():
     assert game.dummy.vp_chips_drained == 8
 
 
-def test_solo_game_returns_human_score_and_tier_summary():
-    game = BatterySoloGame(strategy="balanced", seed=18, challenge="score")
+def test_solo_game_returns_human_score_and_win_condition_summary():
+    game = BatterySoloGame(strategy="balanced", seed=18, condition="all")
 
     scores, reports = game.play()
 
     assert {name for name, _score, _summary in scores} == {"You"}
     assert reports
-    assert "highest_tier" in scores[0][2]
-    assert "success_success" in scores[0][2]
+    assert "satisfied_conditions" in scores[0][2]
+    assert "great_success" in scores[0][2]
+    assert "builder_success" in scores[0][2]
+    assert "colonizer_success" in scores[0][2]
     assert scores[0][2]["dummy_claimed_tiles"] > 0
     assert game.end_reason() in {"vp_pool", "human_tableau", "round_limit"}

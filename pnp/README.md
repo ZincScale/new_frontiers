@@ -15,7 +15,7 @@ Open the desired HTML file in a browser and print at 100% scale.
 
 - 4 Phase Battery player boards
 - 9 quick-reference cards
-- 11 solo challenge / Dummy phase cards
+- 11 solo win-condition / Dummy phase cards
 - printable max markers and setup strips
 
 The card layout uses poker-size-ish cards sized to fit 9 per letter page.
@@ -47,7 +47,7 @@ on the max pip value.
 
 ## Roll Solo Tuning
 
-The Roll Phase Battery solo mode uses a 12-round challenge with two Dummy phase
-cards per round. Result tiers are currently tuned for the Score Challenge at
-roughly 90%, 60%, 50%, and 30% for Success, Great, Triumphant, and Epic with
-the balanced simulator strategy.
+The Roll Phase Battery solo mode uses a fixed 12-round clock with two Dummy
+phase cards per round. Score-only win conditions are Great, Triumphant, and
+Epic. Named win conditions such as Builder, Colonizer, Satisfied Populace, and
+Industrial add Starry Rift-style requirements on top of a lower score floor.

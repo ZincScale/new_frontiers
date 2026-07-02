@@ -11,39 +11,32 @@ from .model import PHASE_ORDER, Phase, Tile, TileKind
 
 
 @dataclass(frozen=True)
-class SoloTier:
+class SoloWinCondition:
     name: str
     label: str
     min_score: int
-
-
-SOLO_TIERS: tuple[SoloTier, ...] = (
-    SoloTier("success", "Success", 31),
-    SoloTier("great", "Great", 37),
-    SoloTier("triumphant", "Triumphant", 38),
-    SoloTier("epic", "Epic", 41),
-)
-
-SOLO_ROUNDS = 12
-SOLO_VP_POOL = 30
-
-
-@dataclass(frozen=True)
-class SoloChallenge:
-    key: str
-    name: str
     min_tableau: int = 0
     min_completed_tiles: int = 0
     min_vp_chips: int = 0
     min_max_capacity: int = 0
 
 
-SOLO_CHALLENGES: dict[str, SoloChallenge] = {
-    "score": SoloChallenge("score", "Score Challenge"),
-    "builder": SoloChallenge("builder", "Builder Challenge", min_completed_tiles=7),
-    "settler": SoloChallenge("settler", "Settler Challenge", min_tableau=10),
-    "merchant": SoloChallenge("merchant", "Merchant Challenge", min_vp_chips=10),
-    "engine": SoloChallenge("engine", "Engine Challenge", min_max_capacity=16),
+SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
+    SoloWinCondition("great", "Great", 37),
+    SoloWinCondition("triumphant", "Triumphant", 38),
+    SoloWinCondition("epic", "Epic", 41),
+    SoloWinCondition("builder", "Builder", 31, min_completed_tiles=7),
+    SoloWinCondition("colonizer", "Colonizer", 31, min_tableau=10),
+    SoloWinCondition("satisfied_populace", "Satisfied Populace", 31, min_vp_chips=10),
+    SoloWinCondition("industrial", "Industrial", 31, min_max_capacity=16),
+)
+
+SOLO_ROUNDS = 12
+SOLO_VP_POOL = 30
+
+
+SOLO_WIN_CONDITION_MAP: dict[str, SoloWinCondition] = {
+    condition.name: condition for condition in SOLO_WIN_CONDITIONS
 }
 
 
@@ -73,10 +66,10 @@ class BatterySoloGame:
         strategy: str = "balanced",
         seed: Optional[int] = None,
         config: Optional[BatteryConfig] = None,
-        challenge: str = "score",
+        condition: str = "all",
         dummy_count: int = 2,
     ):
-        self.challenge = SOLO_CHALLENGES[challenge]
+        self.condition_filter = condition
         self.dummy_count = dummy_count
         base_config = config or BatteryConfig()
         solo_config = replace(
@@ -191,49 +184,59 @@ class BatterySoloGame:
             return "round_limit"
         return "in_progress"
 
-    def highest_tier(self) -> Optional[SoloTier]:
+    def satisfied_conditions(self):
         summary = self.human_summary()
-        achieved = [tier for tier in SOLO_TIERS if self.tier_success_without_summary(tier, summary)]
-        return achieved[-1] if achieved else None
+        return [
+            condition
+            for condition in self.active_conditions()
+            if self.condition_success_without_summary(condition, summary)
+        ]
+
+    def active_conditions(self) -> tuple[SoloWinCondition, ...]:
+        if self.condition_filter == "all":
+            return SOLO_WIN_CONDITIONS
+        return (SOLO_WIN_CONDITION_MAP[self.condition_filter],)
 
     def human_summary(self):
         summary = self.game.final_scores()[0][2]
         summary = dict(summary)
         summary["vp_chips"] = self.player.vp_chips
         summary["max_capacity"] = sum(track.maximum for track in self.player.tracks.values())
-        summary["challenge"] = self.challenge.key
-        summary["challenge_name"] = self.challenge.name
-        for tier in SOLO_TIERS:
-            summary[f"{tier.name}_score"] = tier.min_score
-            summary[f"{tier.name}_success"] = self.tier_success_without_summary(tier, summary)
-        highest = next((tier for tier in reversed(SOLO_TIERS) if summary[f"{tier.name}_success"]), None)
-        summary["highest_tier"] = highest.name if highest else "loss"
-        summary["highest_tier_label"] = highest.label if highest else "Loss"
+        summary["condition_filter"] = self.condition_filter
+        satisfied = []
+        for condition in self.active_conditions():
+            success = self.condition_success_without_summary(condition, summary)
+            summary[f"{condition.name}_score"] = condition.min_score
+            summary[f"{condition.name}_success"] = success
+            if success:
+                satisfied.append(condition.name)
+        summary["satisfied_conditions"] = tuple(satisfied)
+        summary["condition_success"] = bool(satisfied)
         summary["dummy_claimed_tiles"] = len(self.dummy.claimed_tiles)
         summary["dummy_vp_chips_drained"] = self.dummy.vp_chips_drained
         summary["dummy_goods"] = self.dummy.goods
         summary["end_reason"] = self.end_reason()
         return summary
 
-    def tier_success_without_summary(self, tier: SoloTier, summary) -> bool:
+    def condition_success_without_summary(self, condition: SoloWinCondition, summary) -> bool:
         return (
-            self.game.score(self.player) >= tier.min_score
-            and summary["tableau"] >= self.challenge.min_tableau
-            and summary["completed_tiles"] >= self.challenge.min_completed_tiles
-            and summary["vp_chips"] >= self.challenge.min_vp_chips
-            and summary["max_capacity"] >= self.challenge.min_max_capacity
+            self.game.score(self.player) >= condition.min_score
+            and summary["tableau"] >= condition.min_tableau
+            and summary["completed_tiles"] >= condition.min_completed_tiles
+            and summary["vp_chips"] >= condition.min_vp_chips
+            and summary["max_capacity"] >= condition.min_max_capacity
         )
 
     def final_scores(self):
         return [("You", self.game.score(self.player), self.human_summary())]
 
 
-def run_one(strategy: str, seed: int, config: BatteryConfig, challenge: str, dummy_count: int):
+def run_one(strategy: str, seed: int, config: BatteryConfig, condition: str, dummy_count: int):
     game = BatterySoloGame(
         strategy=strategy,
         seed=seed,
         config=config,
-        challenge=challenge,
+        condition=condition,
         dummy_count=dummy_count,
     )
     scores, reports = game.play()
@@ -245,7 +248,7 @@ def main():
     parser.add_argument("--games", type=int, default=100)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--strategy", default="balanced")
-    parser.add_argument("--challenge", choices=tuple(SOLO_CHALLENGES), default="score")
+    parser.add_argument("--condition", choices=("all", *SOLO_WIN_CONDITION_MAP), default="all")
     parser.add_argument("--dummy-count", type=int, default=2)
     parser.add_argument("--max-track-capacity", type=int, default=6)
     parser.add_argument("--starting-capacity", type=int, default=2)
@@ -264,7 +267,7 @@ def main():
         yellow_mode=args.yellow_mode,
     )
 
-    tiers = Counter()
+    conditions = Counter()
     end_reasons = Counter()
     rounds = []
     human_scores = []
@@ -279,14 +282,18 @@ def main():
             args.strategy,
             args.seed + index,
             config,
-            args.challenge,
+            args.condition,
             args.dummy_count,
         )
         last_game = game
         last_scores = scores
         last_reports = reports
         summary = scores[0][2]
-        tiers[summary["highest_tier"]] += 1
+        if summary["satisfied_conditions"]:
+            for condition in summary["satisfied_conditions"]:
+                conditions[condition] += 1
+        else:
+            conditions["loss"] += 1
         end_reasons[game.end_reason()] += 1
         rounds.append(game.game.round_number)
         human_scores.append(scores[0][1])
@@ -295,17 +302,16 @@ def main():
 
     print(f"Games: {args.games}")
     print(f"Strategy: {args.strategy}")
-    print(f"Challenge: {args.challenge}")
+    print(f"Condition filter: {args.condition}")
     print(f"Dummy phase cards: {args.dummy_count}")
     print(f"Average rounds: {mean(rounds):.1f}")
     print(f"Average score: {mean(human_scores):.1f}")
     print(f"Average dummy churn: {mean(claimed_tiles):.1f} tiles, {mean(drained_vp):.1f} VP chips")
-    print("Victory tiers")
-    cumulative = 0
-    for tier in reversed(SOLO_TIERS):
-        cumulative += tiers[tier.name]
-        print(f"  {tier.label}: {cumulative / args.games:.1%}+")
-    print(f"  Loss: {tiers['loss'] / args.games:.1%}")
+    print("Win conditions")
+    for condition in SOLO_WIN_CONDITIONS:
+        if args.condition == "all" or args.condition == condition.name:
+            print(f"  {condition.label}: {conditions[condition.name] / args.games:.1%}")
+    print(f"  No condition: {conditions['loss'] / args.games:.1%}")
     print("End reasons")
     for reason, count in end_reasons.most_common():
         print(f"  {reason}: {count}")

@@ -551,39 +551,34 @@ Finish the round, then score normally:
 - World and Development VP;
 - 6-cost Development bonuses, converted as closely as possible.
 
-For a 6-cost Development bonus that refers to dice you own, count color
-presence, not max pips.
-
-Max pips are phase capacity. They are not extra physical dice for scoring.
+For a 6-cost Development bonus that refers to dice you own, use the battery
+track that matches what the bonus is counting.
 
 Use this conversion:
 
-- A color track with max above 0 counts as one die of that color.
-- A color track never counts as more than one die, no matter how high its max
-  is.
-- Blue, Brown, Red, Green, Purple, and White usually count as present from
-  setup.
-- Yellow counts only if you have gained at least one Alien Technology pip.
-- If a bonus counts total dice owned, count present color tracks, maximum 7.
-- If a bonus counts dice of a specific color, that color contributes either 0
-  or 1.
+- If a bonus counts dice of a specific color, count that color's max pips.
+- If a bonus counts total dice owned, count total max pips across all tracks.
+- If a bonus counts different colors of dice, count color presence instead:
+  each color track with max above 0 counts once.
+- Yellow counts as present only if you have gained at least one Alien Technology
+  pip.
 
 Examples:
 
 ```text
-Red max 4 = you own 1 Military die for bonus scoring.
-Blue max 3 = you own 1 Novelty die for bonus scoring.
-Yellow max 0 = you own 0 Alien Technology dice for bonus scoring.
-Yellow max 2 = you own 1 Alien Technology die for bonus scoring.
+New Galactic Order counts Military dice.
+Red max 4 = you own 4 Military dice for this bonus.
+
+Galactic Exchange counts different colors of dice.
+Blue, Brown, Red, Green, Purple, and White present = 6 colors.
+Yellow max 0 = Yellow is not present.
+Yellow max 2 = Yellow is present, for 7 colors total.
 ```
 
-This keeps color-identity bonuses meaningful without letting battery capacity
-double as an end-game scoring multiplier.
-
-## Solo Mode: Challenge Deck
+## Solo Mode: Win Conditions
 
 Solo mode uses the normal Phase Battery rules with a fixed clock, dummy phase
-cards, challenge cards, and graded result tiers. This follows the solo style of New Frontiers:
+cards, and win conditions. This follows the solo style of New Frontiers:
 Starry Rift and Jump Drive: Terminal Velocity: you are not racing an automa
 score. You are trying to build the right empire before time runs out.
 
@@ -592,7 +587,7 @@ Additional components:
 - five Dummy phase cards: Explore, Develop, Settle, Produce, Ship;
 - one Dummy claimed-tile row;
 - one Dummy Goods marker;
-- one solo challenge card.
+- one solo win-condition card or campaign sheet.
 
 Setup:
 
@@ -600,29 +595,33 @@ Setup:
 2. Use a 30 VP chip pool.
 3. Set Dummy Goods to 0.
 4. Shuffle the five Dummy phase cards into a face-down deck.
-5. Choose one challenge card.
+5. Choose one win condition to attempt, or use all listed win conditions as a
+   campaign sheet.
 
-Result tiers:
+Score-only win conditions:
 
 ```text
-Success      Score 31+ VP.
 Great        Score 37+ VP.
 Triumphant   Score 38+ VP.
 Epic         Score 41+ VP.
 ```
 
-Recommended challenge cards:
+Recommended named win conditions:
 
 ```text
-Score Challenge     Meet the score threshold.
-Builder Challenge   Meet the score threshold and complete 7+ tiles.
-Settler Challenge   Meet the score threshold and have 10+ tableau tiles.
-Merchant Challenge  Meet the score threshold and score 10+ VP chips.
-Engine Challenge    Meet the score threshold and have 16+ total max pips.
+Great       Score 37+ VP.
+Triumphant  Score 38+ VP.
+Epic        Score 41+ VP.
+Builder     Score 31+ VP and complete 7+ tiles.
+Colonizer   Score 31+ VP and have 10+ tableau tiles.
+Satisfied Populace
+            Score 31+ VP and score 10+ VP chips.
+Industrial  Score 31+ VP and have 16+ total max pips.
 ```
 
-For a non-score challenge, the extra requirement is the same for every result
-tier. The tier is determined by your final score.
+If using campaign play, mark at most one satisfied win condition after each
+game. To win a four-game campaign, mark four different win conditions in four
+successive games. For one-off play, simply note every condition you satisfied.
 
 Solo round structure:
 
@@ -663,17 +662,14 @@ Solo end conditions:
 - the VP chip pool is exhausted;
 - your tableau reaches 12 or more tile squares.
 
-Finish the round, then check your challenge card. Your result is the highest
-tier whose score threshold you reached while also meeting that challenge's
-extra requirement, if any.
+Finish the round, then check your chosen win condition or campaign sheet. You
+succeed if your final score and tableau meet a listed condition.
 
 Solo example:
 
 ```text
-Challenge: Builder.
-To get any listed result, complete 7+ tiles.
-Your final score determines the tier: Success 31, Great 37, Triumphant 38,
-or Epic 41.
+Win condition: Builder.
+Target: score 31+ VP and complete 7+ tiles.
 
 You select Settle.
 Dummy reveals Produce and Develop.
@@ -703,14 +699,14 @@ Current solo simulation with the recommended defaults:
 ```text
 All difficulties use 12 rounds and two Dummy phase cards per round.
 Average Dummy churn: about 19 claimed tiles and 12 drained VP chips.
-For the Score Challenge with the balanced heuristic, Success is about 90%,
-Great about 60%, Triumphant about 50%, and Epic about 30%.
+For the score-only win conditions with the balanced heuristic, Great is about
+60%, Triumphant about 50%, and Epic about 30%.
 ```
 
 Run:
 
 ```bash
-python3 -m roll_galaxy.solo --games 100 --strategy balanced --challenge score
+python3 -m roll_galaxy.solo --games 100 --strategy balanced --condition all
 ```
 
 ## Full Round Example
@@ -831,9 +827,11 @@ identity.
 
 Solo challenge mode uses 12 rounds and two Dummy phase cards each round. In
 simulation sweeps, the Dummy claimed about 19 tiles and drained about 12 VP
-chips on average. Score Challenge tiers are tuned around 90%, 60%, 50%, and
-30% success for Success, Great, Triumphant, and Epic with the balanced
-heuristic. Treat those as simulation guideposts, not final balance data.
+chips on average. Score-only win conditions are tuned around 60%, 50%, and 30%
+success for Great, Triumphant, and Epic with the balanced heuristic. Named
+conditions such as Builder and Satisfied Populace are intentionally easier if
+your empire leans into that plan. Treat those as simulation guideposts, not
+final balance data.
 
 Run:
 
