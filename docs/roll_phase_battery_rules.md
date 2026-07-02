@@ -606,17 +606,17 @@ the campaign.
 Score-only win conditions:
 
 ```text
-Great        Score 37+ VP.
-Triumphant   Score 38+ VP.
-Epic         Score 41+ VP.
+Great        Score 36+ VP.
+Triumphant   Score 39+ VP.
+Epic         Score 42+ VP.
 ```
 
 Recommended named win conditions:
 
 ```text
-Great       Score 37+ VP.
-Triumphant  Score 38+ VP.
-Epic        Score 41+ VP.
+Great       Score 36+ VP.
+Triumphant  Score 39+ VP.
+Epic        Score 42+ VP.
 Builder     Score 31+ VP and complete 7+ tiles.
 Developer   Score 31+ VP and have 4+ Developments.
 Colonizer   Score 31+ VP and have 6+ Worlds.
@@ -735,7 +735,7 @@ Current solo simulation with the recommended defaults:
 All difficulties use 12 rounds and two Dummy phase cards per round.
 Average Dummy churn: about 19 claimed tiles and 12 drained VP chips.
 For one-off score-only win conditions with the balanced heuristic, Great is
-about 60%, Triumphant about 50%, and Epic about 30%.
+about 64%, Triumphant about 43%, and Epic about 24%.
 ```
 
 Run:
@@ -862,7 +862,7 @@ identity.
 
 Solo challenge mode uses 12 rounds and two Dummy phase cards each round. In
 simulation sweeps, the Dummy claimed about 19 tiles and drained about 12 VP
-chips on average. Score-only win conditions are tuned around 60%, 50%, and 30%
+chips on average. Score-only win conditions are tuned around 64%, 43%, and 24%
 success for Great, Triumphant, and Epic with the balanced heuristic. Named
 conditions such as Builder and Satisfied Populace are intentionally easier if
 your empire leans into that plan. Treat those as simulation guideposts, not

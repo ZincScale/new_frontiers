@@ -31,9 +31,9 @@ class SoloWinCondition:
 
 
 SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
-    SoloWinCondition("great", "Great", 37),
-    SoloWinCondition("triumphant", "Triumphant", 38),
-    SoloWinCondition("epic", "Epic", 41),
+    SoloWinCondition("great", "Great", 36),
+    SoloWinCondition("triumphant", "Triumphant", 39),
+    SoloWinCondition("epic", "Epic", 42),
     SoloWinCondition("builder", "Builder", 31, min_completed_tiles=7),
     SoloWinCondition("developer", "Developer", 31, min_developments=4),
     SoloWinCondition("colonizer", "Colonizer", 31, min_worlds=6),
