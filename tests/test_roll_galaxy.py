@@ -216,71 +216,83 @@ def test_yellow_alien_mode_produces_only_on_alien_world():
     assert player.goods[0].world is alien
 
 
-def test_solo_rival_phase_adds_selected_phase_for_player():
+def test_solo_dummy_phase_adds_selected_phase_for_player():
     game = BatterySoloGame(strategy="builder", seed=15)
     game.phase_deck = [Phase.SHIP]
+    game.dummy_count = 1
 
     report = game.play_round()
 
-    assert report.rival_phase is Phase.SHIP
+    assert report.dummy_phases == (Phase.SHIP,)
     assert Phase.SHIP in report.selected
-    assert report.rival_score >= game.difficulty.starting_score
+    assert report.human_score == game.game.score(game.player)
 
 
-def test_solo_rival_explore_banks_insight_for_next_build():
+def test_solo_dummy_draw_reshuffles_before_short_round_draw():
+    game = BatterySoloGame(seed=20)
+    game.phase_deck = [Phase.SHIP]
+
+    phases = game.draw_dummy_phases()
+
+    assert len(phases) == 2
+    assert len(set(phases)) == 2
+
+
+def test_solo_dummy_explore_churns_one_development_and_one_world():
     game = BatterySoloGame(seed=16)
-
-    game.resolve_rival_phase(Phase.EXPLORE)
-
-    assert game.rival.insight == 1
-
-    before_score = game.rival.score
-    before_pool = game.game.vp_pool
-    game.resolve_rival_phase(Phase.DEVELOP)
-
-    assert game.rival.insight == 0
-    assert game.rival.virtual_tiles == 4
-    assert game.rival.score == before_score + 3
-    assert game.game.vp_pool == before_pool - 3
-
-
-def test_solo_rival_build_claims_matching_tile_from_bag():
-    game = BatterySoloGame(seed=19)
     before_devs = sum(1 for tile in game.game.tile_bag if tile.kind is TileKind.DEVELOPMENT)
     before_worlds = sum(1 for tile in game.game.tile_bag if tile.kind is TileKind.WORLD)
 
-    game.resolve_rival_phase(Phase.DEVELOP)
-    game.resolve_rival_phase(Phase.SETTLE)
+    game.resolve_dummy_phase(Phase.EXPLORE)
 
     after_devs = sum(1 for tile in game.game.tile_bag if tile.kind is TileKind.DEVELOPMENT)
     after_worlds = sum(1 for tile in game.game.tile_bag if tile.kind is TileKind.WORLD)
 
     assert after_devs == before_devs - 1
     assert after_worlds == before_worlds - 1
-    assert len(game.rival_claimed_tiles) == 2
-    assert game.rival.virtual_tiles == 5
+    assert len(game.dummy.claimed_tiles) == 2
 
 
-def test_solo_rival_ship_scores_goods_or_minimum_raid():
+def test_solo_dummy_build_phases_claim_matching_tile_from_bag():
+    game = BatterySoloGame(seed=19)
+    before_devs = sum(1 for tile in game.game.tile_bag if tile.kind is TileKind.DEVELOPMENT)
+    before_worlds = sum(1 for tile in game.game.tile_bag if tile.kind is TileKind.WORLD)
+
+    game.resolve_dummy_phase(Phase.DEVELOP)
+    game.resolve_dummy_phase(Phase.SETTLE)
+
+    after_devs = sum(1 for tile in game.game.tile_bag if tile.kind is TileKind.DEVELOPMENT)
+    after_worlds = sum(1 for tile in game.game.tile_bag if tile.kind is TileKind.WORLD)
+
+    assert after_devs == before_devs - 1
+    assert after_worlds == before_worlds - 1
+    assert len(game.dummy.claimed_tiles) == 2
+
+
+def test_solo_dummy_ship_drains_vp_pool_from_goods_or_minimum_raid():
     game = BatterySoloGame(seed=17)
-    before_score = game.rival.score
+    before_pool = game.game.vp_pool
 
-    game.resolve_rival_phase(Phase.SHIP)
+    game.resolve_dummy_phase(Phase.SHIP)
 
-    assert game.rival.score == before_score + 2
+    assert game.game.vp_pool == before_pool - 2
+    assert game.dummy.vp_chips_drained == 2
 
-    game.rival.goods = 3
-    game.resolve_rival_phase(Phase.SHIP)
+    game.dummy.goods = 3
+    game.resolve_dummy_phase(Phase.SHIP)
 
-    assert game.rival.goods == 0
-    assert game.rival.score == before_score + 8
+    assert game.dummy.goods == 0
+    assert game.dummy.vp_chips_drained == 8
 
 
-def test_solo_game_returns_human_and_rival_scores():
-    game = BatterySoloGame(strategy="balanced", seed=18)
+def test_solo_game_returns_human_score_and_tier_summary():
+    game = BatterySoloGame(strategy="balanced", seed=18, challenge="score")
 
     scores, reports = game.play()
 
-    assert {name for name, _score, _summary in scores} == {"You", "Rival"}
+    assert {name for name, _score, _summary in scores} == {"You"}
     assert reports
+    assert "highest_tier" in scores[0][2]
+    assert "success_success" in scores[0][2]
+    assert scores[0][2]["dummy_claimed_tiles"] > 0
     assert game.end_reason() in {"vp_pool", "human_tableau", "round_limit"}

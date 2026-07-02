@@ -11,42 +11,60 @@ from .model import PHASE_ORDER, Phase, Tile, TileKind
 
 
 @dataclass(frozen=True)
-class SoloDifficulty:
+class SoloTier:
     name: str
-    starting_score: int
-    vp_pool: int = 30
+    label: str
+    min_score: int
 
 
-SOLO_DIFFICULTIES: dict[str, SoloDifficulty] = {
-    "training": SoloDifficulty("training", 8),
-    "standard": SoloDifficulty("standard", 12),
-    "advanced": SoloDifficulty("advanced", 14),
-    "expert": SoloDifficulty("expert", 16),
+SOLO_TIERS: tuple[SoloTier, ...] = (
+    SoloTier("success", "Success", 31),
+    SoloTier("great", "Great", 37),
+    SoloTier("triumphant", "Triumphant", 38),
+    SoloTier("epic", "Epic", 41),
+)
+
+SOLO_ROUNDS = 12
+SOLO_VP_POOL = 30
+
+
+@dataclass(frozen=True)
+class SoloChallenge:
+    key: str
+    name: str
+    min_tableau: int = 0
+    min_completed_tiles: int = 0
+    min_vp_chips: int = 0
+    min_max_capacity: int = 0
+
+
+SOLO_CHALLENGES: dict[str, SoloChallenge] = {
+    "score": SoloChallenge("score", "Score Challenge"),
+    "builder": SoloChallenge("builder", "Builder Challenge", min_completed_tiles=7),
+    "settler": SoloChallenge("settler", "Settler Challenge", min_tableau=10),
+    "merchant": SoloChallenge("merchant", "Merchant Challenge", min_vp_chips=10),
+    "engine": SoloChallenge("engine", "Engine Challenge", min_max_capacity=16),
 }
 
 
 @dataclass
-class RivalState:
-    difficulty: SoloDifficulty
-    score: int
-    vp_chips: int = 0
-    virtual_tiles: int = 3
+class DummyState:
+    claimed_tiles: list[Tile]
     goods: int = 0
-    insight: int = 0
+    vp_chips_drained: int = 0
 
 
 @dataclass(frozen=True)
 class SoloRoundReport:
     round_number: int
     human_phase: Phase
-    rival_phase: Phase
+    dummy_phases: tuple[Phase, ...]
     selected: tuple[Phase, ...]
     used_pips: int
     human_score: int
-    rival_score: int
-    rival_virtual_tiles: int
-    rival_goods: int
-    rival_insight: int
+    dummy_claimed_tiles: int
+    dummy_goods: int
+    vp_pool: int
 
 
 class BatterySoloGame:
@@ -55,16 +73,21 @@ class BatterySoloGame:
         strategy: str = "balanced",
         seed: Optional[int] = None,
         config: Optional[BatteryConfig] = None,
-        difficulty: str = "standard",
+        challenge: str = "score",
+        dummy_count: int = 2,
     ):
-        self.difficulty = SOLO_DIFFICULTIES[difficulty]
+        self.challenge = SOLO_CHALLENGES[challenge]
+        self.dummy_count = dummy_count
         base_config = config or BatteryConfig()
-        solo_config = replace(base_config, vp_pool_per_player=self.difficulty.vp_pool)
+        solo_config = replace(
+            base_config,
+            vp_pool_per_player=SOLO_VP_POOL,
+            max_rounds=SOLO_ROUNDS,
+        )
         self.game = BatteryGame([("You", strategy)], seed=seed, config=solo_config)
-        self.rival = RivalState(self.difficulty, score=self.difficulty.starting_score)
         self.phase_deck = list(PHASE_ORDER)
         self.game.rng.shuffle(self.phase_deck)
-        self.rival_claimed_tiles: list[Tile] = []
+        self.dummy = DummyState(claimed_tiles=[])
         self.reports: list[SoloRoundReport] = []
 
     @property
@@ -79,9 +102,9 @@ class BatterySoloGame:
     def play_round(self) -> SoloRoundReport:
         self.game.round_number += 1
         human_phase = self.game.choose_phase(self.player)
-        rival_phase = self.draw_rival_phase()
+        dummy_phases = self.draw_dummy_phases()
         self.player.selected_phases.append(human_phase)
-        selected = tuple(phase for phase in PHASE_ORDER if phase in {human_phase, rival_phase})
+        selected = tuple(phase for phase in PHASE_ORDER if phase in {human_phase, *dummy_phases})
 
         before = self.player.used_pips
         for phase in selected:
@@ -90,68 +113,70 @@ class BatterySoloGame:
         if used == 0:
             self.player.dead_rounds += 1
 
-        self.resolve_rival_phase(rival_phase)
+        for phase in dummy_phases:
+            self.resolve_dummy_phase(phase)
         self.game.manage_empire(self.player)
 
         return SoloRoundReport(
             self.game.round_number,
             human_phase,
-            rival_phase,
+            dummy_phases,
             selected,
             used,
             self.game.score(self.player),
-            self.rival.score,
-            self.rival.virtual_tiles,
-            self.rival.goods,
-            self.rival.insight,
+            len(self.dummy.claimed_tiles),
+            self.dummy.goods,
+            self.game.vp_pool,
         )
 
-    def draw_rival_phase(self) -> Phase:
-        if not self.phase_deck:
+    def draw_dummy_phases(self) -> tuple[Phase, ...]:
+        if len(self.phase_deck) < min(self.dummy_count, len(PHASE_ORDER)):
             self.phase_deck = list(PHASE_ORDER)
             self.game.rng.shuffle(self.phase_deck)
-        return self.phase_deck.pop()
+        phases = []
+        for _ in range(self.dummy_count):
+            if not self.phase_deck:
+                self.phase_deck = list(PHASE_ORDER)
+                self.game.rng.shuffle(self.phase_deck)
+            phases.append(self.phase_deck.pop())
+        return tuple(phases)
 
-    def resolve_rival_phase(self, phase: Phase):
+    def resolve_dummy_phase(self, phase: Phase):
         if phase is Phase.EXPLORE:
-            self.rival.insight = min(3, self.rival.insight + 1)
+            self.claim_dummy_tile(TileKind.DEVELOPMENT)
+            self.claim_dummy_tile(TileKind.WORLD)
             return
-        if phase in (Phase.DEVELOP, Phase.SETTLE):
-            points = 2
-            kind = TileKind.DEVELOPMENT if phase is Phase.DEVELOP else TileKind.WORLD
-            if self.claim_rival_tile(kind) is not None:
-                self.rival.virtual_tiles += 1
-            if self.rival.insight:
-                points += 1
-                self.rival.insight -= 1
-            self.score_rival(points)
+        if phase is Phase.DEVELOP:
+            self.claim_dummy_tile(TileKind.DEVELOPMENT)
+            return
+        if phase is Phase.SETTLE:
+            self.claim_dummy_tile(TileKind.WORLD)
             return
         if phase is Phase.PRODUCE:
-            self.rival.goods = min(4, self.rival.goods + 1)
+            self.dummy.goods = min(4, self.dummy.goods + 1)
             return
         if phase is Phase.SHIP:
-            shipped = max(1, self.rival.goods)
-            self.rival.goods = 0
-            self.score_rival(shipped * 2)
+            drained = max(1, self.dummy.goods) * 2
+            self.dummy.goods = 0
+            self.drain_vp_pool(drained)
             return
         raise ValueError(f"unknown phase: {phase}")
 
-    def claim_rival_tile(self, kind: TileKind) -> Optional[Tile]:
+    def claim_dummy_tile(self, kind: TileKind) -> Optional[Tile]:
         for index, tile in enumerate(self.game.tile_bag):
             if tile.kind is kind:
-                self.rival_claimed_tiles.append(tile)
+                self.dummy.claimed_tiles.append(tile)
                 del self.game.tile_bag[index]
                 return tile
         return None
 
-    def score_rival(self, points: int):
-        scored = min(points, self.game.vp_pool)
-        self.rival.vp_chips += scored
-        self.rival.score += scored
-        self.game.vp_pool -= scored
+    def drain_vp_pool(self, amount: int):
+        drained = min(amount, self.game.vp_pool)
+        self.dummy.vp_chips_drained += drained
+        self.game.vp_pool -= drained
 
     def game_over(self) -> bool:
-        if self.game.round_number >= self.game.config.max_rounds:
+        if self.game.round_number >= SOLO_ROUNDS:
             return True
         if self.game.vp_pool <= 0:
             return True
@@ -162,51 +187,72 @@ class BatterySoloGame:
             return "vp_pool"
         if len(self.player.tableau) >= self.game.config.target_tableau_squares:
             return "human_tableau"
-        if self.game.round_number >= self.game.config.max_rounds:
+        if self.game.round_number >= SOLO_ROUNDS:
             return "round_limit"
         return "in_progress"
 
+    def highest_tier(self) -> Optional[SoloTier]:
+        summary = self.human_summary()
+        achieved = [tier for tier in SOLO_TIERS if self.tier_success_without_summary(tier, summary)]
+        return achieved[-1] if achieved else None
+
+    def human_summary(self):
+        summary = self.game.final_scores()[0][2]
+        summary = dict(summary)
+        summary["vp_chips"] = self.player.vp_chips
+        summary["max_capacity"] = sum(track.maximum for track in self.player.tracks.values())
+        summary["challenge"] = self.challenge.key
+        summary["challenge_name"] = self.challenge.name
+        for tier in SOLO_TIERS:
+            summary[f"{tier.name}_score"] = tier.min_score
+            summary[f"{tier.name}_success"] = self.tier_success_without_summary(tier, summary)
+        highest = next((tier for tier in reversed(SOLO_TIERS) if summary[f"{tier.name}_success"]), None)
+        summary["highest_tier"] = highest.name if highest else "loss"
+        summary["highest_tier_label"] = highest.label if highest else "Loss"
+        summary["dummy_claimed_tiles"] = len(self.dummy.claimed_tiles)
+        summary["dummy_vp_chips_drained"] = self.dummy.vp_chips_drained
+        summary["dummy_goods"] = self.dummy.goods
+        summary["end_reason"] = self.end_reason()
+        return summary
+
+    def tier_success_without_summary(self, tier: SoloTier, summary) -> bool:
+        return (
+            self.game.score(self.player) >= tier.min_score
+            and summary["tableau"] >= self.challenge.min_tableau
+            and summary["completed_tiles"] >= self.challenge.min_completed_tiles
+            and summary["vp_chips"] >= self.challenge.min_vp_chips
+            and summary["max_capacity"] >= self.challenge.min_max_capacity
+        )
+
     def final_scores(self):
-        human_score = self.game.score(self.player)
-        human_summary = self.game.final_scores()[0][2]
-        rival_summary = {
-            "difficulty": self.difficulty.name,
-            "rounds": self.game.round_number,
-            "virtual_tiles": self.rival.virtual_tiles,
-            "credits": 0,
-            "goods": self.rival.goods,
-            "insight": self.rival.insight,
-            "claimed_tiles": len(self.rival_claimed_tiles),
-            "vp_chips": self.rival.vp_chips,
-            "starting_score": self.difficulty.starting_score,
-            "end_reason": self.end_reason(),
-        }
-        rows = [
-            ("You", human_score, human_summary),
-            ("Rival", self.rival.score, rival_summary),
-        ]
-        return sorted(rows, key=lambda row: row[1], reverse=True)
+        return [("You", self.game.score(self.player), self.human_summary())]
 
 
-def run_one(strategy: str, seed: int, config: BatteryConfig, difficulty: str):
-    game = BatterySoloGame(strategy=strategy, seed=seed, config=config, difficulty=difficulty)
+def run_one(strategy: str, seed: int, config: BatteryConfig, challenge: str, dummy_count: int):
+    game = BatterySoloGame(
+        strategy=strategy,
+        seed=seed,
+        config=config,
+        challenge=challenge,
+        dummy_count=dummy_count,
+    )
     scores, reports = game.play()
     return game, scores, reports
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run the Roll phase-battery solo prototype.")
+    parser = argparse.ArgumentParser(description="Run the Roll phase-battery solo challenge prototype.")
     parser.add_argument("--games", type=int, default=100)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--strategy", default="balanced")
-    parser.add_argument("--difficulty", choices=tuple(SOLO_DIFFICULTIES), default="standard")
+    parser.add_argument("--challenge", choices=tuple(SOLO_CHALLENGES), default="score")
+    parser.add_argument("--dummy-count", type=int, default=2)
     parser.add_argument("--max-track-capacity", type=int, default=6)
     parser.add_argument("--starting-capacity", type=int, default=2)
     parser.add_argument("--starting-white-capacity", type=int, default=2)
     parser.add_argument("--starting-credits", type=int, default=1)
     parser.add_argument("--free-recharge", type=int, default=0)
     parser.add_argument("--yellow-mode", choices=("ship", "alien"), default="alien")
-    parser.add_argument("--max-rounds", type=int, default=40)
     args = parser.parse_args()
 
     config = BatteryConfig(
@@ -216,37 +262,50 @@ def main():
         starting_credits=args.starting_credits,
         minimum_recharge=args.free_recharge,
         yellow_mode=args.yellow_mode,
-        max_rounds=args.max_rounds,
     )
 
-    wins = Counter()
+    tiers = Counter()
     end_reasons = Counter()
     rounds = []
     human_scores = []
-    rival_scores = []
+    claimed_tiles = []
+    drained_vp = []
     last_game = None
     last_scores = None
     last_reports = None
 
     for index in range(args.games):
-        game, scores, reports = run_one(args.strategy, args.seed + index, config, args.difficulty)
+        game, scores, reports = run_one(
+            args.strategy,
+            args.seed + index,
+            config,
+            args.challenge,
+            args.dummy_count,
+        )
         last_game = game
         last_scores = scores
         last_reports = reports
-        human = next(score for name, score, _summary in scores if name == "You")
-        rival = next(score for name, score, _summary in scores if name == "Rival")
-        wins["human" if human > rival else "rival"] += 1
+        summary = scores[0][2]
+        tiers[summary["highest_tier"]] += 1
         end_reasons[game.end_reason()] += 1
         rounds.append(game.game.round_number)
-        human_scores.append(human)
-        rival_scores.append(rival)
+        human_scores.append(scores[0][1])
+        claimed_tiles.append(summary["dummy_claimed_tiles"])
+        drained_vp.append(summary["dummy_vp_chips_drained"])
 
     print(f"Games: {args.games}")
     print(f"Strategy: {args.strategy}")
-    print(f"Difficulty: {args.difficulty}")
+    print(f"Challenge: {args.challenge}")
+    print(f"Dummy phase cards: {args.dummy_count}")
     print(f"Average rounds: {mean(rounds):.1f}")
-    print(f"Average score: human {mean(human_scores):.1f}, rival {mean(rival_scores):.1f}")
-    print(f"Win rate: human {wins['human'] / args.games:.1%}, rival {wins['rival'] / args.games:.1%}")
+    print(f"Average score: {mean(human_scores):.1f}")
+    print(f"Average dummy churn: {mean(claimed_tiles):.1f} tiles, {mean(drained_vp):.1f} VP chips")
+    print("Victory tiers")
+    cumulative = 0
+    for tier in reversed(SOLO_TIERS):
+        cumulative += tiers[tier.name]
+        print(f"  {tier.label}: {cumulative / args.games:.1%}+")
+    print(f"  Loss: {tiers['loss'] / args.games:.1%}")
     print("End reasons")
     for reason, count in end_reasons.most_common():
         print(f"  {reason}: {count}")
@@ -258,10 +317,11 @@ def main():
     print("Last game final rounds")
     for report in (last_reports or [])[-5:]:
         phases = [phase.value for phase in report.selected]
+        dummy = [phase.value for phase in report.dummy_phases]
         print(
             f"  R{report.round_number}: you {report.human_phase.value}, "
-            f"rival {report.rival_phase.value}, phases {phases}, "
-            f"scores human {report.human_score} / rival {report.rival_score}"
+            f"dummy {dummy}, phases {phases}, score {report.human_score}, "
+            f"bag churn {report.dummy_claimed_tiles}, VP pool {report.vp_pool}"
         )
     if last_game is not None:
         print(f"VP pool remaining: {last_game.game.vp_pool}")

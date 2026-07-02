@@ -15,7 +15,7 @@ Open the desired HTML file in a browser and print at 100% scale.
 
 - 4 Phase Battery player boards
 - 9 quick-reference cards
-- 11 solo Rival reference / phase cards
+- 11 solo challenge / Dummy phase cards
 - printable max markers and setup strips
 
 The card layout uses poker-size-ish cards sized to fit 9 per letter page.
@@ -25,6 +25,7 @@ Sleeve with spare cards for playtesting.
 
 - `print-and-play.html`: Tiny Galaxy printable card sheets.
 - `roll-phase-battery.html`: Roll phase battery boards and references.
+- `roll-phase-battery.pdf`: generated Roll phase battery print-and-play PDF.
 - `styles/cards.css`: print layout and card styling.
 - `styles/roll.css`: Roll phase battery print layout.
 - `assets/source/upgrade-art-sheet.png`: 12-panel representative upgrade art.
@@ -44,12 +45,9 @@ as balance changes.
 For the Roll boards, put the colored die on the current pip value and a marker
 on the max pip value.
 
-## Current Solo Tuning
+## Roll Solo Tuning
 
-- Training: empire 1, energy 1, culture 1, VP 0.
-- Standard: empire 1, energy 2, culture 1, VP 2.
-- Advanced: empire 1, energy 3, culture 1, VP 4.
-- Expert: empire 1, energy 3, culture 1, VP 6.
-
-The Rival Empire uses the regular Galaxy mat side, not the official Rogue
-Galaxy side.
+The Roll Phase Battery solo mode uses a 12-round challenge with two Dummy phase
+cards per round. Result tiers are currently tuned for the Score Challenge at
+roughly 90%, 60%, 50%, and 30% for Success, Great, Triumphant, and Epic with
+the balanced simulator strategy.

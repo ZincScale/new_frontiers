@@ -558,147 +558,137 @@ Red max 4 = you own 4 Military dice.
 Blue max 3 = you own 3 Novelty dice.
 ```
 
-## Solo Mode: Rival Phase Deck
+## Solo Mode: Challenge Deck
 
-Solo mode uses the normal Phase Battery rules for you and a lightweight Rival
-that supplies extra selected phases, drains the VP chip pool, and races your
-score.
+Solo mode uses the normal Phase Battery rules with a fixed clock, dummy phase
+cards, challenge cards, and graded result tiers. This follows the solo style of New Frontiers:
+Starry Rift and Jump Drive: Terminal Velocity: you are not racing an automa
+score. You are trying to build the right empire before time runs out.
 
 Additional components:
 
-- one Rival score marker;
-- one Rival claimed-tile row;
-- one Rival Goods marker;
-- one Rival Insight marker;
-- five Rival phase cards: Explore, Develop, Settle, Produce, Ship.
+- five Dummy phase cards: Explore, Develop, Settle, Produce, Ship;
+- one Dummy claimed-tile row;
+- one Dummy Goods marker;
+- one solo challenge card.
 
 Setup:
 
-1. Set up your player area normally.
+1. Set up one normal player area.
 2. Use a 30 VP chip pool.
-3. The Rival starts with 3 virtual starting tiles.
-4. Set Rival Goods to 0.
-5. Set Rival Insight to 0.
-6. Choose a difficulty and set the Rival starting score:
+3. Set Dummy Goods to 0.
+4. Shuffle the five Dummy phase cards into a face-down deck.
+5. Choose one challenge card.
+
+Result tiers:
 
 ```text
-Training  8
-Standard 12
-Advanced 14
-Expert   16
+Success      Score 31+ VP.
+Great        Score 37+ VP.
+Triumphant   Score 38+ VP.
+Epic         Score 41+ VP.
 ```
 
-Shuffle the five Rival phase cards into a face-down Rival phase deck.
+Recommended challenge cards:
+
+```text
+Score Challenge     Meet the score threshold.
+Builder Challenge   Meet the score threshold and complete 7+ tiles.
+Settler Challenge   Meet the score threshold and have 10+ tableau tiles.
+Merchant Challenge  Meet the score threshold and score 10+ VP chips.
+Engine Challenge    Meet the score threshold and have 16+ total max pips.
+```
+
+For a non-score challenge, the extra requirement is the same for every result
+tier. The tier is determined by your final score.
 
 Solo round structure:
 
 1. Select your phase normally.
-2. Reveal the top Rival phase card. If the deck is empty, shuffle all five
-   Rival phase cards to form a new deck first.
-3. The selected phases this round are your selected phase plus the Rival phase.
+2. Reveal two Dummy phase cards. If the deck is empty, shuffle all five Dummy
+   phase cards to form a new deck first.
+3. The selected phases this round are your selected phase plus the Dummy phases.
 4. Resolve selected phases in normal Roll order. You may spend pips in any
    selected phase.
-5. Resolve only the revealed Rival phase card's Rival effect.
+5. Resolve both Dummy phase effects.
 6. Manage Empire normally.
 
-The Rival never spends pips, never has Credits, never builds real tiles, and
-never uses tile powers. It does claim tiles from the bag to keep the tile mix
-moving. Only track the four Rival values: score, claimed tiles, Goods, and
-Insight.
+The Dummy never spends pips, never has Credits, never builds an empire, never
+scores, and never uses tile powers. It exists to add phase uncertainty, drain
+some VP chips, and churn the tile bag.
 
-Important: the Rival effect happens only for the Rival phase card revealed this
-round. Your selected phase can let you act, but it does not make the Rival claim
-tiles, gain Goods, gain Insight, or score.
-
-Rival card effects:
+Dummy card effects:
 
 ```text
-Explore:  Rival gains 1 Insight, max 3.
-Develop:  Rival claims 1 Development tile. Rival scores 2 VP chips.
-Settle:   Rival claims 1 World tile. Rival scores 2 VP chips.
-Produce:  Rival Goods +1, max 4.
-Ship:     Rival Ships all Goods for 2 VP chips each.
+Explore:  Claim 1 Development tile and 1 World tile from the bag.
+Develop:  Claim 1 Development tile from the bag.
+Settle:   Claim 1 World tile from the bag.
+Produce:  Dummy Goods +1, max 4.
+Ship:     Drain 2 VP chips per Dummy Good, then set Dummy Goods to 0.
+           If Dummy Goods is 0, drain 2 VP chips anyway.
 ```
 
-When the Rival claims a tile, draw the first matching tile from the bag and
-place it face down in a Rival row. Do not read or resolve the tile. If no
-matching tile remains in the bag, the Rival still scores.
+When the Dummy claims a tile, draw the first matching tile from the bag and
+place it face down in the Dummy row. Do not read or resolve the tile. If no
+matching tile remains in the bag, skip that claim.
 
-The Rival's claimed tiles do not trigger the 12-tile tableau end condition. They
-exist to churn the tile bag and to show how much pressure the Rival has applied.
-
-If the Rival Ships with 0 Goods, it scores 2 VP chips anyway.
-
-If the Rival has at least 1 Insight when it Develops or Settles, spend 1 Insight
-and the Rival scores +1 VP chip for that Develop or Settle.
-
-Rival scoring:
-
-- Rival VP chips come from the shared VP chip pool.
-- If the VP chip pool is empty, finish the round and end the game.
-- The Rival's final score is its starting score plus VP chips it scored.
+The Dummy's claimed tiles do not trigger the 12-tile tableau end condition. They
+exist only to keep the bag moving at a multiplayer-like pace.
 
 Solo end conditions:
 
+- the round limit is reached;
 - the VP chip pool is exhausted;
-- your tableau reaches 12 or more tile squares;
-- the round limit is reached, if using the simulator.
+- your tableau reaches 12 or more tile squares.
 
-Finish the round, then compare your final score to the Rival score.
+Finish the round, then check your challenge card. Your result is the highest
+tier whose score threshold you reached while also meeting that challenge's
+extra requirement, if any.
 
 Solo example:
 
 ```text
-Standard Rival starts at 12 VP.
-Rival has 3 virtual starting tiles.
-Rival Goods 0.
-Rival Insight 0.
+Challenge: Builder.
+To get any listed result, complete 7+ tiles.
+Your final score determines the tier: Success 31, Great 37, Triumphant 38,
+or Epic 41.
 
 You select Settle.
-Rival reveals Produce.
+Dummy reveals Produce and Develop.
 
-Selected phases: Settle, Produce.
+Selected phases: Develop, Settle, Produce.
 
-You spend Red pips during Settle.
-You spend Green pips during Produce if able.
+You may spend Brown pips during Develop.
+You may spend Red pips during Settle.
+You may spend Green pips during Produce.
 
-Rival resolves Produce: Rival Goods 0 -> 1.
-Rival does not claim a World, because the Rival card was Produce, not Settle.
+Dummy resolves Produce: Dummy Goods 0 -> 1.
+Dummy resolves Develop: draw one Development tile from the bag and place it
+face down in the Dummy row.
 ```
 
 Later:
 
 ```text
-Rival reveals Develop.
+Dummy reveals Explore and Ship.
 
-Draw one Development tile from the bag.
-Place it face down in the Rival row.
-Rival scores 2 VP chips.
-```
-
-Later:
-
-```text
-Rival has 2 Goods.
-Rival reveals Ship.
-
-Rival Ships both Goods.
-Rival scores 4 VP chips.
-Rival Goods 2 -> 0.
+Explore: draw one Development and one World from the bag into the Dummy row.
+Ship: Dummy has 1 Good, so drain 2 VP chips and set Dummy Goods to 0.
 ```
 
 Current solo simulation with the recommended defaults:
 
 ```text
-Average length: about 11-13 rounds
-Standard difficulty: roughly even for production/ship strategies, easier for
-build-heavy strategies
+All difficulties use 12 rounds and two Dummy phase cards per round.
+Average Dummy churn: about 19 claimed tiles and 12 drained VP chips.
+For the Score Challenge with the balanced heuristic, Success is about 90%,
+Great about 60%, Triumphant about 50%, and Epic about 30%.
 ```
 
 Run:
 
 ```bash
-python3 -m roll_galaxy.solo --games 100 --strategy balanced --difficulty standard
+python3 -m roll_galaxy.solo --games 100 --strategy balanced --challenge score
 ```
 
 ## Full Round Example
@@ -817,10 +807,11 @@ simulator. Yellow-as-Ship averaged 13.2 rounds with nearly identical strategy
 results, so Alien-mode remains the recommended default for theme and tile
 identity.
 
-Solo Standard is intentionally close but not perfectly flat across strategies:
-Balanced won 62%, Builder 68.5%, Settler 77.5%, Producer 42.5%, and Shipper
-45% in 200-game sweeps with the current heuristic player. Treat those as
-simulation guideposts, not final balance data.
+Solo challenge mode uses 12 rounds and two Dummy phase cards each round. In
+simulation sweeps, the Dummy claimed about 19 tiles and drained about 12 VP
+chips on average. Score Challenge tiers are tuned around 90%, 60%, 50%, and
+30% success for Success, Great, Triumphant, and Epic with the balanced
+heuristic. Treat those as simulation guideposts, not final balance data.
 
 Run:
 
