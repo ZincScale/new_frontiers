@@ -193,7 +193,7 @@ After spending:
 
 ```text
 Brown   0/2
-Red     1/3
+Red     2/3
 Purple  0/2
 White   1/2
 ```
@@ -485,27 +485,12 @@ end and scoring, as in the base game.
 
 ## Reassign Powers
 
-Because there is no Assign Dice step, reassign powers need conversion.
+Ignore reassign powers.
 
-Use this conversion guide for the first playtest:
-
-```text
-Reassign 1 die:
-Move 1 current pip from one track to another track, not above max.
-
-Reassign 1 or 2 dice:
-Move up to 2 current pips among tracks, not above max.
-
-Dictate:
-Optional rule. Spend 1 current pip from any track to move 1 current pip from
-another track to any different track, not above max.
-```
-
-If a reassign power names a color, the moved pip must come from or go to that
-color, matching the original intent as closely as possible.
-
-For a first table test, you can ignore reassign powers entirely. They mostly
-exist in base Roll to solve bad faces, and this variant removes bad faces.
+There is no Assign Dice step, so these powers have no timing window. They mostly
+exist in the base game to repair bad faces, and this variant removes bad faces.
+Development tiles with only reassign text still count for cost, VP, tableau
+size, tags, and end-game bonuses.
 
 ## Other Tile Power Conversion
 
@@ -674,4 +659,3 @@ Compare yellow modes:
 python3 -m roll_galaxy.simulate --games 100 --yellow-mode alien --players P1:balanced P2:builder P3:settler P4:shipper
 python3 -m roll_galaxy.simulate --games 100 --yellow-mode ship --players P1:balanced P2:builder P3:settler P4:shipper
 ```
-
