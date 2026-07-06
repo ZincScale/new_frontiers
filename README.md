@@ -1,43 +1,57 @@
 # Dice-Galaxy Prototypes
 
 This repository contains a Python rules prototype for a small-box dice galaxy
-game with a generic die-face upgrade system, plus a Roll for the Galaxy
-phase-battery variant prototype.
+game with a generic die-face upgrade system, plus Roll for the Galaxy variant
+prototypes.
 
-## Roll For The Galaxy Phase Battery
+## Roll For The Galaxy Mancala Dice Variant
 
-The Roll prototype replaces face-roll luck with deterministic phase-capacity
-tracks. Dice colors become rechargeable batteries for Explore, Develop, Settle,
-Produce, Ship, Wild, and Alien work.
+The main Roll prototype replaces the Dice Cup, roll, and assign steps with a
+five-section mancala loop:
+
+```text
+Explore -> Develop -> Settle -> Produce -> Ship -> Explore
+```
+
+Dice colors remain identities. Blue, brown, red, green, and purple have matching
+phase sections; white and yellow are flexible dice that enter a normal phase
+section from Spent.
 
 Rules draft:
 
-- `docs/roll_phase_battery_rules.md`
-- `docs/roll_phase_battery_rules.pdf`
+- `docs/roll_mancala_dice_design.md`
+- `docs/roll_mancala_dice_design.pdf`
+- `docs/roll_phase_battery_rules.md` for the archived phase-battery branch.
 
 Print-and-play files:
 
-- `pnp/roll-phase-battery.html`
-- `pnp/roll-phase-battery.pdf`
+- `pnp/roll-mancala.html`
+- `pnp/roll-mancala.pdf`
+- `pnp/roll-phase-battery.html` for the archived phase-battery branch.
 
-Run the multiplayer simulator:
+Run the mancala multiplayer simulator:
+
+```bash
+python3 -m roll_mancala.simulate --games 100 --players P1:balanced P2:builder P3:settler P4:shipper
+```
+
+The mancala multiplayer default uses an 11 VP chip pool per player and the
+normal 12-square tableau end condition. Current tuning targets roughly 14-16
+rounds with the five-section loop.
+
+Run the mancala solo campaign simulator:
+
+```bash
+python3 -m roll_mancala.solo --games 100 --strategy balanced --campaign outreach
+```
+
+Run the archived phase-battery multiplayer simulator:
 
 ```bash
 python3 -m roll_galaxy.simulate --games 100 --players P1:balanced P2:builder P3:settler P4:shipper
 ```
 
-The multiplayer default uses a 16 VP chip pool per player and the normal
-12-square tableau end condition. Use `--vp-pool-per-player 12` to compare
-against the base game's VP pool size.
-
-Compare Alien Yellow with Yellow-as-Ship:
-
-```bash
-python3 -m roll_galaxy.simulate --games 100 --yellow-mode alien --players P1:balanced P2:builder P3:settler P4:shipper
-python3 -m roll_galaxy.simulate --games 100 --yellow-mode ship --players P1:balanced P2:builder P3:settler P4:shipper
-```
-
-Run the solo campaign simulator:
+Run the archived phase-battery solo campaign simulator:
 
 ```bash
 python3 -m roll_galaxy.solo --games 100 --strategy balanced --campaign outreach

@@ -6,175 +6,20 @@ from dataclasses import dataclass, replace
 from statistics import mean
 from typing import Optional
 
-from .engine import BatteryConfig, BatteryGame
-from .model import PHASE_ORDER, DieColor, Phase, Tile, TileKind
-
-
-@dataclass(frozen=True)
-class SoloWinCondition:
-    name: str
-    label: str
-    min_score: int
-    min_tableau: int = 0
-    min_completed_tiles: int = 0
-    min_developments: int = 0
-    min_worlds: int = 0
-    min_production_worlds: int = 0
-    min_distinct_world_colors: int = 0
-    min_novelty_worlds: int = 0
-    min_rare_worlds: int = 0
-    min_alien_worlds: int = 0
-    min_vp_chips: int = 0
-    min_max_capacity: int = 0
-    min_blue_capacity: int = 0
-    min_red_capacity: int = 0
-
-
-SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
-    SoloWinCondition("great", "Great", 40),
-    SoloWinCondition("triumphant", "Triumphant", 43),
-    SoloWinCondition("epic", "Epic", 46),
-    SoloWinCondition("builder", "Builder", 31, min_completed_tiles=7),
-    SoloWinCondition("developer", "Developer", 31, min_developments=4),
-    SoloWinCondition("colonizer", "Colonizer", 31, min_worlds=6),
-    SoloWinCondition("satisfied_populace", "Satisfied Populace", 31, min_vp_chips=10),
-    SoloWinCondition("industrial", "Industrial", 31, min_max_capacity=16),
-    SoloWinCondition("production", "Production", 31, min_production_worlds=4),
-    SoloWinCondition("diverse", "Diverse", 31, min_distinct_world_colors=3),
-    SoloWinCondition("novelty", "Novelty", 31, min_novelty_worlds=2),
-    SoloWinCondition("rare", "Rare Elements", 31, min_rare_worlds=2),
-    SoloWinCondition("alien", "Alien Contact", 31, min_alien_worlds=1),
-    SoloWinCondition("military", "Military", 31, min_red_capacity=5),
-    SoloWinCondition("discovery", "Discovery", 31, min_blue_capacity=5),
-    SoloWinCondition("great_builder", "Great Builder", 40, min_completed_tiles=7),
-    SoloWinCondition("great_developer", "Great Developer", 40, min_developments=4),
-    SoloWinCondition("great_colonizer", "Great Colonizer", 40, min_worlds=6),
-    SoloWinCondition("great_satisfied", "Great Populace", 40, min_vp_chips=10),
-    SoloWinCondition("great_industrial", "Great Industrial", 40, min_max_capacity=16),
-    SoloWinCondition("great_production", "Great Production", 40, min_production_worlds=4),
-    SoloWinCondition("great_diverse", "Great Diversity", 40, min_distinct_world_colors=3),
-    SoloWinCondition("great_novelty", "Great Novelty", 40, min_novelty_worlds=2),
-    SoloWinCondition("great_rare", "Great Rare Elements", 40, min_rare_worlds=2),
-    SoloWinCondition("great_alien", "Great Alien Contact", 40, min_alien_worlds=1),
-    SoloWinCondition("great_military", "Great Military", 40, min_red_capacity=5),
-    SoloWinCondition("great_discovery", "Great Discovery", 40, min_blue_capacity=5),
-    SoloWinCondition("architect", "Architect", 40, min_developments=6),
-    SoloWinCondition("empire_builder", "Empire Builder", 43, min_completed_tiles=9),
-    SoloWinCondition("industrialist", "Industrialist", 43, min_max_capacity=18),
-    SoloWinCondition("golden_age", "Golden Age", 46, min_completed_tiles=8),
-    SoloWinCondition("colonial_power", "Colonial Power", 40, min_worlds=7),
-    SoloWinCondition("renaissance", "Renaissance", 43, min_worlds=7),
-    SoloWinCondition("production_web", "Production Web", 40, min_production_worlds=5),
-    SoloWinCondition("prosperity", "Prosperity", 40, min_vp_chips=14),
-    SoloWinCondition("novelty_boom", "Novelty Boom", 40, min_novelty_worlds=2),
-    SoloWinCondition("rare_monopoly", "Rare Monopoly", 40, min_rare_worlds=2),
-    SoloWinCondition("alien_empire", "Alien Empire", 46, min_alien_worlds=1),
-    SoloWinCondition("warlord", "Warlord", 43, min_red_capacity=5),
-    SoloWinCondition("pathfinder", "Pathfinder", 40, min_blue_capacity=5),
-    SoloWinCondition("discoverer", "Discoverer", 43, min_blue_capacity=5),
-    SoloWinCondition("grand_architect", "Grand Architect", 46, min_developments=6),
-    SoloWinCondition("imperial_reach", "Imperial Reach", 46, min_worlds=7),
-    SoloWinCondition("research_league", "Research League", 43, min_developments=5),
-    SoloWinCondition("commerce_ring", "Commerce Ring", 40, min_vp_chips=12),
-    SoloWinCondition("galactic_unifier", "Galactic Unifier", 46, min_distinct_world_colors=4),
-    SoloWinCondition("fleet_command", "Fleet Command", 40, min_red_capacity=4),
+from roll_galaxy.solo import (
+    SOLO_CAMPAIGN_MAP,
+    SOLO_CAMPAIGNS,
+    SOLO_WIN_CONDITION_MAP,
+    SOLO_WIN_CONDITIONS,
+    SoloWinCondition,
 )
 
-SOLO_ROUNDS = 12
+from .engine import MancalaConfig, MancalaGame
+from .model import PHASE_ORDER, SECTION_ORDER, DieColor, Phase, SourceChoice, Tile, TileKind
+
+
+SOLO_ROUNDS = 16
 SOLO_VP_POOL = 30
-
-
-SOLO_WIN_CONDITION_MAP: dict[str, SoloWinCondition] = {
-    condition.name: condition for condition in SOLO_WIN_CONDITIONS
-}
-
-
-@dataclass(frozen=True)
-class SoloCampaign:
-    key: str
-    label: str
-    condition_names: tuple[str, ...]
-
-    @property
-    def conditions(self) -> tuple[SoloWinCondition, ...]:
-        return tuple(SOLO_WIN_CONDITION_MAP[name] for name in self.condition_names)
-
-
-SOLO_CAMPAIGNS: tuple[SoloCampaign, ...] = (
-    SoloCampaign(
-        "outreach",
-        "Outreach",
-        (
-            "colonial_power",
-            "production_web",
-            "great_alien",
-            "great_production",
-            "great_colonizer",
-            "great_builder",
-            "great_industrial",
-            "great_diverse",
-        ),
-    ),
-    SoloCampaign(
-        "industry",
-        "Industrial Base",
-        (
-            "grand_architect",
-            "architect",
-            "industrialist",
-            "research_league",
-            "great_satisfied",
-            "great_developer",
-            "great_industrial",
-            "great_production",
-        ),
-    ),
-    SoloCampaign(
-        "survey",
-        "Sector Survey",
-        (
-            "discoverer",
-            "pathfinder",
-            "renaissance",
-            "great_novelty",
-            "great_rare",
-            "great_alien",
-            "great_diverse",
-            "great_colonizer",
-        ),
-    ),
-    SoloCampaign(
-        "contact",
-        "Alien Contact",
-        (
-            "warlord",
-            "alien_empire",
-            "great_military",
-            "great_discovery",
-            "fleet_command",
-            "great_alien",
-            "great_diverse",
-            "commerce_ring",
-        ),
-    ),
-    SoloCampaign(
-        "mastery",
-        "Mastery",
-        (
-            "grand_architect",
-            "imperial_reach",
-            "galactic_unifier",
-            "golden_age",
-            "empire_builder",
-            "industrialist",
-            "commerce_ring",
-            "great_builder",
-            "great_industrial",
-        ),
-    ),
-)
-
-SOLO_CAMPAIGN_MAP: dict[str, SoloCampaign] = {campaign.key: campaign for campaign in SOLO_CAMPAIGNS}
 
 
 @dataclass
@@ -187,22 +32,23 @@ class DummyState:
 @dataclass(frozen=True)
 class SoloRoundReport:
     round_number: int
-    human_phase: Phase
+    human_phase: Optional[Phase]
+    human_source: SourceChoice
     dummy_phases: tuple[Phase, ...]
     selected: tuple[Phase, ...]
-    used_pips: int
+    used_workers: int
     human_score: int
     dummy_claimed_tiles: int
     dummy_goods: int
     vp_pool: int
 
 
-class BatterySoloGame:
+class MancalaSoloGame:
     def __init__(
         self,
         strategy: str = "balanced",
         seed: Optional[int] = None,
-        config: Optional[BatteryConfig] = None,
+        config: Optional[MancalaConfig] = None,
         condition: str = "all",
         campaign: Optional[str] = None,
         dummy_count: int = 2,
@@ -210,13 +56,14 @@ class BatterySoloGame:
         self.condition_filter = condition
         self.campaign = SOLO_CAMPAIGN_MAP[campaign] if campaign else None
         self.dummy_count = dummy_count
-        base_config = config or BatteryConfig()
+        base_config = config or MancalaConfig()
         solo_config = replace(
             base_config,
             vp_pool_per_player=SOLO_VP_POOL,
             max_rounds=SOLO_ROUNDS,
+            dummy_phase_count=0,
         )
-        self.game = BatteryGame([("You", strategy)], seed=seed, config=solo_config)
+        self.game = MancalaGame([("You", strategy)], seed=seed, config=solo_config)
         self.phase_deck = list(PHASE_ORDER)
         self.game.rng.shuffle(self.phase_deck)
         self.dummy = DummyState(claimed_tiles=[])
@@ -233,16 +80,25 @@ class BatterySoloGame:
 
     def play_round(self) -> SoloRoundReport:
         self.game.round_number += 1
-        human_phase = self.game.choose_phase(self.player)
-        dummy_phases = self.draw_dummy_phases()
-        self.player.selected_phases.append(human_phase)
-        selected = tuple(phase for phase in PHASE_ORDER if phase in {human_phase, *dummy_phases})
+        source = self.game.choose_source(self.player)
+        sow = self.game.sow_choice(self.player, source)
+        human_phase = sow.selected_phase
+        if human_phase is not None:
+            self.player.selected_phases.append(human_phase)
+            self.player.selected_sections.append(sow.final_section)
 
-        before = self.player.used_pips
+        dummy_phases = self.draw_dummy_phases()
+        selected = tuple(
+            phase
+            for phase in PHASE_ORDER
+            if phase in ({human_phase} if human_phase else set()) or phase in dummy_phases
+        )
+
+        before = self.player.used_workers
         before_completed = self.player.completed_tiles
         for phase in selected:
             self.game.resolve_phase(self.player, phase)
-        used = self.player.used_pips - before
+        used = self.player.used_workers - before
         if used == 0 and self.player.completed_tiles == before_completed:
             self.player.dead_rounds += 1
 
@@ -253,6 +109,7 @@ class BatterySoloGame:
         return SoloRoundReport(
             self.game.round_number,
             human_phase,
+            source,
             dummy_phases,
             selected,
             used,
@@ -324,6 +181,13 @@ class BatterySoloGame:
             return "round_limit"
         return "in_progress"
 
+    def active_conditions(self) -> tuple[SoloWinCondition, ...]:
+        if self.campaign is not None:
+            return self.campaign.conditions
+        if self.condition_filter == "all":
+            return SOLO_WIN_CONDITIONS
+        return (SOLO_WIN_CONDITION_MAP[self.condition_filter],)
+
     def satisfied_conditions(self):
         summary = self.human_summary()
         return [
@@ -332,18 +196,13 @@ class BatterySoloGame:
             if self.condition_success_without_summary(condition, summary)
         ]
 
-    def active_conditions(self) -> tuple[SoloWinCondition, ...]:
-        if self.campaign is not None:
-            return self.campaign.conditions
-        if self.condition_filter == "all":
-            return SOLO_WIN_CONDITIONS
-        return (SOLO_WIN_CONDITION_MAP[self.condition_filter],)
-
     def human_summary(self):
         summary = self.game.final_scores()[0][2]
         summary = dict(summary)
         summary["vp_chips"] = self.player.vp_chips
-        summary["max_capacity"] = sum(track.maximum for track in self.player.tracks.values())
+        summary["max_capacity"] = self.owned_die_count()
+        summary["blue_capacity"] = self.owned_die_count(DieColor.BLUE)
+        summary["red_capacity"] = self.owned_die_count(DieColor.RED)
         summary.update(self.tableau_summary())
         summary["condition_filter"] = self.condition_filter
         summary["campaign"] = self.campaign.key if self.campaign else None
@@ -377,9 +236,23 @@ class BatterySoloGame:
             and summary["alien_worlds"] >= condition.min_alien_worlds
             and summary["vp_chips"] >= condition.min_vp_chips
             and summary["max_capacity"] >= condition.min_max_capacity
-            and self.player.tracks[DieColor.BLUE].maximum >= condition.min_blue_capacity
-            and self.player.tracks[DieColor.RED].maximum >= condition.min_red_capacity
+            and summary["blue_capacity"] >= condition.min_blue_capacity
+            and summary["red_capacity"] >= condition.min_red_capacity
         )
+
+    def owned_die_count(self, color: Optional[DieColor] = None) -> int:
+        total = 0
+        for dice in self.player.sections.values():
+            total += sum(1 for die in dice if color is None or die is color)
+        for spent_color, count in self.player.spent.items():
+            if color is None or spent_color is color:
+                total += count
+        for good in self.player.goods:
+            if color is None or good.color is color:
+                total += 1
+        for build in self.player.dev_stack + self.player.world_stack:
+            total += sum(1 for die in build.workers if color is None or die is color)
+        return total
 
     def tableau_summary(self):
         worlds = [tile for tile in self.player.tableau if tile.kind is TileKind.WORLD]
@@ -402,12 +275,12 @@ class BatterySoloGame:
 def run_one(
     strategy: str,
     seed: int,
-    config: BatteryConfig,
+    config: MancalaConfig,
     condition: str,
     dummy_count: int,
     campaign: Optional[str] = None,
 ):
-    game = BatterySoloGame(
+    game = MancalaSoloGame(
         strategy=strategy,
         seed=seed,
         config=config,
@@ -420,28 +293,32 @@ def run_one(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run the Roll phase-battery solo challenge prototype.")
+    parser = argparse.ArgumentParser(description="Run the Roll mancala solo challenge prototype.")
     parser.add_argument("--games", type=int, default=100)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--strategy", default="balanced")
     parser.add_argument("--condition", choices=("all", *SOLO_WIN_CONDITION_MAP), default="all")
     parser.add_argument("--campaign", choices=tuple(SOLO_CAMPAIGN_MAP), default=None)
     parser.add_argument("--dummy-count", type=int, default=2)
-    parser.add_argument("--max-track-capacity", type=int, default=6)
-    parser.add_argument("--starting-capacity", type=int, default=2)
-    parser.add_argument("--starting-white-capacity", type=int, default=2)
+    parser.add_argument("--section-cap", type=int, default=6)
+    parser.add_argument("--starting-per-phase", type=int, default=2)
+    parser.add_argument("--starting-white", type=int, default=2)
+    parser.add_argument("--starting-yellow", type=int, default=0)
     parser.add_argument("--starting-credits", type=int, default=1)
-    parser.add_argument("--free-recharge", type=int, default=0)
-    parser.add_argument("--yellow-mode", choices=("ship", "alien"), default="alien")
+    parser.add_argument("--recovery-sow-cost", type=int, default=2)
+    parser.add_argument("--vp-pool-per-player", type=int, default=11)
+    parser.add_argument("--conservative-bonus", action="store_true")
     args = parser.parse_args()
 
-    config = BatteryConfig(
-        starting_capacity=args.starting_capacity,
-        starting_white_capacity=args.starting_white_capacity,
-        max_track_capacity=args.max_track_capacity,
+    config = MancalaConfig(
+        section_cap=args.section_cap,
+        starting_per_phase=args.starting_per_phase,
+        starting_white=args.starting_white,
+        starting_yellow=args.starting_yellow,
         starting_credits=args.starting_credits,
-        minimum_recharge=args.free_recharge,
-        yellow_mode=args.yellow_mode,
+        recovery_sow_cost=args.recovery_sow_cost,
+        vp_pool_per_player=args.vp_pool_per_player,
+        conservative_bonus=args.conservative_bonus,
     )
 
     conditions = Counter()
@@ -546,9 +423,10 @@ def main():
     for report in (last_reports or [])[-5:]:
         phases = [phase.value for phase in report.selected]
         dummy = [phase.value for phase in report.dummy_phases]
+        human = report.human_phase.value if report.human_phase else None
         print(
-            f"  R{report.round_number}: you {report.human_phase.value}, "
-            f"dummy {dummy}, phases {phases}, score {report.human_score}, "
+            f"  R{report.round_number}: you {human}, dummy {dummy}, "
+            f"phases {phases}, score {report.human_score}, "
             f"bag churn {report.dummy_claimed_tiles}, VP pool {report.vp_pool}"
         )
     if last_game is not None:

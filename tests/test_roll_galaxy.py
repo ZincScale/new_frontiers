@@ -1,6 +1,6 @@
 from roll_galaxy.engine import BatteryConfig, BatteryGame
 from roll_galaxy.model import BuildSlot, DieColor, Phase, Tile, TileKind
-from roll_galaxy.solo import BatterySoloGame, SOLO_WIN_CONDITION_MAP
+from roll_galaxy.solo import BatterySoloGame, SOLO_CAMPAIGNS, SOLO_WIN_CONDITION_MAP
 from roll_galaxy.tiles import HOME_WORLDS, NON_START_TILES, START_FACTION_PAIRS
 
 
@@ -343,10 +343,14 @@ def test_solo_campaign_filters_to_campaign_conditions():
     assert summary["campaign"] == "outreach"
     assert summary["campaign_name"] == "Outreach"
     assert {condition.name for condition in game.active_conditions()} == {
-        "great",
-        "colonizer",
-        "builder",
-        "industrial",
+        "colonial_power",
+        "production_web",
+        "great_alien",
+        "great_production",
+        "great_colonizer",
+        "great_builder",
+        "great_industrial",
+        "great_diverse",
     }
     assert "epic_success" not in summary
 
@@ -355,3 +359,12 @@ def test_solo_score_only_thresholds_are_retuned_for_one_shot_builds():
     assert SOLO_WIN_CONDITION_MAP["great"].min_score == 40
     assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 43
     assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 46
+
+
+def test_solo_campaign_scenarios_do_not_repeat_within_sheet():
+    for campaign in SOLO_CAMPAIGNS:
+        names = campaign.condition_names
+
+        assert len(names) >= 8
+        assert len(names) == len(set(names))
+        assert all(SOLO_WIN_CONDITION_MAP[name].min_score >= 40 for name in names)

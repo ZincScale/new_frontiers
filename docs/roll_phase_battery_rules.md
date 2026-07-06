@@ -31,6 +31,10 @@ For the first playtest, do not add free recharge, tile-specific retuning, or a
 new dummy-player system. Those are tuning knobs after the core battery loop is
 tested at the table.
 
+There is also a parked mancala dice alternative in
+`docs/roll_mancala_dice_design.md`. It uses the base game's physical dice as
+mancala stones. That design is not part of this ruleset.
+
 ## Components
 
 Use all normal Roll for the Galaxy components except the Dice Cups.
@@ -686,11 +690,11 @@ Setup:
 4. Shuffle the five Dummy phase cards into a face-down deck.
 5. Choose one campaign sheet.
 
-Each campaign has four win conditions. Play four games in a row. At the end of
-each game, mark exactly one satisfied condition on the campaign sheet that you
-have not already marked. If you cannot mark a new condition, you lose the
-campaign. If you mark all four conditions after four successive games, you win
-the campaign.
+Each campaign sheet has a menu of scenario conditions. Play four games in a
+row. At the end of each game, mark exactly one satisfied scenario on that
+campaign sheet that you have not already marked. If you cannot mark a new
+scenario, you lose the campaign. If you mark four different scenarios after
+four successive games, you win the campaign.
 
 Score-only win conditions:
 
@@ -727,23 +731,63 @@ Campaign sheets:
 
 ```text
 Outreach
-Great, Colonizer, Builder, Industrial.
+Colonial Power, Production Web, Great Alien Contact, Great Production,
+Great Colonizer, Great Builder, Great Industrial, Great Diversity.
 
 Industrial Base
-Triumphant, Developer, Industrial, Production.
+Grand Architect, Architect, Industrialist, Research League, Great Populace,
+Great Developer, Great Industrial, Great Production.
 
 Sector Survey
-Triumphant, Diverse, Novelty, Rare Elements.
+Discoverer, Pathfinder, Renaissance, Great Novelty, Great Rare Elements,
+Great Alien Contact, Great Diversity, Great Colonizer.
 
 Alien Contact
-Epic, Alien Contact, Military, Discovery.
+Warlord, Alien Empire, Great Military, Great Discovery, Fleet Command,
+Great Alien Contact, Great Diversity, Commerce Ring.
 
 Mastery
-Epic, Novelty, Rare Elements, Military.
+Grand Architect, Imperial Reach, Galactic Unifier, Golden Age, Empire Builder,
+Industrialist, Commerce Ring, Great Builder, Great Industrial.
 ```
 
-For one-off practice, ignore the campaign sheet and simply note every condition
-you satisfied.
+Scenario condition key:
+
+```text
+Great Builder        Score 40+ VP and complete 7+ tiles.
+Great Developer      Score 40+ VP and have 4+ Developments.
+Great Colonizer      Score 40+ VP and have 6+ Worlds.
+Great Populace       Score 40+ VP and score 10+ VP chips.
+Great Industrial     Score 40+ VP and have 16+ total max pips.
+Great Production     Score 40+ VP and have 4+ production Worlds.
+Great Diversity      Score 40+ VP and have 3+ different World colors.
+Great Novelty        Score 40+ VP and have 2+ Novelty Worlds.
+Great Rare Elements  Score 40+ VP and have 2+ Rare Worlds.
+Great Alien Contact  Score 40+ VP and have 1+ Alien World.
+Great Military       Score 40+ VP and have Red max 5.
+Great Discovery      Score 40+ VP and have Blue max 5.
+Architect            Score 40+ VP and have 6+ Developments.
+Colonial Power       Score 40+ VP and have 7+ Worlds.
+Production Web       Score 40+ VP and have 5+ production Worlds.
+Pathfinder           Score 40+ VP and have Blue max 5.
+Commerce Ring        Score 40+ VP and score 12+ VP chips.
+Fleet Command        Score 40+ VP and have Red max 4.
+Empire Builder       Score 43+ VP and complete 9+ tiles.
+Industrialist        Score 43+ VP and have 18+ total max pips.
+Renaissance          Score 43+ VP and have 7+ Worlds.
+Warlord              Score 43+ VP and have Red max 5.
+Discoverer           Score 43+ VP and have Blue max 5.
+Research League      Score 43+ VP and have 5+ Developments.
+Golden Age           Score 46+ VP and complete 8+ tiles.
+Alien Empire         Score 46+ VP and have 1+ Alien World.
+Grand Architect      Score 46+ VP and have 6+ Developments.
+Imperial Reach       Score 46+ VP and have 7+ Worlds.
+Galactic Unifier     Score 46+ VP and have 4+ different World colors.
+```
+
+For one-off practice, ignore the campaign sheet and simply note every broad
+condition or scenario condition you satisfied. Campaign mode is intentionally
+harder because each marked scenario requires at least a Great score.
 
 Solo round structure:
 
@@ -785,15 +829,18 @@ Solo end conditions:
 - your tableau reaches 12 or more tile squares.
 
 Finish the round, then check your campaign sheet. Mark one satisfied unmarked
-condition. If you cannot mark one, the campaign is lost.
+scenario. If you cannot mark one, the campaign is lost.
 
 Solo example:
 
 ```text
 Campaign: Outreach.
-Unmarked conditions: Great, Colonizer, Builder, Industrial.
-You finish with 35 VP, 7 completed tiles, and 15 total max pips.
-You may mark Builder, but not Great or Industrial.
+Unmarked scenarios include Colonial Power, Production Web, Great Alien Contact,
+Great Production, Great Colonizer, Great Builder, Great Industrial, and Great
+Diversity.
+You finish with 41 VP, 7 completed tiles, 6 Worlds, and 4 production Worlds.
+You may mark Great Builder, Great Colonizer, or Great Production. Mark exactly
+one of them.
 
 You select Settle.
 Dummy reveals Produce and Develop.
@@ -825,6 +872,8 @@ All difficulties use 12 rounds and two Dummy phase cards per round.
 Average Dummy churn: about 18 claimed tiles and 11 drained VP chips.
 For one-off score-only win conditions with the balanced heuristic, Great is
 about 58%, Triumphant about 37%, and Epic about 20%.
+Scenario-menu campaign sheets are much harder. In 200-game balanced-heuristic
+sweeps, the five campaign sheets each landed around 11-13% campaign wins.
 ```
 
 Run:

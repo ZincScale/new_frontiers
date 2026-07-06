@@ -307,6 +307,146 @@ body {
   text-align: center;
 }
 
+.mancala-board {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  border-radius: 0.08in;
+  background: var(--paper);
+}
+
+.mancala-board header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.14in 0.18in 0.1in;
+  border-bottom: 1px solid rgba(43, 48, 56, 0.35);
+  background: #263f47;
+  color: #fff;
+}
+
+.mancala-board h1,
+.mancala-board p,
+.pit h2,
+.spent-pit h2 {
+  margin: 0;
+}
+
+.mancala-board h1 {
+  font-size: 20pt;
+  letter-spacing: 0;
+}
+
+.mancala-board header p {
+  font-size: 11pt;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.mancala-loop {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr 1fr;
+  gap: 0.08in;
+  padding: 0.16in 0.18in;
+}
+
+.pit,
+.spent-pit {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 1.18in;
+  border: 1.5px solid var(--line);
+  border-radius: 0.06in;
+  background: #fff;
+  padding: 0.08in;
+}
+
+.pit h2,
+.spent-pit h2 {
+  font-size: 12pt;
+  line-height: 1;
+}
+
+.pit .identity,
+.spent-pit .identity {
+  font-size: 7.4pt;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.pit .bowl,
+.spent-pit .bowl {
+  display: grid;
+  min-height: 0.52in;
+  margin: 0.06in 0;
+  place-items: center;
+  border: 1px dashed rgba(43, 48, 56, 0.45);
+  border-radius: 0.05in;
+  color: var(--muted);
+  font-size: 8pt;
+  font-weight: 900;
+  text-align: center;
+}
+
+.pit .note,
+.spent-pit .note {
+  color: var(--muted);
+  font-size: 7.2pt;
+  font-weight: 800;
+}
+
+.pit.blue { border-color: var(--blue); }
+.pit.brown { border-color: var(--brown); }
+.pit.red { border-color: var(--red); }
+.pit.green { border-color: var(--green); }
+.pit.purple { border-color: var(--purple); }
+
+.pit.blue h2,
+.pit.blue .identity { color: var(--blue); }
+.pit.brown h2,
+.pit.brown .identity { color: var(--brown); }
+.pit.red h2,
+.pit.red .identity { color: var(--red); }
+.pit.green h2,
+.pit.green .identity { color: var(--green); }
+.pit.purple h2,
+.pit.purple .identity { color: var(--purple); }
+
+.spent-pit {
+  border-color: #5f6673;
+  background: #f2f4f5;
+}
+
+.mancala-board footer {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 1.6fr;
+  gap: 0.06in;
+  padding: 0.1in 0.18in 0.14in;
+  border-top: 1px solid rgba(43, 48, 56, 0.25);
+  color: var(--muted);
+  font-size: 8.2pt;
+  font-weight: 800;
+}
+
+.bonus-list {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.035in 0.07in;
+  margin: 0;
+  padding: 0.1in 0.12in;
+  font-size: 7.8pt;
+}
+
+.bonus-list dt {
+  font-weight: 900;
+}
+
+.bonus-list dd {
+  margin: 0;
+}
+
 @media print {
   body {
     background: #fff;
