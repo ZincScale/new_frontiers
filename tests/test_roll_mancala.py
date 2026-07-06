@@ -381,8 +381,11 @@ def test_mancala_solo_campaigns_have_four_unique_conditions():
 def test_mancala_solo_campaigns_focus_on_current_mancala_design():
     campaigns = {campaign.key: campaign.condition_names for campaign in SOLO_CAMPAIGNS}
 
-    assert campaigns["expansion"] == ("great", "builder", "colonizer", "phase_specialist")
-    assert campaigns["development"] == ("triumphant", "developer", "credit_economy", "logistics")
-    assert campaigns["trade"] == ("triumphant", "producer", "shipper", "diverse")
-    assert campaigns["management"] == ("epic", "workforce", "phase_momentum", "phase_specialist")
+    assert campaigns["frontier_survey"] == ("great", "colonizer", "diverse", "phase_specialist")
+    assert campaigns["core_worlds"] == ("triumphant", "developer", "builder", "credit_economy")
+    assert campaigns["trade_league"] == ("triumphant", "producer", "shipper", "diverse")
+    assert campaigns["supply_lines"] == ("great", "workforce", "logistics", "phase_momentum")
+    assert campaigns["colonial_boom"] == ("great", "colonizer", "producer", "logistics")
+    assert campaigns["industrial_push"] == ("epic", "workforce", "credit_economy", "phase_momentum")
+    assert campaigns["imperial_prestige"] == ("epic", "builder", "shipper", "phase_specialist")
     assert campaigns["mastery"] == ("epic", "credit_economy", "logistics", "phase_momentum")

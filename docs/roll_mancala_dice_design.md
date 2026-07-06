@@ -320,27 +320,53 @@ A campaign is four consecutive games. Each game must mark one campaign scenario
 not already marked. Win the campaign by marking all four scenarios.
 
 ```text
-Expansion
-  Great, Builder, Colonizer, Phase Specialist
+Frontier Survey
+  Great, Colonizer, Diversified Economy, Phase Specialist
 
-Development
-  Triumphant, Developer, Credit Economy, Logistics
+Core Worlds Renaissance
+  Triumphant, Developer, Builder, Credit Economy
 
-Galactic Trade
+Trade League
   Triumphant, Producer, Shipper, Diversified Economy
 
-Imperial Management
-  Epic, Expanded Workforce, Phase Momentum, Phase Specialist
+Supply Lines
+  Great, Expanded Workforce, Logistics, Phase Momentum
+
+Colonial Boom
+  Great, Colonizer, Producer, Logistics
+
+Industrial Mobilization
+  Epic, Expanded Workforce, Credit Economy, Phase Momentum
+
+Imperial Prestige
+  Epic, Builder, Shipper, Phase Specialist
 
 Galactic Mastery
   Epic, Credit Economy, Logistics, Phase Momentum
 ```
 
+Campaign story hooks:
+
+- Frontier Survey: chart a scattered sector and turn discoveries into a working
+  colony network.
+- Core Worlds Renaissance: rebuild the home cluster through Developments,
+  infrastructure, and Credit discipline.
+- Trade League: make production and shipping the center of galactic influence.
+- Supply Lines: keep a wide empire supplied through workforce growth and
+  repeated recovery.
+- Colonial Boom: expand fast, then make the new Worlds produce.
+- Industrial Mobilization: push a large workforce and Credit economy into an
+  Epic-scale engine.
+- Imperial Prestige: convert visible accomplishments into prestige before the
+  Dummy drains the sector.
+- Galactic Mastery: a hard economy-control arc for strong solo play.
+
 Current balanced-strategy tuning target:
 
 ```text
-Expansion / Galactic Trade: approachable campaign wins
-Development / Imperial Management / Galactic Mastery: harder economy campaigns
+Frontier Survey / Trade League / Colonial Boom: approachable campaign wins
+Core Worlds / Supply Lines / Industrial Mobilization / Imperial Prestige / Mastery:
+  harder economy and prestige campaigns
 ```
 
 ## Current Test Coverage

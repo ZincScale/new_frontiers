@@ -337,6 +337,46 @@ body {
   font-weight: 800;
 }
 
+.dense-aid .aid-title {
+  padding: 0.1in 0.18in 0.08in;
+}
+
+.dense-aid .aid-title h1 {
+  font-size: 18pt;
+}
+
+.dense-aid .aid-title p {
+  font-size: 8.4pt;
+}
+
+.dense-aid .aid-grid {
+  gap: 0.045in 0.1in;
+  padding: 0.1in 0.16in 0.12in;
+}
+
+.dense-aid .aid-section {
+  padding-bottom: 0.045in;
+}
+
+.dense-aid .aid-section h2 {
+  margin-bottom: 0.025in;
+  font-size: 10.6pt;
+}
+
+.dense-aid .aid-section ul,
+.dense-aid .aid-section ol,
+.dense-aid .aid-map {
+  font-size: 7.8pt;
+}
+
+.dense-aid .aid-section li {
+  margin-bottom: 0.012in;
+}
+
+.dense-aid .aid-map {
+  gap: 0.018in 0.055in;
+}
+
 .marker-sheet {
   display: grid;
   grid-template-rows: auto auto;

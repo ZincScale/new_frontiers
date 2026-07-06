@@ -68,10 +68,13 @@ class SoloCampaign:
 
 
 SOLO_CAMPAIGNS: tuple[SoloCampaign, ...] = (
-    SoloCampaign("expansion", "Expansion", ("great", "builder", "colonizer", "phase_specialist")),
-    SoloCampaign("development", "Development", ("triumphant", "developer", "credit_economy", "logistics")),
-    SoloCampaign("trade", "Galactic Trade", ("triumphant", "producer", "shipper", "diverse")),
-    SoloCampaign("management", "Imperial Management", ("epic", "workforce", "phase_momentum", "phase_specialist")),
+    SoloCampaign("frontier_survey", "Frontier Survey", ("great", "colonizer", "diverse", "phase_specialist")),
+    SoloCampaign("core_worlds", "Core Worlds Renaissance", ("triumphant", "developer", "builder", "credit_economy")),
+    SoloCampaign("trade_league", "Trade League", ("triumphant", "producer", "shipper", "diverse")),
+    SoloCampaign("supply_lines", "Supply Lines", ("great", "workforce", "logistics", "phase_momentum")),
+    SoloCampaign("colonial_boom", "Colonial Boom", ("great", "colonizer", "producer", "logistics")),
+    SoloCampaign("industrial_push", "Industrial Mobilization", ("epic", "workforce", "credit_economy", "phase_momentum")),
+    SoloCampaign("imperial_prestige", "Imperial Prestige", ("epic", "builder", "shipper", "phase_specialist")),
     SoloCampaign("mastery", "Galactic Mastery", ("epic", "credit_economy", "logistics", "phase_momentum")),
 )
 
