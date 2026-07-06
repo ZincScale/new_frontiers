@@ -306,7 +306,7 @@ def main():
     parser.add_argument("--starting-yellow", type=int, default=0)
     parser.add_argument("--starting-credits", type=int, default=1)
     parser.add_argument("--recovery-sow-cost", type=int, default=2)
-    parser.add_argument("--vp-pool-per-player", type=int, default=11)
+    parser.add_argument("--vp-pool-per-player", type=int, default=8)
     parser.add_argument("--conservative-bonus", action="store_true")
     args = parser.parse_args()
 

@@ -35,7 +35,7 @@ Run the mancala multiplayer simulator:
 python3 -m roll_mancala.simulate --games 100 --players P1:balanced P2:builder P3:settler P4:shipper
 ```
 
-The mancala multiplayer default uses an 11 VP chip pool per player and the
+The mancala multiplayer default uses an 8 VP chip pool per player and the
 normal 12-square tableau end condition. Current tuning targets roughly 14-16
 rounds with the five-section loop.
 

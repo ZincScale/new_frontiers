@@ -35,7 +35,7 @@ def main():
         default=0,
         help="Extra random unselected phases per round.",
     )
-    parser.add_argument("--vp-pool-per-player", type=int, default=11)
+    parser.add_argument("--vp-pool-per-player", type=int, default=8)
     parser.add_argument("--max-rounds", type=int, default=50)
     parser.add_argument("--conservative-bonus", action="store_true")
     parser.add_argument("--fixed-seats", action="store_true")

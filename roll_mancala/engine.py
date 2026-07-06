@@ -77,7 +77,7 @@ class MancalaConfig:
     selected_phase_benefits: bool = False
     dummy_phase_count: int = 0
     target_tableau_squares: int = 12
-    vp_pool_per_player: int = 11
+    vp_pool_per_player: int = 8
     max_rounds: int = 50
 
 
@@ -383,14 +383,8 @@ class MancalaGame:
                 break
             build.workers.append(worker)
             player.used_workers += 1
-            if build.progress + player.credits >= build.tile.cost:
-                break
-        if build.progress + player.credits < build.tile.cost:
+        if build.progress < build.tile.cost:
             return
-        credit_cost = max(0, build.tile.cost - build.progress)
-        if credit_cost:
-            player.credits -= credit_cost
-            player.credits_spent += credit_cost
         for worker in build.workers:
             self.add_spent(player, worker)
         stack.pop(0)
@@ -552,7 +546,7 @@ class MancalaGame:
         player.spent[color] += 1
 
     def manage_empire(self, player: Player):
-        while player.credits > self.config.recovery_sow_cost:
+        while player.credits >= self.config.recovery_sow_cost:
             choice = self.best_recovery_choice(player)
             if choice is None:
                 break
@@ -560,8 +554,6 @@ class MancalaGame:
             player.credits_spent += self.config.recovery_sow_cost
             player.recovery_sows += 1
             self.sow_choice(player, choice)
-        if player.credits == 0:
-            player.credits = 1
 
     def best_recovery_choice(self, player: Player) -> Optional[SourceChoice]:
         choices = []

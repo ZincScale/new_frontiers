@@ -139,21 +139,40 @@ def test_develop_keeps_partial_worker_progress_when_short():
     assert player.spent[DieColor.BROWN] == 0
 
 
-def test_develop_can_complete_later_with_credit_and_returns_workers_to_spent():
+def test_develop_does_not_use_credits_to_complete_build():
     game = MancalaGame(seed=8)
     player = game.players[0]
     clear_player(player)
-    player.credits = 1
+    player.credits = 5
     tile = Tile("d", "Large Development", TileKind.DEVELOPMENT, 3, 3)
     player.dev_stack = [Construction(tile, workers=[DieColor.BROWN, DieColor.BLUE])]
 
     game.resolve_phase(player, Phase.DEVELOP)
 
+    assert player.dev_stack[0].progress == 2
+    assert tile not in player.tableau
+    assert player.credits == 5
+    assert player.spent[DieColor.BROWN] == 0
+    assert player.spent[DieColor.BLUE] == 0
+
+
+def test_develop_completes_with_enough_workers_and_returns_workers_to_spent():
+    game = MancalaGame(seed=8)
+    player = game.players[0]
+    clear_player(player)
+    player.credits = 5
+    tile = Tile("d", "Large Development", TileKind.DEVELOPMENT, 3, 3)
+    player.dev_stack = [Construction(tile, workers=[DieColor.BROWN, DieColor.BLUE])]
+    player.sections[Section.DEVELOP] = [DieColor.WHITE]
+
+    game.resolve_phase(player, Phase.DEVELOP)
+
     assert player.dev_stack == []
     assert tile in player.tableau
-    assert player.credits == 0
+    assert player.credits == 5
     assert player.spent[DieColor.BROWN] == 1
     assert player.spent[DieColor.BLUE] == 1
+    assert player.spent[DieColor.WHITE] == 1
 
 
 def test_gain_die_goes_to_matching_section_or_spent_when_full():
@@ -166,6 +185,22 @@ def test_gain_die_goes_to_matching_section_or_spent_when_full():
 
     assert player.sections[Section.SETTLE] == [DieColor.RED]
     assert player.spent[DieColor.RED] == 1
+
+
+def test_manage_empire_spends_exact_credits_to_recover_spent_dice_without_free_credit():
+    game = MancalaGame(seed=34, config=MancalaConfig(recovery_sow_cost=2))
+    player = game.players[0]
+    clear_player(player)
+    player.credits = 2
+    player.spent[DieColor.RED] = 1
+
+    game.manage_empire(player)
+
+    assert player.credits == 0
+    assert player.credits_spent == 2
+    assert player.recovery_sows == 1
+    assert player.spent[DieColor.RED] == 0
+    assert player.sections[Section.SETTLE] == [DieColor.RED]
 
 
 def test_loss_removes_from_spent_before_board_goods_or_progress():

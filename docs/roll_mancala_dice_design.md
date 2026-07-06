@@ -20,11 +20,10 @@ Core economy:
 - Sowing controls where workers are available and which phase the player
   selects.
 - Credits buy tempo by funding extra recovery sows from Spent.
-- Credits also finish Developments and Worlds, but only at completion.
 
-This preserves the Roll feel of spending dice and Credits to build Developments
-and settle Worlds. It also makes card text that gains or loses dice easier to
-interpret: those cards directly change the player's workforce.
+This preserves the Roll feel of using dice as workers while Credits recall
+spent dice back into circulation. It also makes card text that gains or loses
+dice easier to interpret: those cards directly change the player's workforce.
 
 Player board sections:
 
@@ -91,7 +90,7 @@ Set up the base game normally, with these changes:
 1. Do not give players Dice Cups.
 2. Do not use the Roll Dice or Assign Dice rules.
 3. Give each player a Mancala Phase board with five sections and a Spent area.
-4. Use 11 VP chips per player for the shared VP pool.
+4. Use 8 VP chips per player for the shared VP pool.
 5. Set starting dice:
 
 ```text
@@ -355,8 +354,10 @@ Examples:
 - "Worlds cost 1 less" reduces the completion threshold for one World this
   round by 1.
 - "Gain 2 Credits" adds Credits normally, up to the Credit cap.
-- "Spend Credits to complete a Development or World" uses Credits only at
-  completion. Credits are not stored as construction progress.
+- "Spend Credits to refresh dice" means spend Credits during Manage Empire to
+  recover one Spent color group into the mancala loop.
+- If a tile implies Credits can pay a build cost, ignore that payment mode in
+  this variant. Developments and Worlds require workers, not Credits.
 
 ### Produce And Ship Text
 
@@ -428,10 +429,10 @@ Use Roll-style physical placement:
   move it to Spent.
 - Develop: place workers on one Development under construction. Worker progress
   stays on the tile between rounds. During a later Develop phase, add more
-  workers and/or pay Credits to complete it.
+  workers to complete it.
 - Settle: place workers on one World under settlement. Worker progress stays on
-  the tile between rounds. During a later Settle phase, add more workers and/or
-  pay Credits to complete it.
+  the tile between rounds. During a later Settle phase, add more workers to
+  complete it.
 - Produce: place the worker die on an eligible empty World as a Good. It stays
   on that World until Shipped. It does not go to Spent at the end of Produce.
 - Ship: place the worker in the Ship work area, Trade or Consume Goods, then
@@ -457,21 +458,18 @@ Construction rules:
 - A player may have at most one active Development and one active World under
   construction.
 - Workers placed on an active Development or World stay there as progress.
-- Credits are not stored as progress. Credits can only be paid when completing
-  the tile during the matching phase.
-- During Develop, complete a Development if workers on it plus Credits paid now
-  meet or exceed its cost.
-- During Settle, complete a World if workers on it plus Credits paid now meet or
-  exceed its cost.
+- Credits are not stored as progress and cannot be paid toward construction.
+- During Develop, complete a Development if workers on it meet or exceed its
+  cost.
+- During Settle, complete a World if workers on it meet or exceed its cost.
 - When a tile completes, move all workers from that tile to Spent.
 - A player may abandon one active construction tile during Manage Empire. Discard
   that tile and move its workers to Spent.
 
 Example:
 
-- A cost-5 Development has 2 brown workers on it from an earlier round.
-- During a later Develop phase, the player adds 1 more Develop worker and pays
-  2 Credits.
+- A cost-3 Development has 2 brown workers on it from an earlier round.
+- During a later Develop phase, the player adds 1 more Develop worker.
 - The Development completes, and all 3 workers move to Spent.
 
 This means Develop and Settle are no longer one-shot in the mancala branch. They
@@ -479,32 +477,27 @@ remain one-shot only in the archived phase-battery rules.
 
 ## Credits And Workers
 
-Credits do not buy physical workers. A Credit never becomes a die, never enters a
-section, and never gets placed on a tile as lasting progress.
+Credits behave like the base Roll refresh economy. They do not buy build
+progress. A Credit never becomes a die, never enters a section, and never gets
+placed on a tile.
 
-Credits have two jobs:
+Credits have one job in the baseline mancala rules:
 
 - During Manage Empire, spend Credits to buy extra recovery sows from Spent.
   This is how multiple Spent color groups can be positioned before the next
   round.
-- During Develop or Settle, spend Credits as temporary labor only at the moment a
-  tile completes.
-
-If table clarity needs a marker, place spent Credit tokens beside the tile only
-while resolving that Develop or Settle phase, then return them to the bank after
-the tile completes. If the tile does not complete, Credits cannot be spent on
-it.
 
 Example:
 
-- A cost-4 World has 2 red workers on it.
-- During Settle, the player adds 1 red worker and spends 1 Credit.
-- The World completes. The 3 workers move to Spent, and the Credit returns to
-  the bank.
+- Spent contains 2 red dice and 1 green die.
+- During Manage Empire, the player spends 2 Credits to recover the red group.
+- The red dice sow into the mancala loop from Settle and are available next
+  round.
+- The green die remains in Spent unless the player spends another 2 Credits or
+  uses a later Mancala Phase Selection to recover it.
 
-This keeps dice as the real workforce. Credits can help cycle Spent dice back
-onto the board or finish a project, but they do not create new dice or stay on
-the mancala board.
+This keeps dice as the real workforce. Credits help cycle Spent dice back onto
+the board, but they do not create new dice and do not finish projects.
 
 ## Worker Economy Brake
 
