@@ -158,7 +158,7 @@ class MancalaSoloGame:
         before = self.player.phase_actions
         before_completed = self.player.completed_tiles
         for phase in selected:
-            self.game.resolve_phase(self.player, phase)
+            self.game.resolve_phase(self.player, phase, full_strength=phase is human_phase)
         used = self.player.phase_actions - before
         if used == 0 and self.player.completed_tiles == before_completed:
             self.player.dead_rounds += 1

@@ -166,8 +166,9 @@ class MancalaGame:
         for player in self.players:
             before_actions = player.phase_actions
             before_completed = player.completed_tiles
+            own_phase = selections[player.name]
             for phase in selected:
-                self.resolve_phase(player, phase)
+                self.resolve_phase(player, phase, full_strength=phase is own_phase)
             phase_actions[player.name] = player.phase_actions - before_actions
             if phase_actions[player.name] == 0 and player.completed_tiles == before_completed:
                 player.dead_rounds += 1
@@ -238,7 +239,7 @@ class MancalaGame:
         bias = STRATEGY_BIAS[player.strategy][phase]
         if phase is Phase.EXPLORE:
             need_tiles = int(not player.dev_stack) + int(not player.world_stack)
-            return bias + need_tiles * 5 + int(player.credits <= 2) * 2
+            return bias + need_tiles * 5
         if phase is Phase.DEVELOP:
             return bias + self.build_value(player.dev_stack)
         if phase is Phase.SETTLE:
@@ -252,7 +253,8 @@ class MancalaGame:
     def build_value(self, stack: list[Construction]) -> int:
         if not stack:
             return -8
-        return max(0, 9 - stack[0].tile.cost)
+        build = stack[0]
+        return max(0, 9 - build.tile.cost) + build.progress * 3
 
     def preview_sow(self, player: Player, choice: SourceChoice) -> SowResult:
         sections = {section: list(dice) for section, dice in player.sections.items()}
@@ -374,59 +376,92 @@ class MancalaGame:
     def section_index(self, section: Section) -> int:
         return SECTION_ORDER.index(section)
 
-    def resolve_phase(self, player: Player, phase: Phase):
+    def resolve_phase(self, player: Player, phase: Phase, full_strength: bool = True):
         if phase is Phase.DEVELOP:
-            self.resolve_credit_build_phase(player, player.dev_stack, phase)
+            self.resolve_credit_build_phase(player, player.dev_stack, phase, full_strength)
             return
         if phase is Phase.SETTLE:
-            self.resolve_credit_build_phase(player, player.world_stack, phase)
+            self.resolve_credit_build_phase(player, player.world_stack, phase, full_strength)
             return
         if phase is Phase.EXPLORE:
-            self.resolve_explore_phase(player)
+            self.resolve_explore_phase(player, full_strength)
             return
         if phase is Phase.PRODUCE:
-            self.resolve_produce_phase(player)
+            self.resolve_produce_phase(player, full_strength)
             return
         if phase is Phase.SHIP:
-            self.resolve_ship_phase(player)
+            self.resolve_ship_phase(player, full_strength)
             return
         raise ValueError(f"unknown phase: {phase}")
 
-    def resolve_credit_build_phase(self, player: Player, stack: list[Construction], phase: Phase):
+    def resolve_credit_build_phase(
+        self,
+        player: Player,
+        stack: list[Construction],
+        phase: Phase,
+        full_strength: bool = True,
+    ):
         if not stack:
             return
         build = stack[0]
-        discount = self.build_discount(player, phase) + player.match_bonuses.pop(phase, 0)
-        effective_cost = max(0, build.tile.cost - discount)
-        if player.credits < effective_cost:
+        if not full_strength and not self.can_assist_phase(player, phase, build.tile):
             return
-        player.credits -= effective_cost
-        player.credits_spent += effective_cost
-        player.phase_actions += self.phase_strength(player, phase)
+        match_bonus = player.match_bonuses.pop(phase, 0) if full_strength else 0
+        alien_settle = phase is Phase.SETTLE and self.is_alien_tile(build.tile)
+        if alien_settle and DieColor.YELLOW not in player.sections[Section.SETTLE]:
+            return
+        if alien_settle:
+            match_bonus = 0
+        strength = self.phase_strength(player, phase, full_strength, build.tile)
+        discount = self.build_discount(player, phase, build.tile, full_strength) + match_bonus
+        effective_cost = max(0, build.tile.cost - discount)
+        needed = max(0, effective_cost - build.progress)
+        payment = min(player.credits, needed)
+        if payment:
+            player.credits -= payment
+            player.credits_spent += payment
+            build.progress += payment
+            player.phase_actions += strength
+        if build.progress < effective_cost:
+            return
+        if not payment:
+            player.phase_actions += strength
         stack.pop(0)
         self.complete_tile(player, build.tile)
 
-    def build_discount(self, player: Player, phase: Phase) -> int:
+    def build_discount(self, player: Player, phase: Phase, tile: Tile, full_strength: bool = True) -> int:
         section = PHASE_SECTION[phase]
+        if not full_strength:
+            return int(self.can_assist_phase(player, phase, tile))
+        if phase is Phase.SETTLE and self.is_alien_tile(tile):
+            return sum(1 for die in player.sections[section] if die is DieColor.YELLOW)
         return sum(
             1
             for die in player.sections[section]
             if COLOR_SECTION[die] is section or die in (DieColor.WHITE, DieColor.YELLOW)
         )
 
-    def resolve_explore_phase(self, player: Player):
-        actions = self.phase_strength(player, Phase.EXPLORE) + player.match_bonuses.pop(Phase.EXPLORE, 0)
+    def resolve_explore_phase(self, player: Player, full_strength: bool = True):
+        if not full_strength and not self.can_assist_phase(player, Phase.EXPLORE):
+            return
+        actions = self.phase_strength(player, Phase.EXPLORE, full_strength)
+        if full_strength:
+            actions += player.match_bonuses.pop(Phase.EXPLORE, 0)
         for _ in range(actions):
-            if not player.dev_stack:
-                self.scout_tile(player, TileKind.DEVELOPMENT)
-            elif not player.world_stack:
-                self.scout_tile(player, TileKind.WORLD)
-            else:
-                self.gain_credits(player, 2)
+            self.scout_tile(player, self.explore_tile_kind(player))
             player.phase_actions += 1
 
-    def resolve_produce_phase(self, player: Player):
-        actions = self.phase_strength(player, Phase.PRODUCE) + player.match_bonuses.pop(Phase.PRODUCE, 0)
+    def explore_tile_kind(self, player: Player) -> TileKind:
+        if len(player.dev_stack) <= len(player.world_stack):
+            return TileKind.DEVELOPMENT
+        return TileKind.WORLD
+
+    def resolve_produce_phase(self, player: Player, full_strength: bool = True):
+        if not full_strength and not self.can_assist_phase(player, Phase.PRODUCE):
+            return
+        actions = self.phase_strength(player, Phase.PRODUCE, full_strength)
+        if full_strength:
+            actions += player.match_bonuses.pop(Phase.PRODUCE, 0)
         for _ in range(actions):
             candidates = self.producible_worlds(player)
             if not candidates:
@@ -435,9 +470,11 @@ class MancalaGame:
             player.goods.append(Good(world, DieColor.WHITE))
             player.phase_actions += 1
 
-    def resolve_ship_phase(self, player: Player):
-        actions = self.phase_strength(player, Phase.SHIP)
-        bonus = player.match_bonuses.pop(Phase.SHIP, 0)
+    def resolve_ship_phase(self, player: Player, full_strength: bool = True):
+        if not full_strength and not self.can_assist_phase(player, Phase.SHIP):
+            return
+        actions = self.phase_strength(player, Phase.SHIP, full_strength)
+        bonus = player.match_bonuses.pop(Phase.SHIP, 0) if full_strength else 0
         for _ in range(actions):
             if not player.goods:
                 return
@@ -453,8 +490,29 @@ class MancalaGame:
                 self.vp_pool -= claimed
             player.phase_actions += 1
 
-    def phase_strength(self, player: Player, phase: Phase) -> int:
-        return len(player.sections[PHASE_SECTION[phase]])
+    def phase_strength(
+        self,
+        player: Player,
+        phase: Phase,
+        full_strength: bool = True,
+        tile: Optional[Tile] = None,
+    ) -> int:
+        if full_strength:
+            return len(player.sections[PHASE_SECTION[phase]])
+        return int(self.can_assist_phase(player, phase, tile))
+
+    def can_assist_phase(self, player: Player, phase: Phase, tile: Optional[Tile] = None) -> bool:
+        section = PHASE_SECTION[phase]
+        if phase is Phase.SETTLE and tile is not None and self.is_alien_tile(tile):
+            return DieColor.YELLOW in player.sections[section]
+        required = {
+            Phase.EXPLORE: DieColor.BLUE,
+            Phase.DEVELOP: DieColor.BROWN,
+            Phase.SETTLE: DieColor.RED,
+            Phase.PRODUCE: DieColor.GREEN,
+            Phase.SHIP: DieColor.PURPLE,
+        }[phase]
+        return required in player.sections[section]
 
     def scout_tile(self, player: Player, kind: TileKind) -> Optional[Tile]:
         for index, tile in enumerate(self.tile_bag):

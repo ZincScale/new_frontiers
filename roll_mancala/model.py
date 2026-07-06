@@ -56,6 +56,7 @@ PHASE_SECTION: dict[Phase, Section] = {
 @dataclass
 class Construction:
     tile: Tile
+    progress: int = 0
 
 
 @dataclass(frozen=True)

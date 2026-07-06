@@ -145,6 +145,78 @@ def test_phase_selected_by_one_player_is_shared_by_others():
     assert p2.completed_tiles == 1
 
 
+def test_explore_adds_new_tiles_to_bottom_of_shorter_queue_without_credits():
+    game = MancalaGame(seed=6)
+    player = game.players[0]
+    clear_player(player)
+    player.credits = 1
+    player.sections[Section.EXPLORE] = [DieColor.BLUE, DieColor.BLUE, DieColor.BLUE]
+    current_dev = Tile("current-dev", "Current Development", TileKind.DEVELOPMENT, 1, 1)
+    current_world = Tile("current-world", "Current World", TileKind.WORLD, 1, 1)
+    new_dev_1 = Tile("new-dev-1", "New Development 1", TileKind.DEVELOPMENT, 1, 1)
+    new_world = Tile("new-world", "New World", TileKind.WORLD, 1, 1)
+    new_dev_2 = Tile("new-dev-2", "New Development 2", TileKind.DEVELOPMENT, 1, 1)
+    player.dev_stack = [Construction(current_dev)]
+    player.world_stack = [Construction(current_world)]
+    game.tile_bag = [new_dev_1, new_world, new_dev_2]
+
+    game.resolve_phase(player, Phase.EXPLORE)
+
+    assert [build.tile for build in player.dev_stack] == [current_dev, new_dev_1, new_dev_2]
+    assert [build.tile for build in player.world_stack] == [current_world, new_world]
+    assert player.credits == 1
+    assert player.credits_earned == 0
+
+
+def test_opponent_selected_phase_requires_matching_color_assist():
+    game = MancalaGame(seed=6)
+    player = game.players[0]
+    clear_player(player)
+    world = Tile("w", "Production World", TileKind.WORLD, 1, 1, produces=True)
+    player.tableau = [world]
+    player.sections[Section.PRODUCE] = [DieColor.BLUE, DieColor.WHITE]
+
+    game.resolve_phase(player, Phase.PRODUCE, full_strength=False)
+
+    assert player.goods == []
+    assert player.phase_actions == 0
+
+
+def test_opponent_selected_phase_gives_one_matching_color_assist():
+    game = MancalaGame(seed=6)
+    player = game.players[0]
+    clear_player(player)
+    worlds = [
+        Tile("w1", "Production World 1", TileKind.WORLD, 1, 1, produces=True),
+        Tile("w2", "Production World 2", TileKind.WORLD, 1, 1, produces=True),
+    ]
+    player.tableau = worlds
+    player.sections[Section.PRODUCE] = [DieColor.GREEN, DieColor.GREEN, DieColor.GREEN]
+
+    game.resolve_phase(player, Phase.PRODUCE, full_strength=False)
+
+    assert len(player.goods) == 1
+    assert player.phase_actions == 1
+
+
+def test_own_selected_phase_uses_full_section_strength():
+    game = MancalaGame(seed=6)
+    player = game.players[0]
+    clear_player(player)
+    worlds = [
+        Tile("w1", "Production World 1", TileKind.WORLD, 1, 1, produces=True),
+        Tile("w2", "Production World 2", TileKind.WORLD, 1, 1, produces=True),
+        Tile("w3", "Production World 3", TileKind.WORLD, 1, 1, produces=True),
+    ]
+    player.tableau = worlds
+    player.sections[Section.PRODUCE] = [DieColor.GREEN, DieColor.BLUE, DieColor.WHITE]
+
+    game.resolve_phase(player, Phase.PRODUCE)
+
+    assert len(player.goods) == 3
+    assert player.phase_actions == 3
+
+
 def test_develop_does_not_complete_without_enough_credits_after_discount():
     game = MancalaGame(seed=7)
     player = game.players[0]
@@ -157,6 +229,49 @@ def test_develop_does_not_complete_without_enough_credits_after_discount():
     assert player.dev_stack[0].tile == Tile("d", "Large Development", TileKind.DEVELOPMENT, 3, 3)
     assert player.sections[Section.DEVELOP] == [DieColor.BROWN, DieColor.BLUE]
     assert player.credits == 0
+
+
+def test_develop_keeps_partial_credit_progress_until_later_phase():
+    game = MancalaGame(seed=7)
+    player = game.players[0]
+    clear_player(player)
+    player.credits = 1
+    tile = Tile("d", "Large Development", TileKind.DEVELOPMENT, 5, 5)
+    player.dev_stack = [Construction(tile)]
+    player.sections[Section.DEVELOP] = [DieColor.BROWN]
+
+    game.resolve_phase(player, Phase.DEVELOP)
+
+    assert player.dev_stack == [Construction(tile, progress=1)]
+    assert tile not in player.tableau
+    assert player.credits == 0
+    assert player.credits_spent == 1
+
+    player.credits = 3
+    game.resolve_phase(player, Phase.DEVELOP)
+
+    assert player.dev_stack == []
+    assert tile in player.tableau
+    assert player.credits == 0
+    assert player.credits_spent == 4
+
+
+def test_opponent_selected_build_assist_uses_one_matching_discount():
+    game = MancalaGame(seed=8)
+    player = game.players[0]
+    clear_player(player)
+    player.credits = 2
+    tile = Tile("d", "Assisted Development", TileKind.DEVELOPMENT, 3, 3)
+    player.dev_stack = [Construction(tile)]
+    player.sections[Section.DEVELOP] = [DieColor.BROWN, DieColor.BROWN, DieColor.WHITE]
+
+    game.resolve_phase(player, Phase.DEVELOP, full_strength=False)
+
+    assert player.dev_stack == []
+    assert tile in player.tableau
+    assert player.credits == 0
+    assert player.credits_spent == 2
+    assert player.phase_actions == 1
 
 
 def test_develop_uses_credits_to_complete_build_after_section_discount():
@@ -208,6 +323,57 @@ def test_develop_match_bonus_reduces_completion_cost():
     assert player.dev_stack == []
     assert tile in player.tableau
     assert player.credits == 0
+
+
+def test_alien_world_requires_yellow_in_settle():
+    game = MancalaGame(seed=8)
+    player = game.players[0]
+    clear_player(player)
+    player.credits = 10
+    world = Tile(
+        "alien-world",
+        "Alien World",
+        TileKind.WORLD,
+        3,
+        3,
+        world_color="Alien Technology",
+        tags=("alien_technology",),
+    )
+    player.world_stack = [Construction(world)]
+    player.sections[Section.SETTLE] = [DieColor.RED, DieColor.WHITE]
+    player.match_bonuses[Phase.SETTLE] = 1
+
+    game.resolve_phase(player, Phase.SETTLE)
+
+    assert player.world_stack == [Construction(world)]
+    assert world not in player.tableau
+    assert player.credits == 10
+
+
+def test_yellow_settles_alien_world_and_is_only_discount():
+    game = MancalaGame(seed=8)
+    player = game.players[0]
+    clear_player(player)
+    player.credits = 5
+    world = Tile(
+        "alien-world",
+        "Alien World",
+        TileKind.WORLD,
+        4,
+        4,
+        world_color="Alien Technology",
+        tags=("alien_technology",),
+    )
+    player.world_stack = [Construction(world)]
+    player.sections[Section.SETTLE] = [DieColor.YELLOW, DieColor.RED, DieColor.WHITE]
+    player.match_bonuses[Phase.SETTLE] = 1
+
+    game.resolve_phase(player, Phase.SETTLE)
+
+    assert player.world_stack == []
+    assert world in player.tableau
+    assert player.credits == 2
+    assert player.credits_spent == 3
 
 
 def test_gain_die_goes_to_matching_section_or_spent_when_full():

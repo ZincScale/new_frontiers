@@ -699,32 +699,32 @@ win the campaign.
 Score-only win conditions:
 
 ```text
-Great        Score 40+ VP.
-Triumphant   Score 43+ VP.
-Epic         Score 46+ VP.
+Great        Score 42+ VP.
+Triumphant   Score 45+ VP.
+Epic         Score 48+ VP.
 ```
 
 Named win conditions:
 
 ```text
-Great       Score 40+ VP.
-Triumphant  Score 43+ VP.
-Epic        Score 46+ VP.
-Builder     Score 31+ VP and complete 7+ tiles.
-Developer   Score 31+ VP and have 4+ Developments.
-Colonizer   Score 31+ VP and have 6+ Worlds.
+Great       Score 42+ VP.
+Triumphant  Score 45+ VP.
+Epic        Score 48+ VP.
+Builder     Score 35+ VP and complete 9+ tiles.
+Developer   Score 35+ VP and have 5+ Developments.
+Colonizer   Score 35+ VP and have 7+ Worlds.
 Satisfied Populace
-            Score 31+ VP and score 10+ VP chips.
-Industrial  Score 31+ VP and have 16+ total max pips.
-Production  Score 31+ VP and have 4+ production Worlds.
-Diverse     Score 31+ VP and have 3+ different World colors.
-Novelty     Score 31+ VP and have 2+ Novelty Worlds.
+            Score 35+ VP and score 12+ VP chips.
+Industrial  Score 35+ VP and have 19+ total max pips.
+Production  Score 35+ VP and have 5+ production Worlds.
+Diverse     Score 35+ VP and have 4+ different World colors.
+Novelty     Score 35+ VP and have 2+ Novelty Worlds.
 Rare Elements
-            Score 31+ VP and have 2+ Rare Worlds.
+            Score 35+ VP and have 2+ Rare Worlds.
 Alien Contact
-            Score 31+ VP and have 1+ Alien World.
-Military    Score 31+ VP and have Red max 5.
-Discovery   Score 31+ VP and have Blue max 5.
+            Score 35+ VP and have 1+ Alien World.
+Military    Score 35+ VP and have Red max 5.
+Discovery   Score 35+ VP and have Blue max 5.
 ```
 
 Campaign sheets:
@@ -740,7 +740,7 @@ Sector Survey
 Triumphant, Diverse, Novelty, Rare Elements.
 
 Alien Contact
-Epic, Alien Contact, Military, Discovery.
+Triumphant, Alien Contact, Diverse, Discovery.
 
 Mastery
 Epic, Novelty, Rare Elements, Military.
@@ -828,7 +828,7 @@ Current solo simulation with the recommended defaults:
 All difficulties use 12 rounds and two Dummy phase cards per round.
 Average Dummy churn: about 18 claimed tiles and 11 drained VP chips.
 For one-off score-only win conditions with the balanced heuristic, Great is
-about 58%, Triumphant about 37%, and Epic about 20%.
+about 45%, Triumphant about 25%, and Epic about 12%.
 Four-condition campaign sheets are stricter than one-off practice because each
 game must mark a different condition from that sheet.
 ```
@@ -959,8 +959,8 @@ remains the recommended default for theme and tile identity.
 Solo challenge mode uses 12 rounds and two Dummy phase cards each round. In
 simulation sweeps, the Dummy claimed about 18 tiles and drained about 11 VP
 chips on average. After the one-shot Develop/Settle change, score-only win
-conditions were retuned to 40, 43, and 46 VP. In a 1000-game balanced-heuristic
-sweep, those landed around 58%, 37%, and 20% success for Great, Triumphant, and
+conditions were retuned to 42, 45, and 48 VP. In a 1000-game balanced-heuristic
+sweep, those landed around 45%, 25%, and 12% success for Great, Triumphant, and
 Epic. Treat these as simulation guideposts, not final balance data.
 
 Run:

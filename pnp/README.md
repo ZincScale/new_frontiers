@@ -56,9 +56,8 @@ Credits pay Develop/Settle costs and Good markers track produced Goods.
 
 ## Roll Solo Tuning
 
-The Roll Mancala solo mode uses a 16-round clock with two Dummy phase cards per
-round. Score-only win conditions are Great at 38+ VP, Triumphant at 42+ VP, and
-Epic at 46+ VP. Named win conditions require 34+ VP plus their mark. Campaign
-sheets combine those into story arcs such as Frontier Survey, Core Worlds
-Renaissance, Trade League, Supply Lines, Colonial Boom, Industrial
-Mobilization, Imperial Prestige, and Galactic Mastery.
+The Roll Phase Battery solo mode uses a 12-round clock with two Dummy phase
+cards per round. Score-only win conditions are Great at 42+ VP, Triumphant at
+45+ VP, and Epic at 48+ VP. Named win conditions require 35+ VP plus their mark.
+Campaign sheets combine those into arcs such as Outreach, Industrial Base,
+Sector Survey, Alien Contact, and Mastery.

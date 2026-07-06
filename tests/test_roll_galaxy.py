@@ -352,9 +352,11 @@ def test_solo_campaign_filters_to_campaign_conditions():
 
 
 def test_solo_score_only_thresholds_are_retuned_for_one_shot_builds():
-    assert SOLO_WIN_CONDITION_MAP["great"].min_score == 40
-    assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 43
-    assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 46
+    assert SOLO_WIN_CONDITION_MAP["great"].min_score == 42
+    assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 45
+    assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 48
+    assert SOLO_WIN_CONDITION_MAP["builder"].min_completed_tiles == 9
+    assert SOLO_WIN_CONDITION_MAP["industrial"].min_max_capacity == 19
 
 
 def test_solo_campaign_conditions_do_not_repeat_within_sheet():

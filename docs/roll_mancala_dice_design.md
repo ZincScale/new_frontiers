@@ -10,7 +10,7 @@ and end-game scoring.
 
 ## Design Thesis
 
-Dice stay in the mancala economy. They do not become workers, construction
+Dice stay in the mancala economy. They do not become workers, paid construction
 progress, or Goods.
 
 The loop has five sections:
@@ -87,8 +87,10 @@ Each round:
 1. Each player chooses one source: a board section, or one color group in Spent.
 2. Each player sows those stones.
 3. The final section sown selects that player's phase.
-4. All selected phases occur for all players, in normal Roll phase order.
-5. Resolve Manage Empire.
+4. All selected phases occur in normal Roll phase order.
+5. Your selected phase resolves at full section strength.
+6. A phase selected only by another player gives you at most one matching-color assist.
+7. Resolve Manage Empire.
 
 There is no Citizenry and no dice assignment area.
 
@@ -131,19 +133,39 @@ White and Yellow do not create match bonuses.
 
 Stones stay on the mancala board when phases resolve.
 
+Your own selected phase uses the full number of stones in that phase section.
+Other players' selected phases are assists: you may resolve at most one
+action/discount, and only if you have the matching color in that section.
+
+```text
+Blue in Explore    assists Explore
+Brown in Develop   assists Develop
+Red in Settle      assists non-Alien Settle
+Yellow in Settle   assists Alien Settle
+Green in Produce   assists Produce
+Purple in Ship     assists Ship
+```
+
+White does not enable an assist by itself.
+
 ### Explore
 
-Explore actions equal stones in Explore plus the Explore match bonus.
+Explore actions equal stones in Explore plus the Explore match bonus if you
+selected Explore. An assisted Explore scouts one tile.
 
 For each action:
 
-1. If your Development queue is empty, scout one Development.
-2. Else if your World queue is empty, scout one World.
-3. Else gain 2 Credits.
+1. Scout one new tile into the bottom of your shorter construction queue.
+2. If the queues are tied, scout a Development.
+
+Explore never gains Credits. It expands future build options without changing
+the current top queued Development or World.
 
 ### Develop
 
-Develop completes the top queued Development if you can pay its effective cost.
+Develop works on the top queued Development. If you selected Develop, use full
+section discounts. If Develop was selected only by another player, you may apply
+a one-Credit discount only if you have a Brown stone in Develop.
 
 ```text
 effective cost =
@@ -153,12 +175,25 @@ Development cost
 - Develop match bonus
 ```
 
-Pay the remaining cost in Credits. If you cannot pay, nothing happens to that
-Development this phase. No partial progress is kept.
+Pay any number of Credits up to the remaining effective cost. Paid Credits stay
+on that queued Development as progress. If paid progress is still below the
+current effective cost, leave the Development queued and continue it in a later
+Develop phase.
+
+Recalculate the section discount each time Develop occurs. Only paid Credits are
+permanent progress.
 
 ### Settle
 
-Settle works like Develop, but for the top queued World.
+Settle works like Develop, but for the top queued World. If you selected Settle,
+use full section discounts. If Settle was selected only by another player, you
+may apply a one-Credit discount only if you have a Red stone in Settle.
+
+Alien Worlds are the exception: you must have at least one Yellow stone in
+Settle to settle an Alien World. For an Alien World, only Yellow stones in
+Settle reduce the Credit cost; Red stones, White stones, and the Red Settle match
+bonus do not help. If Settle was selected only by another player, an Alien World
+assist requires Yellow in Settle and gives one Credit of discount.
 
 ```text
 effective cost =
@@ -168,19 +203,34 @@ World cost
 - Settle match bonus
 ```
 
-Pay the remaining cost in Credits. If you cannot pay, nothing happens to that
-World this phase. No partial progress is kept.
+For an Alien World, use this instead:
+
+```text
+effective cost =
+Alien World cost
+- Yellow stones in Settle
+```
+
+Pay any number of Credits up to the remaining effective cost. Paid Credits stay
+on that queued World as progress. If paid progress is still below the current
+effective cost, leave the World queued and continue it in a later Settle phase.
+
+Recalculate the section discount each time Settle occurs. Only paid Credits are
+permanent progress.
 
 ### Produce
 
-Produce actions equal stones in Produce plus the Produce match bonus.
+Produce actions equal stones in Produce plus the Produce match bonus if you
+selected Produce. An assisted Produce places at most one Good and requires a
+Green stone in Produce.
 
 Each action places one Good marker on an eligible empty production World in your
 tableau. The stone remains in Produce. The Good marker is not a die.
 
 ### Ship
 
-Ship actions equal stones in Ship.
+Ship actions equal stones in Ship if you selected Ship. An assisted Ship ships
+at most one Good and requires a Purple stone in Ship.
 
 Each action ships one Good marker. If you have 2 or fewer Credits, trade the
 Good for Credits. Otherwise, consume it for VP chips. The Ship match bonus adds
@@ -224,13 +274,14 @@ Use the following translation rules:
 - Dice-count scoring: count physical dice in board sections and Spent only.
 
 Ignore text that would place a die as lasting construction progress. This
-variant does not track partial builds.
+variant tracks only Credit progress on queued Developments and Worlds.
 
 ## Multiplayer Notes
 
-All selected phases are shared. If one player selects Develop, every player may
-resolve Develop. A player can benefit from a phase even if they did not select
-it, as long as they have the relevant stones, Credits, queued tile, or Goods.
+All selected phases are shared, but not at full strength for everyone. If one
+player selects Develop, every player may assist Develop, but only players with a
+Brown stone in Develop get the one-discount assist. The selecting player resolves
+Develop at full section strength.
 
 The current prototype settings are:
 
@@ -245,8 +296,8 @@ VP pool:                8 per player
 Tableau end trigger:    12 cards
 ```
 
-Recent smoke simulation with four strategies averaged about 10 rounds and
-showed no recurring dead-round jam.
+Recent smoke simulation with four strategies averaged about 14-15 rounds with
+matching-color assists.
 
 ## Solo Mode
 
@@ -263,7 +314,7 @@ Each round:
 
 1. You sow and select one phase.
 2. Draw 2 Dummy Phase cards.
-3. Resolve your selected phase plus the dummy phases, in normal phase order.
+3. Resolve your selected phase plus the dummy phases, in normal phase order; your phase is full strength and Dummy phases are matching-color assists.
 4. Resolve the dummy effects.
 5. Resolve Manage Empire.
 6. If the Dummy deck cannot supply 2 cards, reshuffle all five Dummy Phase cards.

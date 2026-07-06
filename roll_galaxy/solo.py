@@ -31,21 +31,21 @@ class SoloWinCondition:
 
 
 SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
-    SoloWinCondition("great", "Great", 40),
-    SoloWinCondition("triumphant", "Triumphant", 43),
-    SoloWinCondition("epic", "Epic", 46),
-    SoloWinCondition("builder", "Builder", 31, min_completed_tiles=7),
-    SoloWinCondition("developer", "Developer", 31, min_developments=4),
-    SoloWinCondition("colonizer", "Colonizer", 31, min_worlds=6),
-    SoloWinCondition("satisfied_populace", "Satisfied Populace", 31, min_vp_chips=10),
-    SoloWinCondition("industrial", "Industrial", 31, min_max_capacity=16),
-    SoloWinCondition("production", "Production", 31, min_production_worlds=4),
-    SoloWinCondition("diverse", "Diverse", 31, min_distinct_world_colors=3),
-    SoloWinCondition("novelty", "Novelty", 31, min_novelty_worlds=2),
-    SoloWinCondition("rare", "Rare Elements", 31, min_rare_worlds=2),
-    SoloWinCondition("alien", "Alien Contact", 31, min_alien_worlds=1),
-    SoloWinCondition("military", "Military", 31, min_red_capacity=5),
-    SoloWinCondition("discovery", "Discovery", 31, min_blue_capacity=5),
+    SoloWinCondition("great", "Great", 42),
+    SoloWinCondition("triumphant", "Triumphant", 45),
+    SoloWinCondition("epic", "Epic", 48),
+    SoloWinCondition("builder", "Builder", 35, min_completed_tiles=9),
+    SoloWinCondition("developer", "Developer", 35, min_developments=5),
+    SoloWinCondition("colonizer", "Colonizer", 35, min_worlds=7),
+    SoloWinCondition("satisfied_populace", "Satisfied Populace", 35, min_vp_chips=12),
+    SoloWinCondition("industrial", "Industrial", 35, min_max_capacity=19),
+    SoloWinCondition("production", "Production", 35, min_production_worlds=5),
+    SoloWinCondition("diverse", "Diverse", 35, min_distinct_world_colors=4),
+    SoloWinCondition("novelty", "Novelty", 35, min_novelty_worlds=2),
+    SoloWinCondition("rare", "Rare Elements", 35, min_rare_worlds=2),
+    SoloWinCondition("alien", "Alien Contact", 35, min_alien_worlds=1),
+    SoloWinCondition("military", "Military", 35, min_red_capacity=5),
+    SoloWinCondition("discovery", "Discovery", 35, min_blue_capacity=5),
 )
 
 SOLO_ROUNDS = 12
@@ -72,7 +72,7 @@ SOLO_CAMPAIGNS: tuple[SoloCampaign, ...] = (
     SoloCampaign("outreach", "Outreach", ("great", "colonizer", "builder", "industrial")),
     SoloCampaign("industry", "Industrial Base", ("triumphant", "developer", "industrial", "production")),
     SoloCampaign("survey", "Sector Survey", ("triumphant", "diverse", "novelty", "rare")),
-    SoloCampaign("contact", "Alien Contact", ("epic", "alien", "military", "discovery")),
+    SoloCampaign("contact", "Alien Contact", ("triumphant", "alien", "diverse", "discovery")),
     SoloCampaign("mastery", "Mastery", ("epic", "novelty", "rare", "military")),
 )
 
