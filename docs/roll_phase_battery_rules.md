@@ -18,7 +18,8 @@ The recommended minimal ruleset is:
 - dice colors become deterministic phase batteries;
 - each track has current pips and max pips;
 - gaining a die increases that color's max and current pips by 1;
-- Credits recharge spent pips during Manage Empire;
+- Credits can complete Develop/Settle builds or recharge spent pips during
+  Manage Empire;
 - White remains wild;
 - Yellow is Alien-specific by default.
 
@@ -89,7 +90,8 @@ Set up the base game normally, with these changes:
 1. Do not give players Dice Cups.
 2. Do not put dice in the Cup or Citizenry.
 3. Give each player a Phase Battery board.
-4. Set starting tracks:
+4. Use 16 VP chips per player for the shared VP pool.
+5. Set starting tracks:
 
 ```text
 Blue    2/2
@@ -177,8 +179,12 @@ Spend 1 Purple pip = one Ship worker
 Spend 1 White pip  = one worker in any selected phase
 ```
 
-Spend pips one at a time. Stop when you run out of pips or cannot use more of
-that phase.
+For Explore, Produce, and Ship, spend pips one at a time. Stop when you run out
+of pips or cannot use more of that phase.
+
+For Develop and Settle, pips are build currency. You must pay the full tile cost
+at once with phase pips, Galactic Credits, or a mix of both. If you cannot pay
+the full cost, you spend nothing and keep the tile in your Construction Zone.
 
 ## Example Round
 
@@ -204,8 +210,10 @@ Develop, Settle, Ship
 
 You may:
 
-- Develop with Brown. Brown is empty, so you may spend White instead.
-- Settle with Red.
+- Develop only if you can pay the full Development cost with Brown, White,
+  Yellow if eligible, Credits, or a mix of those.
+- Settle only if you can pay the full World cost with Red, White, Yellow if
+  eligible, Credits, or a mix of those.
 - Ship with Purple, or White if Purple runs out.
 
 After spending:
@@ -216,6 +224,10 @@ Red     2/3
 Purple  0/2
 White   1/2
 ```
+
+If your top Development costs 2 and you have Brown `0/2`, White `2/2`, and 0
+Credits, you may spend 2 White to complete it. If you have only White `1/2` and
+0 Credits, you spend nothing on that Development this round.
 
 ## Explore
 
@@ -239,51 +251,70 @@ Blue becomes 0/2.
 
 When Develop occurs, spend Brown or White pips.
 
-Each pip adds one Developer to the top tile of your Development stack.
+You may complete the top tile of your Development stack if you can pay its full
+cost immediately.
 
-If the number of Developers on that tile equals its cost, complete the
-Development:
+Payment may be any mix of:
+
+- Brown pips;
+- White pips;
+- Yellow pips, if the Development is Alien-tagged;
+- Galactic Credits.
+
+If you pay the full cost, complete the Development:
 
 1. Move it to your tableau.
 2. Apply any immediate converted effects.
-3. Continue spending remaining Develop pips on the next Development if able.
 
 Use normal Development costs. Six-cost Developments cost 6.
 
 Example:
 
 ```text
-Brown is 2/2.
-Your top Development costs 2.
-Spend 2 Brown.
+Brown is 1/2.
+Credits are 2.
+Your top Development costs 3.
+Spend 1 Brown and 2 Credits.
 Complete the Development.
-Brown becomes 0/2.
+Brown becomes 0/2 and Credits become 0.
 ```
+
+If Brown is 1/2, White is 0/2, Credits are 0, and the top Development costs 2,
+you cannot partially build it. Spend nothing.
 
 ## Settle
 
 When Settle occurs, spend Red or White pips.
 
-Each pip adds one Settler to the top tile of your World stack.
+You may complete the top tile of your World stack if you can pay its full cost
+immediately.
 
-If the number of Settlers on that tile equals its cost, complete the World:
+Payment may be any mix of:
+
+- Red pips;
+- White pips;
+- Yellow pips, if the World is Alien Technology;
+- Galactic Credits.
+
+If you pay the full cost, complete the World:
 
 1. Move it to your tableau.
 2. Gain any dice listed on the World by pipping up those colors.
 3. Gain any listed Galactic Credits.
 4. Place a starting Good if the tile's die placement says the die begins on the
    World.
-5. Continue spending remaining Settle pips on the next World if able.
 
 Example:
 
 ```text
-Red is 2/2.
-Your top World costs 2 and grants one Novelty die.
-Spend 2 Red to complete it.
+Red is 1/2.
+White is 1/2.
+Credits are 1.
+Your top World costs 3 and grants one Novelty die.
+Spend 1 Red, 1 White, and 1 Credit to complete it.
 Novelty maps to Blue.
 Blue 2/2 becomes 3/3.
-Red becomes 0/2.
+Red becomes 0/2, White becomes 0/2, and Credits become 0.
 ```
 
 ## Produce
@@ -386,6 +417,22 @@ Blue stays 6/6. The excess is lost.
 If a tile grants two dice, pip up both colors. If both dice are the same color,
 pip that color twice, still capped at 6.
 
+## Military / Red Dice
+
+In base Roll for the Galaxy, Military is a die color, not a separate conquest
+discount as in Race for the Galaxy or New Frontiers. Military dice can roll or
+be assigned as workers, and red dice are especially associated with Settle.
+
+For this variant, Military maps to Red capacity:
+
+- gaining a Military die pips up Red;
+- losing a Military die pips Red down;
+- Red pips help pay to Settle Worlds;
+- end-game bonuses that count Military dice count Red max pips.
+
+There is no separate military conquest rule by default. Worlds still use their
+printed Settle costs unless a specific tile power reduces that cost.
+
 ## Losing Dice
 
 Whenever a tile says to lose or remove a die, reduce one track by 1 max.
@@ -465,6 +512,10 @@ The simulator supports both versions. The current default is Alien mode.
 
 Galactic Credits no longer recruit dice from Citizenry.
 
+During Develop or Settle, Credits may be spent as build currency. Each Credit
+pays 1 cost toward the top Development or World. The full cost must be paid at
+once; Credits cannot be left on a tile as progress.
+
 During Manage Empire:
 
 1. Spend Galactic Credits to recharge tracks.
@@ -496,6 +547,8 @@ Use the normal Construction Zone rules:
 
 - Game Tiles in the Development stack are built by Develop pips.
 - Game Tiles in the World stack are built by Settle pips.
+- Developments and Worlds must be completed in one payment.
+- Partial Develop/Settle progress is not tracked.
 - Completed tiles move to your tableau.
 - The game end condition still checks tableau size as normal.
 
@@ -532,7 +585,7 @@ Act as if you have an extra worker:
 Gain 1 temporary pip in that phase this round.
 
 Reduce a Develop or Settle cost:
-Reduce the number of pips required by that amount.
+Reduce the combined pips/Credits required by that amount.
 
 Gain Credits:
 Gain Galactic Credits normally.
@@ -542,7 +595,7 @@ Gain Galactic Credits normally.
 
 Use normal Roll for the Galaxy end conditions:
 
-- the initial VP chip pool is exhausted; or
+- the Phase Battery VP chip pool is exhausted; or
 - any player has 12 or more tile squares in their tableau.
 
 Finish the round, then score normally:
@@ -575,6 +628,42 @@ Yellow max 0 = Yellow is not present.
 Yellow max 2 = Yellow is present, for 7 colors total.
 ```
 
+## Game Length Tuning
+
+The tableau end condition remains the normal Roll for the Galaxy condition: 12
+or more tile squares in one player's tableau. Do not raise this for the first
+playtest.
+
+The VP pool is the easier tuning knob. The base game uses 12 VP chips per
+player. This variant currently uses 16 VP chips per player because the simulator
+often ended by VP pool exhaustion before players approached 12 tableau squares.
+
+What this changes:
+
+- If games end by VP pool exhaustion, a larger VP pool makes them longer.
+- If games end by a player reaching 12 tableau squares, a larger VP pool does
+  little or nothing.
+
+Recent simulation examples:
+
+```text
+Mixed 4-player strategies, 12 VP/player:
+Average 12.8 rounds; 231/300 games ended by VP pool, 69/300 by tableau.
+
+Mixed 4-player strategies, 16 VP/player:
+Average 15.1 rounds; 204/300 games ended by VP pool, 96/300 by tableau.
+
+All-builder 4-player strategies, 12 VP/player:
+Average 13.6 rounds; 16/300 games ended by VP pool, 284/300 by tableau.
+
+All-builder 4-player strategies, 16 VP/player:
+Average 13.7 rounds; 12/300 games ended by VP pool, 288/300 by tableau.
+```
+
+So 16 VP/player is a playtest default, not a claim that every game will last
+longer. Fast-building tables will still be governed by the 12-square tableau
+end condition.
+
 ## Solo Mode: Win Conditions
 
 Solo mode uses the normal Phase Battery rules with a fixed clock, dummy phase
@@ -606,17 +695,17 @@ the campaign.
 Score-only win conditions:
 
 ```text
-Great        Score 36+ VP.
-Triumphant   Score 39+ VP.
-Epic         Score 42+ VP.
+Great        Score 40+ VP.
+Triumphant   Score 43+ VP.
+Epic         Score 46+ VP.
 ```
 
 Recommended named win conditions:
 
 ```text
-Great       Score 36+ VP.
-Triumphant  Score 39+ VP.
-Epic        Score 42+ VP.
+Great       Score 40+ VP.
+Triumphant  Score 43+ VP.
+Epic        Score 46+ VP.
 Builder     Score 31+ VP and complete 7+ tiles.
 Developer   Score 31+ VP and have 4+ Developments.
 Colonizer   Score 31+ VP and have 6+ Worlds.
@@ -662,8 +751,8 @@ Solo round structure:
 2. Reveal two Dummy phase cards. If the deck is empty, shuffle all five Dummy
    phase cards to form a new deck first.
 3. The selected phases this round are your selected phase plus the Dummy phases.
-4. Resolve selected phases in normal Roll order. You may spend pips in any
-   selected phase.
+4. Resolve selected phases in normal Roll order. You may spend pips and Credits
+   in any selected phase.
 5. Resolve both Dummy phase effects.
 6. Manage Empire normally.
 
@@ -711,8 +800,8 @@ Dummy reveals Produce and Develop.
 
 Selected phases: Develop, Settle, Produce.
 
-You may spend Brown pips during Develop.
-You may spend Red pips during Settle.
+You may spend Brown pips and Credits during Develop.
+You may spend Red pips and Credits during Settle.
 You may spend Green pips during Produce.
 
 Dummy resolves Produce: Dummy Goods 0 -> 1.
@@ -733,9 +822,9 @@ Current solo simulation with the recommended defaults:
 
 ```text
 All difficulties use 12 rounds and two Dummy phase cards per round.
-Average Dummy churn: about 19 claimed tiles and 12 drained VP chips.
+Average Dummy churn: about 18 claimed tiles and 11 drained VP chips.
 For one-off score-only win conditions with the balanced heuristic, Great is
-about 64%, Triumphant about 43%, and Epic about 24%.
+about 58%, Triumphant about 37%, and Epic about 20%.
 ```
 
 Run:
@@ -835,6 +924,7 @@ Starting main tracks: 2/2
 Starting White:       2/2
 Starting Yellow:      0/0
 Track max:            6
+VP pool:              16 per player
 Free recharge:        0
 Yellow mode:          Alien
 ```
@@ -848,25 +938,24 @@ The current Python prototype uses the spreadsheet in this directory:
 Current simulation result with real start tiles and all tracks at `2/2`:
 
 ```text
-Four players: average length about 13 rounds
-Two players: average length about 19 rounds
+Three players: average length about 16.0 rounds
+Four players:  average length about 14.8 rounds
+Five players:  average length about 14.6 rounds
 Estimated table time: 45-60 minutes for experienced players
 ```
 
-In a 200-game four-player sweep with Balanced, Builder, Settler, and Shipper
-strategies, Alien-mode Yellow averaged 13.1 rounds. Wins were close among
-Balanced, Builder, and Settler; Shipper lagged in the current heuristic
-simulator. Yellow-as-Ship averaged 13.2 rounds with nearly identical strategy
-results, so Alien-mode remains the recommended default for theme and tile
-identity.
+In a 1000-game four-player sweep with Balanced, Builder, Settler, and Shipper
+strategies, Alien-mode Yellow with 16 VP/player averaged 14.8 rounds. Wins were
+tightly grouped: Builder 270, Settler 258, Balanced 244, Shipper 228. In a
+100-game comparison, Yellow-as-Ship averaged about the same length, so Alien-mode
+remains the recommended default for theme and tile identity.
 
 Solo challenge mode uses 12 rounds and two Dummy phase cards each round. In
-simulation sweeps, the Dummy claimed about 19 tiles and drained about 12 VP
-chips on average. Score-only win conditions are tuned around 64%, 43%, and 24%
-success for Great, Triumphant, and Epic with the balanced heuristic. Named
-conditions such as Builder and Satisfied Populace are intentionally easier if
-your empire leans into that plan. Treat those as simulation guideposts, not
-final balance data.
+simulation sweeps, the Dummy claimed about 18 tiles and drained about 11 VP
+chips on average. After the one-shot Develop/Settle change, score-only win
+conditions were retuned to 40, 43, and 46 VP. In a 1000-game balanced-heuristic
+sweep, those landed around 58%, 37%, and 20% success for Great, Triumphant, and
+Epic. Treat these as simulation guideposts, not final balance data.
 
 Run:
 

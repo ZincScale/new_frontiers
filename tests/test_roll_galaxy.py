@@ -1,6 +1,6 @@
 from roll_galaxy.engine import BatteryConfig, BatteryGame
 from roll_galaxy.model import BuildSlot, DieColor, Phase, Tile, TileKind
-from roll_galaxy.solo import BatterySoloGame
+from roll_galaxy.solo import BatterySoloGame, SOLO_WIN_CONDITION_MAP
 from roll_galaxy.tiles import HOME_WORLDS, NON_START_TILES, START_FACTION_PAIRS
 
 
@@ -58,6 +58,7 @@ def test_completed_world_grants_pip_instead_of_new_worker_die():
 def test_settle_spends_track_pips_to_build_world():
     game = BatteryGame(seed=5)
     player = game.players[0]
+    player.credits = 0
     player.tracks[DieColor.RED].current = 2
     player.tracks[DieColor.RED].maximum = 3
     player.tracks[DieColor.WHITE].current = 0
@@ -69,6 +70,38 @@ def test_settle_spends_track_pips_to_build_world():
     assert player.completed_tiles == 1
     assert player.tracks[DieColor.RED].current == 1
     assert player.tracks[DieColor.RED].maximum == 4
+
+
+def test_develop_can_use_credits_to_finish_tile_in_one_shot():
+    game = BatteryGame(seed=22)
+    player = game.players[0]
+    player.credits = 2
+    player.tracks[DieColor.BROWN].current = 1
+    player.tracks[DieColor.WHITE].current = 0
+    player.dev_stack = [BuildSlot(Tile("d-test", "Test Development", TileKind.DEVELOPMENT, 3, 3))]
+
+    game.resolve_phase(player, Phase.DEVELOP)
+
+    assert player.dev_stack == []
+    assert player.completed_tiles == 1
+    assert player.tracks[DieColor.BROWN].current == 0
+    assert player.credits == 0
+    assert player.credits_spent == 2
+
+
+def test_develop_does_not_keep_partial_progress_when_short_on_funds():
+    game = BatteryGame(seed=23)
+    player = game.players[0]
+    player.credits = 0
+    player.tracks[DieColor.BROWN].current = 1
+    player.tracks[DieColor.WHITE].current = 0
+    player.dev_stack = [BuildSlot(Tile("d-test", "Test Development", TileKind.DEVELOPMENT, 2, 2))]
+
+    game.resolve_phase(player, Phase.DEVELOP)
+
+    assert len(player.dev_stack) == 1
+    assert player.dev_stack[0].progress == 0
+    assert player.tracks[DieColor.BROWN].current == 1
 
 
 def test_credits_recharge_depleted_tracks_and_record_spending():
@@ -193,6 +226,7 @@ def test_yellow_alien_mode_can_settle_alien_world():
 def test_yellow_alien_mode_does_not_pay_for_non_alien_settle():
     game = BatteryGame(seed=13, config=BatteryConfig(yellow_mode="alien"))
     player = game.players[0]
+    player.credits = 0
     player.tracks[DieColor.RED].current = 0
     player.tracks[DieColor.YELLOW].current = 1
     player.tracks[DieColor.WHITE].current = 0
@@ -315,3 +349,9 @@ def test_solo_campaign_filters_to_campaign_conditions():
         "industrial",
     }
     assert "epic_success" not in summary
+
+
+def test_solo_score_only_thresholds_are_retuned_for_one_shot_builds():
+    assert SOLO_WIN_CONDITION_MAP["great"].min_score == 40
+    assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 43
+    assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 46

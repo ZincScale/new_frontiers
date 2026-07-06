@@ -29,6 +29,7 @@ def main():
     parser.add_argument("--starting-credits", type=int, default=1)
     parser.add_argument("--free-recharge", type=int, default=0)
     parser.add_argument("--yellow-mode", choices=("ship", "alien"), default="alien")
+    parser.add_argument("--vp-pool-per-player", type=int, default=16)
     parser.add_argument("--max-rounds", type=int, default=40)
     parser.add_argument("--fixed-seats", action="store_true")
     parser.add_argument(
@@ -51,6 +52,7 @@ def main():
         starting_credits=args.starting_credits,
         minimum_recharge=args.free_recharge,
         yellow_mode=args.yellow_mode,
+        vp_pool_per_player=args.vp_pool_per_player,
         max_rounds=args.max_rounds,
     )
     wins = Counter()
@@ -97,6 +99,7 @@ def main():
     print(f"Starting credits: {config.starting_credits}")
     print(f"Free recharge: {config.minimum_recharge}")
     print(f"Yellow mode: {config.yellow_mode}")
+    print(f"VP pool per player: {config.vp_pool_per_player}")
     print(f"Average rounds: {sum(rounds) / len(rounds):.1f}")
     print()
     print("Wins")

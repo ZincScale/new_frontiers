@@ -31,9 +31,9 @@ class SoloWinCondition:
 
 
 SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
-    SoloWinCondition("great", "Great", 36),
-    SoloWinCondition("triumphant", "Triumphant", 39),
-    SoloWinCondition("epic", "Epic", 42),
+    SoloWinCondition("great", "Great", 40),
+    SoloWinCondition("triumphant", "Triumphant", 43),
+    SoloWinCondition("epic", "Epic", 46),
     SoloWinCondition("builder", "Builder", 31, min_completed_tiles=7),
     SoloWinCondition("developer", "Developer", 31, min_developments=4),
     SoloWinCondition("colonizer", "Colonizer", 31, min_worlds=6),
@@ -141,10 +141,11 @@ class BatterySoloGame:
         selected = tuple(phase for phase in PHASE_ORDER if phase in {human_phase, *dummy_phases})
 
         before = self.player.used_pips
+        before_completed = self.player.completed_tiles
         for phase in selected:
             self.game.resolve_phase(self.player, phase)
         used = self.player.used_pips - before
-        if used == 0:
+        if used == 0 and self.player.completed_tiles == before_completed:
             self.player.dead_rounds += 1
 
         for phase in dummy_phases:

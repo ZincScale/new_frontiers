@@ -56,7 +56,7 @@ class BatteryConfig:
     minimum_recharge: int = 0
     yellow_mode: str = "alien"
     target_tableau_squares: int = 12
-    vp_pool_per_player: int = 12
+    vp_pool_per_player: int = 16
     max_rounds: int = 40
 
 
@@ -130,10 +130,11 @@ class BatteryGame:
         used_pips = {}
         for player in self.players:
             before = player.used_pips
+            before_completed = player.completed_tiles
             for phase in selected_phases:
                 self.resolve_phase(player, phase)
             used_pips[player.name] = player.used_pips - before
-            if used_pips[player.name] == 0:
+            if used_pips[player.name] == 0 and player.completed_tiles == before_completed:
                 player.dead_rounds += 1
             self.manage_empire(player)
         return RoundReport(
@@ -147,33 +148,45 @@ class BatteryGame:
         return max(PHASE_ORDER, key=lambda phase: self.phase_value(player, phase))
 
     def phase_value(self, player: Player, phase: Phase) -> int:
-        if self.available_capacity(player, phase) <= 0:
-            return -20
         bias = STRATEGY_BIAS[player.strategy][phase]
         if phase is Phase.EXPLORE:
+            if self.available_capacity(player, phase) <= 0:
+                return -20
             need_tiles = int(not player.dev_stack) + int(not player.world_stack)
             return bias + need_tiles * 5 + int(player.credits <= 2) * 2
         if phase is Phase.DEVELOP:
+            if not self.can_complete_build(player, phase, player.dev_stack):
+                return -20
             return bias + self.stack_need(player.dev_stack)
         if phase is Phase.SETTLE:
+            if not self.can_complete_build(player, phase, player.world_stack):
+                return -20
             return bias + self.stack_need(player.world_stack)
         if phase is Phase.PRODUCE:
+            if self.available_capacity(player, phase) <= 0:
+                return -20
             return bias + max(0, self.producible_world_count(player) - len(player.goods)) * 3
         if phase is Phase.SHIP:
+            if self.available_capacity(player, phase) <= 0:
+                return -20
             return bias + len(player.goods) * 5 + int(player.credits <= 2)
         raise ValueError(f"unknown phase: {phase}")
 
     def stack_need(self, stack: list[BuildSlot]) -> int:
         if not stack:
             return -4
-        slot = stack[0]
-        remaining = slot.tile.cost - slot.progress
-        return max(0, 7 - remaining)
+        return max(0, 7 - stack[0].tile.cost)
 
     def available_capacity(self, player: Player, phase: Phase) -> int:
         return sum(self.track(player, color).current for color in self.phase_colors(player, phase))
 
     def resolve_phase(self, player: Player, phase: Phase):
+        if phase is Phase.DEVELOP:
+            self.resolve_build_phase(player, phase, player.dev_stack)
+            return
+        if phase is Phase.SETTLE:
+            self.resolve_build_phase(player, phase, player.world_stack)
+            return
         while self.available_capacity(player, phase) > 0 and self.can_apply_worker(player, phase):
             spent_color = self.spend_phase_pip(player, phase)
             if spent_color is None:
@@ -187,9 +200,9 @@ class BatteryGame:
         if phase is Phase.EXPLORE:
             return True
         if phase is Phase.DEVELOP:
-            return bool(player.dev_stack)
+            return self.can_complete_build(player, phase, player.dev_stack)
         if phase is Phase.SETTLE:
-            return bool(player.world_stack)
+            return self.can_complete_build(player, phase, player.world_stack)
         if phase is Phase.PRODUCE:
             return self.producible_world_count(player) > len(player.goods)
         if phase is Phase.SHIP:
@@ -248,13 +261,9 @@ class BatteryGame:
         if phase is Phase.EXPLORE:
             return self.explore(player)
         if phase is Phase.DEVELOP:
-            if spent_color is DieColor.YELLOW and not self.is_alien_build(player.dev_stack):
-                return False
-            return self.build(player, player.dev_stack)
+            return False
         if phase is Phase.SETTLE:
-            if spent_color is DieColor.YELLOW and not self.is_alien_build(player.world_stack):
-                return False
-            return self.build(player, player.world_stack)
+            return False
         if phase is Phase.PRODUCE:
             return self.produce(player, spent_color)
         if phase is Phase.SHIP:
@@ -286,11 +295,48 @@ class BatteryGame:
     def build(self, player: Player, stack: list[BuildSlot]) -> bool:
         if not stack:
             return False
-        slot = stack[0]
-        slot.progress += 1
-        if slot.progress >= slot.tile.cost:
-            self.complete_tile(player, stack.pop(0).tile)
+        tile = stack[0].tile
+        phase = Phase.DEVELOP if tile.kind is TileKind.DEVELOPMENT else Phase.SETTLE
+        if not self.can_complete_build(player, phase, stack):
+            return False
+        spent_pips = self.spend_build_cost(player, phase, tile.cost)
+        player.used_pips += spent_pips
+        self.complete_tile(player, stack.pop(0).tile)
         return True
+
+    def resolve_build_phase(self, player: Player, phase: Phase, stack: list[BuildSlot]):
+        if not stack:
+            return
+        tile = stack[0].tile
+        if not self.can_complete_build(player, phase, stack):
+            return
+        spent_pips = self.spend_build_cost(player, phase, tile.cost)
+        player.used_pips += spent_pips
+        self.complete_tile(player, stack.pop(0).tile)
+
+    def can_complete_build(self, player: Player, phase: Phase, stack: list[BuildSlot]) -> bool:
+        if not stack:
+            return False
+        return stack[0].tile.cost <= self.available_build_funds(player, phase)
+
+    def available_build_funds(self, player: Player, phase: Phase) -> int:
+        return player.credits + self.available_capacity(player, phase)
+
+    def spend_build_cost(self, player: Player, phase: Phase, cost: int) -> int:
+        remaining = cost
+        spent_pips = 0
+        for color in self.phase_colors(player, phase):
+            if remaining <= 0:
+                break
+            track = self.track(player, color)
+            spent = min(track.current, remaining)
+            track.current -= spent
+            remaining -= spent
+            spent_pips += spent
+        if remaining > 0:
+            player.credits -= remaining
+            player.credits_spent += remaining
+        return spent_pips
 
     def complete_tile(self, player: Player, tile: Tile):
         player.tableau.append(tile)
