@@ -342,8 +342,32 @@ def test_mancala_solo_thresholds_are_tuned_for_mancala_pace():
     assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 46
     assert SOLO_WIN_CONDITION_MAP["builder"].min_score == 34
     assert SOLO_WIN_CONDITION_MAP["industrial"].min_max_capacity == 17
-    assert SOLO_WIN_CONDITION_MAP["military"].min_red_capacity == 4
-    assert SOLO_WIN_CONDITION_MAP["discovery"].min_blue_capacity == 4
+    assert SOLO_WIN_CONDITION_MAP["planner"].min_color_match_bonuses == 3
+    assert SOLO_WIN_CONDITION_MAP["financier"].min_credits_spent == 18
+    assert SOLO_WIN_CONDITION_MAP["recycler"].min_recovery_sows == 2
+    assert SOLO_WIN_CONDITION_MAP["momentum"].min_phase_actions == 65
+
+
+def test_mancala_solo_condition_success_uses_stone_economy_metrics():
+    game = MancalaSoloGame(seed=15)
+    game.player.vp_chips = 34
+    summary = {
+        "tableau": 12,
+        "completed_tiles": 7,
+        "developments": 4,
+        "worlds": 6,
+        "production_worlds": 4,
+        "distinct_world_colors": 3,
+        "vp_chips": 8,
+        "max_capacity": 17,
+        "credits_spent": 18,
+        "recovery_sows": 2,
+        "color_match_bonuses": 3,
+        "phase_actions": 65,
+    }
+
+    for name in ("planner", "financier", "recycler", "momentum"):
+        assert game.condition_success_without_summary(SOLO_WIN_CONDITION_MAP[name], summary)
 
 
 def test_mancala_solo_campaigns_have_four_unique_conditions():
@@ -352,3 +376,13 @@ def test_mancala_solo_campaigns_have_four_unique_conditions():
         assert len(campaign.condition_names) == 4
         assert len(campaign.condition_names) == len(set(campaign.condition_names))
         assert set(campaign.condition_names) <= canonical
+
+
+def test_mancala_solo_campaigns_focus_on_current_mancala_design():
+    campaigns = {campaign.key: campaign.condition_names for campaign in SOLO_CAMPAIGNS}
+
+    assert campaigns["first_loop"] == ("great", "builder", "colonizer", "planner")
+    assert campaigns["credit_engine"] == ("triumphant", "developer", "financier", "recycler")
+    assert campaigns["goods_route"] == ("triumphant", "production", "merchant", "diverse")
+    assert campaigns["stone_control"] == ("epic", "industrial", "momentum", "planner")
+    assert campaigns["mastery"] == ("epic", "financier", "recycler", "momentum")

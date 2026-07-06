@@ -300,19 +300,19 @@ Named scenarios require at least 34 VP plus the listed mark:
 Builder             7+ completed tiles
 Developer           4+ Developments
 Colonizer           6+ Worlds
-Satisfied Populace  8+ VP chips
-Industrial          17+ owned dice
-Production          4+ production Worlds
-Diverse             3+ distinct World colors
-Novelty             2+ Novelty Worlds
-Rare Elements       2+ Rare Worlds
-Alien Contact       1+ Alien World
-Military            4+ Red dice
-Discovery           4+ Blue dice
+Merchant Fleet      8+ VP chips
+Stone Economy       17+ owned dice
+Production Network  4+ production Worlds
+Diverse Tableau     3+ distinct World colors
+Mancala Planner     3+ color match bonuses
+Credit Engine       18+ Credits spent
+Recovery Loop       2+ recovery sows
+Momentum            65+ phase actions
 ```
 
 Owned dice means physical dice in your mancala sections plus Spent. Good markers
-and queued tiles do not count.
+and queued tiles do not count. Phase actions are actions produced by stones in
+resolved phase sections, including bonus actions from match bonuses.
 
 ## Solo Campaigns
 
@@ -320,27 +320,27 @@ A campaign is four consecutive games. Each game must mark one campaign scenario
 not already marked. Win the campaign by marking all four scenarios.
 
 ```text
-Outreach
-  Great, Colonizer, Builder, Industrial
+First Loop
+  Great, Builder, Colonizer, Mancala Planner
 
-Industrial Base
-  Triumphant, Developer, Industrial, Production
+Credit Engine
+  Triumphant, Developer, Credit Engine, Recovery Loop
 
-Sector Survey
-  Triumphant, Diverse, Novelty, Rare Elements
+Goods Route
+  Triumphant, Production Network, Merchant Fleet, Diverse Tableau
 
-Alien Contact
-  Epic, Alien Contact, Military, Discovery
+Stone Control
+  Epic, Stone Economy, Momentum, Mancala Planner
 
 Mastery
-  Epic, Novelty, Rare Elements, Military
+  Epic, Credit Engine, Recovery Loop, Momentum
 ```
 
 Current balanced-strategy tuning target:
 
 ```text
-Outreach / Industrial Base: approachable campaign wins
-Sector Survey / Alien Contact / Mastery: harder tile-and-color campaigns
+First Loop / Goods Route: approachable campaign wins
+Credit Engine / Stone Control / Mastery: harder economy-control campaigns
 ```
 
 ## Current Test Coverage
@@ -356,4 +356,3 @@ The automated tests cover:
 - Ship Good markers without moving stones;
 - solo dummy phase selection;
 - solo capacity counting and campaign definitions.
-

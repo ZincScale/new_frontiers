@@ -59,5 +59,5 @@ Credits pay Develop/Settle costs and Good markers track produced Goods.
 The Roll Mancala solo mode uses a 16-round clock with two Dummy phase cards per
 round. Score-only win conditions are Great at 38+ VP, Triumphant at 42+ VP, and
 Epic at 46+ VP. Named win conditions require 34+ VP plus their mark. Campaign
-sheets combine those with named win conditions such as
-Builder, Colonizer, Satisfied Populace, and Industrial.
+sheets combine those with current mancala marks such as Builder, Mancala
+Planner, Credit Engine, Recovery Loop, Goods Route, and Stone Control.

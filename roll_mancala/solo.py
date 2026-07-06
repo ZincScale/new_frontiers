@@ -6,16 +6,31 @@ from dataclasses import dataclass, replace
 from statistics import mean
 from typing import Optional
 
-from roll_galaxy.solo import (
-    SoloWinCondition,
-)
-
 from .engine import MancalaConfig, MancalaGame
 from .model import PHASE_ORDER, SECTION_ORDER, DieColor, Phase, SourceChoice, Tile, TileKind
 
 
 SOLO_ROUNDS = 16
 SOLO_VP_POOL = 30
+
+
+@dataclass(frozen=True)
+class SoloWinCondition:
+    name: str
+    label: str
+    min_score: int
+    min_tableau: int = 0
+    min_completed_tiles: int = 0
+    min_developments: int = 0
+    min_worlds: int = 0
+    min_production_worlds: int = 0
+    min_distinct_world_colors: int = 0
+    min_vp_chips: int = 0
+    min_max_capacity: int = 0
+    min_credits_spent: int = 0
+    min_recovery_sows: int = 0
+    min_color_match_bonuses: int = 0
+    min_phase_actions: int = 0
 
 
 SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
@@ -25,15 +40,14 @@ SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
     SoloWinCondition("builder", "Builder", 34, min_completed_tiles=7),
     SoloWinCondition("developer", "Developer", 34, min_developments=4),
     SoloWinCondition("colonizer", "Colonizer", 34, min_worlds=6),
-    SoloWinCondition("satisfied_populace", "Satisfied Populace", 34, min_vp_chips=8),
-    SoloWinCondition("industrial", "Industrial", 34, min_max_capacity=17),
-    SoloWinCondition("production", "Production", 34, min_production_worlds=4),
-    SoloWinCondition("diverse", "Diverse", 34, min_distinct_world_colors=3),
-    SoloWinCondition("novelty", "Novelty", 34, min_novelty_worlds=2),
-    SoloWinCondition("rare", "Rare Elements", 34, min_rare_worlds=2),
-    SoloWinCondition("alien", "Alien Contact", 34, min_alien_worlds=1),
-    SoloWinCondition("military", "Military", 34, min_red_capacity=4),
-    SoloWinCondition("discovery", "Discovery", 34, min_blue_capacity=4),
+    SoloWinCondition("merchant", "Merchant Fleet", 34, min_vp_chips=8),
+    SoloWinCondition("industrial", "Stone Economy", 34, min_max_capacity=17),
+    SoloWinCondition("production", "Production Network", 34, min_production_worlds=4),
+    SoloWinCondition("diverse", "Diverse Tableau", 34, min_distinct_world_colors=3),
+    SoloWinCondition("planner", "Mancala Planner", 34, min_color_match_bonuses=3),
+    SoloWinCondition("financier", "Credit Engine", 34, min_credits_spent=18),
+    SoloWinCondition("recycler", "Recovery Loop", 34, min_recovery_sows=2),
+    SoloWinCondition("momentum", "Momentum", 34, min_phase_actions=65),
 )
 
 
@@ -54,11 +68,11 @@ class SoloCampaign:
 
 
 SOLO_CAMPAIGNS: tuple[SoloCampaign, ...] = (
-    SoloCampaign("outreach", "Outreach", ("great", "colonizer", "builder", "industrial")),
-    SoloCampaign("industry", "Industrial Base", ("triumphant", "developer", "industrial", "production")),
-    SoloCampaign("survey", "Sector Survey", ("triumphant", "diverse", "novelty", "rare")),
-    SoloCampaign("contact", "Alien Contact", ("epic", "alien", "military", "discovery")),
-    SoloCampaign("mastery", "Mastery", ("epic", "novelty", "rare", "military")),
+    SoloCampaign("first_loop", "First Loop", ("great", "builder", "colonizer", "planner")),
+    SoloCampaign("credit_engine", "Credit Engine", ("triumphant", "developer", "financier", "recycler")),
+    SoloCampaign("goods_route", "Goods Route", ("triumphant", "production", "merchant", "diverse")),
+    SoloCampaign("stone_control", "Stone Control", ("epic", "industrial", "momentum", "planner")),
+    SoloCampaign("mastery", "Mastery", ("epic", "financier", "recycler", "momentum")),
 )
 
 
@@ -275,13 +289,12 @@ class MancalaSoloGame:
             and summary["worlds"] >= condition.min_worlds
             and summary["production_worlds"] >= condition.min_production_worlds
             and summary["distinct_world_colors"] >= condition.min_distinct_world_colors
-            and summary["novelty_worlds"] >= condition.min_novelty_worlds
-            and summary["rare_worlds"] >= condition.min_rare_worlds
-            and summary["alien_worlds"] >= condition.min_alien_worlds
             and summary["vp_chips"] >= condition.min_vp_chips
             and summary["max_capacity"] >= condition.min_max_capacity
-            and summary["blue_capacity"] >= condition.min_blue_capacity
-            and summary["red_capacity"] >= condition.min_red_capacity
+            and summary["credits_spent"] >= condition.min_credits_spent
+            and summary["recovery_sows"] >= condition.min_recovery_sows
+            and summary["color_match_bonuses"] >= condition.min_color_match_bonuses
+            and summary["phase_actions"] >= condition.min_phase_actions
         )
 
     def owned_die_count(self, color: Optional[DieColor] = None) -> int:
