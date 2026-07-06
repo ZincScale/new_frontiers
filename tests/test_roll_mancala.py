@@ -17,7 +17,6 @@ def clear_player(player):
     player.dev_stack = []
     player.world_stack = []
     player.goods = []
-    player.bonus_goods = []
     player.tableau = []
     player.credits = 0
     player.match_bonuses.clear()
@@ -146,7 +145,7 @@ def test_phase_selected_by_one_player_is_shared_by_others():
     assert p2.completed_tiles == 1
 
 
-def test_develop_keeps_partial_worker_progress_when_short():
+def test_develop_does_not_complete_without_enough_credits_after_discount():
     game = MancalaGame(seed=7)
     player = game.players[0]
     clear_player(player)
@@ -155,61 +154,60 @@ def test_develop_keeps_partial_worker_progress_when_short():
 
     game.resolve_phase(player, Phase.DEVELOP)
 
-    assert player.dev_stack[0].progress == 2
-    assert player.sections[Section.DEVELOP] == []
-    assert player.spent[DieColor.BROWN] == 0
+    assert player.dev_stack[0].tile == Tile("d", "Large Development", TileKind.DEVELOPMENT, 3, 3)
+    assert player.sections[Section.DEVELOP] == [DieColor.BROWN, DieColor.BLUE]
+    assert player.credits == 0
 
 
-def test_develop_does_not_use_credits_to_complete_build():
+def test_develop_uses_credits_to_complete_build_after_section_discount():
     game = MancalaGame(seed=8)
     player = game.players[0]
     clear_player(player)
     player.credits = 5
     tile = Tile("d", "Large Development", TileKind.DEVELOPMENT, 3, 3)
-    player.dev_stack = [Construction(tile, workers=[DieColor.BROWN, DieColor.BLUE])]
-
-    game.resolve_phase(player, Phase.DEVELOP)
-
-    assert player.dev_stack[0].progress == 2
-    assert tile not in player.tableau
-    assert player.credits == 5
-    assert player.spent[DieColor.BROWN] == 0
-    assert player.spent[DieColor.BLUE] == 0
-
-
-def test_develop_completes_with_enough_workers_and_returns_workers_to_spent():
-    game = MancalaGame(seed=8)
-    player = game.players[0]
-    clear_player(player)
-    player.credits = 5
-    tile = Tile("d", "Large Development", TileKind.DEVELOPMENT, 3, 3)
-    player.dev_stack = [Construction(tile, workers=[DieColor.BROWN, DieColor.BLUE])]
-    player.sections[Section.DEVELOP] = [DieColor.WHITE]
+    player.dev_stack = [Construction(tile)]
+    player.sections[Section.DEVELOP] = [DieColor.BROWN, DieColor.BLUE]
 
     game.resolve_phase(player, Phase.DEVELOP)
 
     assert player.dev_stack == []
     assert tile in player.tableau
-    assert player.credits == 5
-    assert player.spent[DieColor.BROWN] == 1
-    assert player.spent[DieColor.BLUE] == 1
-    assert player.spent[DieColor.WHITE] == 1
+    assert player.credits == 3
+    assert player.credits_spent == 2
+    assert player.sections[Section.DEVELOP] == [DieColor.BROWN, DieColor.BLUE]
+
+
+def test_develop_can_be_free_when_matching_discount_meets_cost():
+    game = MancalaGame(seed=8)
+    player = game.players[0]
+    clear_player(player)
+    tile = Tile("d", "Large Development", TileKind.DEVELOPMENT, 3, 3)
+    player.dev_stack = [Construction(tile)]
+    player.sections[Section.DEVELOP] = [DieColor.BROWN, DieColor.BROWN, DieColor.WHITE]
+
+    game.resolve_phase(player, Phase.DEVELOP)
+
+    assert player.dev_stack == []
+    assert tile in player.tableau
+    assert player.credits == 0
+    assert player.sections[Section.DEVELOP] == [DieColor.BROWN, DieColor.BROWN, DieColor.WHITE]
 
 
 def test_develop_match_bonus_reduces_completion_cost():
     game = MancalaGame(seed=8)
     player = game.players[0]
     clear_player(player)
+    player.credits = 1
     tile = Tile("d", "Discounted Development", TileKind.DEVELOPMENT, 3, 3)
-    player.dev_stack = [Construction(tile, workers=[DieColor.BROWN, DieColor.BLUE])]
+    player.dev_stack = [Construction(tile)]
+    player.sections[Section.DEVELOP] = [DieColor.BROWN]
     player.match_bonuses[Phase.DEVELOP] = 1
 
     game.resolve_phase(player, Phase.DEVELOP)
 
     assert player.dev_stack == []
     assert tile in player.tableau
-    assert player.spent[DieColor.BROWN] == 1
-    assert player.spent[DieColor.BLUE] == 1
+    assert player.credits == 0
 
 
 def test_gain_die_goes_to_matching_section_or_spent_when_full():
@@ -253,7 +251,7 @@ def test_loss_removes_from_spent_before_board_goods_or_progress():
     assert player.sections[Section.SETTLE] == [DieColor.RED]
 
 
-def test_produce_places_worker_die_as_good_outside_mancala_loop():
+def test_produce_places_good_marker_without_moving_stone():
     game = MancalaGame(seed=11)
     player = game.players[0]
     clear_player(player)
@@ -263,12 +261,12 @@ def test_produce_places_worker_die_as_good_outside_mancala_loop():
 
     game.resolve_phase(player, Phase.PRODUCE)
 
-    assert player.sections[Section.PRODUCE] == []
-    assert player.goods == [Good(world, DieColor.GREEN)]
+    assert player.sections[Section.PRODUCE] == [DieColor.GREEN]
+    assert player.goods == [Good(world, DieColor.WHITE)]
     assert player.spent[DieColor.GREEN] == 0
 
 
-def test_produce_match_bonus_makes_temporary_good_without_capacity():
+def test_produce_match_bonus_makes_extra_good_marker():
     game = MancalaGame(seed=11)
     player = game.players[0]
     clear_player(player)
@@ -278,11 +276,10 @@ def test_produce_match_bonus_makes_temporary_good_without_capacity():
 
     game.resolve_phase(player, Phase.PRODUCE)
 
-    assert player.goods == []
-    assert player.bonus_goods == [world]
+    assert player.goods == [Good(world, DieColor.WHITE)]
 
 
-def test_ship_moves_worker_and_shipped_good_to_spent():
+def test_ship_consumes_good_marker_without_moving_stone():
     game = MancalaGame(seed=12)
     player = game.players[0]
     clear_player(player)
@@ -294,9 +291,10 @@ def test_ship_moves_worker_and_shipped_good_to_spent():
     game.resolve_phase(player, Phase.SHIP)
 
     assert player.goods == []
-    assert player.spent[DieColor.BLUE] == 1
-    assert player.spent[DieColor.PURPLE] == 1
-    assert player.vp_chips == 2
+    assert player.sections[Section.SHIP] == [DieColor.PURPLE]
+    assert player.spent[DieColor.BLUE] == 0
+    assert player.spent[DieColor.PURPLE] == 0
+    assert player.vp_chips == 1
 
 
 def test_ship_match_bonus_adds_vp_to_first_consume():
@@ -311,7 +309,7 @@ def test_ship_match_bonus_adds_vp_to_first_consume():
 
     game.resolve_phase(player, Phase.SHIP)
 
-    assert player.vp_chips == 3
+    assert player.vp_chips == 2
 
 
 def test_mancala_solo_dummy_phase_selects_shared_phase():
@@ -339,9 +337,10 @@ def test_mancala_solo_summary_counts_physical_dice_capacity():
 
 
 def test_mancala_solo_thresholds_are_tuned_for_mancala_pace():
-    assert SOLO_WIN_CONDITION_MAP["great"].min_score == 32
-    assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 34
-    assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 35
+    assert SOLO_WIN_CONDITION_MAP["great"].min_score == 38
+    assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 42
+    assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 46
+    assert SOLO_WIN_CONDITION_MAP["builder"].min_score == 34
     assert SOLO_WIN_CONDITION_MAP["industrial"].min_max_capacity == 17
     assert SOLO_WIN_CONDITION_MAP["military"].min_red_capacity == 4
     assert SOLO_WIN_CONDITION_MAP["discovery"].min_blue_capacity == 4

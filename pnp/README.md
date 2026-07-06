@@ -14,8 +14,8 @@ Open the desired HTML file in a browser and print at 100% scale.
 ### Roll Mancala Dice Variant
 
 - 4 Mancala Phase player boards
-- 1 multiplayer quick-reference aid sheet
-- 1 combined solo procedure / tile-verbiage aid sheet
+- 1 combined rules / solo aid sheet
+- 1 combined campaign / tile-text aid sheet
 - 5 solo Dummy phase cards
 - five-section boards with off-board Spent storage
 
@@ -50,12 +50,14 @@ as balance changes.
 - Turn off "fit to page" if your print dialog shrinks the layout.
 - Cut along the card borders or crop marks.
 
-For the Roll mancala boards, place active physical dice in the five phase
-sections. Keep Spent dice off board. Die faces do not matter.
+For the Roll mancala boards, place physical dice in the five phase sections.
+Keep Spent dice off board. Die faces do not matter. Dice are mancala stones;
+Credits pay Develop/Settle costs and Good markers track produced Goods.
 
 ## Roll Solo Tuning
 
 The Roll Mancala solo mode uses a 16-round clock with two Dummy phase cards per
-round. Score-only win conditions are Great at 32+ VP, Triumphant at 34+ VP, and
-Epic at 35+ VP. Campaign sheets combine those with named win conditions such as
+round. Score-only win conditions are Great at 38+ VP, Triumphant at 42+ VP, and
+Epic at 46+ VP. Named win conditions require 34+ VP plus their mark. Campaign
+sheets combine those with named win conditions such as
 Builder, Colonizer, Satisfied Populace, and Industrial.

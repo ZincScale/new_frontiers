@@ -56,11 +56,6 @@ PHASE_SECTION: dict[Phase, Section] = {
 @dataclass
 class Construction:
     tile: Tile
-    workers: list[DieColor] = field(default_factory=list)
-
-    @property
-    def progress(self) -> int:
-        return len(self.workers)
 
 
 @dataclass(frozen=True)
@@ -94,13 +89,12 @@ class Player:
     world_stack: list[Construction] = field(default_factory=list)
     tableau: list[Tile] = field(default_factory=list)
     goods: list[Good] = field(default_factory=list)
-    bonus_goods: list[Tile] = field(default_factory=list)
     credits: int = 1
     vp_chips: int = 0
     selected_phases: list[Phase] = field(default_factory=list)
     selected_sections: list[Optional[Section]] = field(default_factory=list)
     dead_rounds: int = 0
-    used_workers: int = 0
+    phase_actions: int = 0
     completed_tiles: int = 0
     credits_earned: int = 0
     credits_spent: int = 0

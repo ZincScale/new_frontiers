@@ -87,7 +87,7 @@ class RoundReport:
     selected: tuple[Phase, ...]
     selections: dict[str, Optional[Phase]]
     dummy_phases: tuple[Phase, ...]
-    used_workers: dict[str, int]
+    phase_actions: dict[str, int]
     scores: dict[str, int]
 
 
@@ -162,14 +162,14 @@ class MancalaGame:
             selected_set.add(phase)
             dummy_phases.append(phase)
         selected = tuple(phase for phase in PHASE_ORDER if phase in selected_set)
-        used_workers: dict[str, int] = {}
+        phase_actions: dict[str, int] = {}
         for player in self.players:
-            before_workers = player.used_workers
+            before_actions = player.phase_actions
             before_completed = player.completed_tiles
             for phase in selected:
                 self.resolve_phase(player, phase)
-            used_workers[player.name] = player.used_workers - before_workers
-            if used_workers[player.name] == 0 and player.completed_tiles == before_completed:
+            phase_actions[player.name] = player.phase_actions - before_actions
+            if phase_actions[player.name] == 0 and player.completed_tiles == before_completed:
                 player.dead_rounds += 1
             self.manage_empire(player)
 
@@ -178,7 +178,7 @@ class MancalaGame:
             selected,
             selections,
             tuple(dummy_phases),
-            used_workers,
+            phase_actions,
             {player.name: self.score(player) for player in self.players},
         )
 
@@ -252,7 +252,7 @@ class MancalaGame:
     def build_value(self, stack: list[Construction]) -> int:
         if not stack:
             return -8
-        return max(0, 7 - stack[0].tile.cost) + stack[0].progress
+        return max(0, 9 - stack[0].tile.cost)
 
     def preview_sow(self, player: Player, choice: SourceChoice) -> SowResult:
         sections = {section: list(dice) for section, dice in player.sections.items()}
@@ -375,108 +375,86 @@ class MancalaGame:
         return SECTION_ORDER.index(section)
 
     def resolve_phase(self, player: Player, phase: Phase):
-        self.apply_phase_match_bonus(player, phase)
         if phase is Phase.DEVELOP:
-            self.resolve_build_phase(player, player.dev_stack, phase)
+            self.resolve_credit_build_phase(player, player.dev_stack, phase)
             return
         if phase is Phase.SETTLE:
-            self.resolve_build_phase(player, player.world_stack, phase)
+            self.resolve_credit_build_phase(player, player.world_stack, phase)
             return
-        while self.can_apply_worker(player, phase):
-            worker = self.take_worker(player, phase)
-            if worker is None:
-                return
-            if not self.apply_worker(player, phase, worker):
-                self.add_spent(player, worker)
-                return
-            player.used_workers += 1
+        if phase is Phase.EXPLORE:
+            self.resolve_explore_phase(player)
+            return
+        if phase is Phase.PRODUCE:
+            self.resolve_produce_phase(player)
+            return
+        if phase is Phase.SHIP:
+            self.resolve_ship_phase(player)
+            return
+        raise ValueError(f"unknown phase: {phase}")
 
-    def resolve_build_phase(self, player: Player, stack: list[Construction], phase: Phase):
+    def resolve_credit_build_phase(self, player: Player, stack: list[Construction], phase: Phase):
         if not stack:
             return
         build = stack[0]
-        effective_cost = self.effective_build_cost(player, phase, build.tile)
-        while build.progress < effective_cost:
-            worker = self.take_worker(player, phase, alien_only=self.is_alien_tile(build.tile))
-            if worker is None:
-                break
-            build.workers.append(worker)
-            player.used_workers += 1
-        if build.progress < effective_cost:
+        discount = self.build_discount(player, phase) + player.match_bonuses.pop(phase, 0)
+        effective_cost = max(0, build.tile.cost - discount)
+        if player.credits < effective_cost:
             return
-        for worker in build.workers:
-            self.add_spent(player, worker)
+        player.credits -= effective_cost
+        player.credits_spent += effective_cost
+        player.phase_actions += self.phase_strength(player, phase)
         stack.pop(0)
         self.complete_tile(player, build.tile)
 
-    def can_apply_worker(self, player: Player, phase: Phase) -> bool:
-        if self.available_workers(player, phase) <= 0:
-            return False
-        if phase is Phase.EXPLORE:
-            return True
-        if phase is Phase.PRODUCE:
-            return self.producible_world_count(player) > 0
-        if phase is Phase.SHIP:
-            return bool(player.goods)
-        return False
-
-    def apply_phase_match_bonus(self, player: Player, phase: Phase):
-        if phase in (Phase.DEVELOP, Phase.SETTLE, Phase.SHIP):
-            return
-        count = player.match_bonuses.pop(phase, 0)
-        if count <= 0:
-            return
-        if phase is Phase.EXPLORE:
-            for _ in range(count):
-                if not player.dev_stack:
-                    self.scout_tile(player, TileKind.DEVELOPMENT)
-                elif not player.world_stack:
-                    self.scout_tile(player, TileKind.WORLD)
-                else:
-                    self.gain_credits(player, 1)
-            return
-        if phase is Phase.PRODUCE:
-            for _ in range(count):
-                candidates = self.producible_worlds(player)
-                if not candidates:
-                    return
-                player.bonus_goods.append(max(candidates, key=lambda tile: tile.vp))
-
-    def effective_build_cost(self, player: Player, phase: Phase, tile: Tile) -> int:
-        if phase not in (Phase.DEVELOP, Phase.SETTLE):
-            return tile.cost
-        return max(0, tile.cost - player.match_bonuses.pop(phase, 0))
-
-    def available_workers(self, player: Player, phase: Phase, alien_only: bool = False) -> int:
-        return len(player.sections[PHASE_SECTION[phase]])
-
-    def take_worker(self, player: Player, phase: Phase, alien_only: bool = False) -> Optional[DieColor]:
+    def build_discount(self, player: Player, phase: Phase) -> int:
         section = PHASE_SECTION[phase]
-        if alien_only and DieColor.YELLOW in player.sections[section]:
-            player.sections[section].remove(DieColor.YELLOW)
-            return DieColor.YELLOW
-        if player.sections[section]:
-            return player.sections[section].pop(0)
-        return None
+        return sum(
+            1
+            for die in player.sections[section]
+            if COLOR_SECTION[die] is section or die in (DieColor.WHITE, DieColor.YELLOW)
+        )
 
-    def apply_worker(self, player: Player, phase: Phase, worker: DieColor) -> bool:
-        if phase is Phase.EXPLORE:
-            return self.explore(player, worker)
-        if phase is Phase.PRODUCE:
-            return self.produce(player, worker)
-        if phase is Phase.SHIP:
-            return self.ship(player, worker)
-        return False
+    def resolve_explore_phase(self, player: Player):
+        actions = self.phase_strength(player, Phase.EXPLORE) + player.match_bonuses.pop(Phase.EXPLORE, 0)
+        for _ in range(actions):
+            if not player.dev_stack:
+                self.scout_tile(player, TileKind.DEVELOPMENT)
+            elif not player.world_stack:
+                self.scout_tile(player, TileKind.WORLD)
+            else:
+                self.gain_credits(player, 2)
+            player.phase_actions += 1
 
-    def explore(self, player: Player, worker: DieColor) -> bool:
-        if not player.dev_stack:
-            self.scout_tile(player, TileKind.DEVELOPMENT)
-        elif not player.world_stack:
-            self.scout_tile(player, TileKind.WORLD)
-        else:
-            self.gain_credits(player, 2)
-        self.add_spent(player, worker)
-        return True
+    def resolve_produce_phase(self, player: Player):
+        actions = self.phase_strength(player, Phase.PRODUCE) + player.match_bonuses.pop(Phase.PRODUCE, 0)
+        for _ in range(actions):
+            candidates = self.producible_worlds(player)
+            if not candidates:
+                return
+            world = max(candidates, key=lambda tile: tile.vp)
+            player.goods.append(Good(world, DieColor.WHITE))
+            player.phase_actions += 1
+
+    def resolve_ship_phase(self, player: Player):
+        actions = self.phase_strength(player, Phase.SHIP)
+        bonus = player.match_bonuses.pop(Phase.SHIP, 0)
+        for _ in range(actions):
+            if not player.goods:
+                return
+            good = max(player.goods, key=lambda item: item.world.vp)
+            player.goods.remove(good)
+            if player.credits <= 2:
+                self.gain_credits(player, 3 + good.world.vp // 2)
+            else:
+                vp = 1 + bonus
+                bonus = 0
+                claimed = min(vp, self.vp_pool)
+                player.vp_chips += claimed
+                self.vp_pool -= claimed
+            player.phase_actions += 1
+
+    def phase_strength(self, player: Player, phase: Phase) -> int:
+        return len(player.sections[PHASE_SECTION[phase]])
 
     def scout_tile(self, player: Player, kind: TileKind) -> Optional[Tile]:
         for index, tile in enumerate(self.tile_bag):
@@ -486,47 +464,6 @@ class MancalaGame:
                 del self.tile_bag[index]
                 return tile
         return None
-
-    def produce(self, player: Player, worker: DieColor) -> bool:
-        candidates = self.producible_worlds(player)
-        if worker is DieColor.YELLOW:
-            alien_candidates = [tile for tile in candidates if self.is_alien_tile(tile)]
-            candidates = alien_candidates or candidates
-        if not candidates:
-            return False
-        world = max(candidates, key=lambda tile: tile.vp)
-        player.goods.append(Good(world, worker))
-        return True
-
-    def ship(self, player: Player, worker: DieColor) -> bool:
-        if not player.goods and not player.bonus_goods:
-            return False
-        candidates = player.goods
-        if worker is DieColor.YELLOW:
-            alien_goods = [good for good in candidates if self.is_alien_tile(good.world)]
-            candidates = alien_goods or candidates
-        bonus = player.match_bonuses.pop(Phase.SHIP, 0)
-        if candidates:
-            good = max(candidates, key=lambda item: item.world.vp)
-            player.goods.remove(good)
-            self.add_spent(player, good.color)
-            good_color = good.color
-            world = good.world
-        else:
-            world = max(player.bonus_goods, key=lambda tile: tile.vp)
-            player.bonus_goods.remove(world)
-            good_color = None
-        if player.credits <= 2:
-            self.gain_credits(player, 3 + world.vp // 2)
-        else:
-            vp = 1 + int(good_color is self.world_color(world) or good_color is DieColor.WHITE)
-            if bonus:
-                vp += 1
-            claimed = min(vp, self.vp_pool)
-            player.vp_chips += claimed
-            self.vp_pool -= claimed
-        self.add_spent(player, worker)
-        return True
 
     def complete_tile(self, player: Player, tile: Tile):
         player.tableau.append(tile)
@@ -545,7 +482,7 @@ class MancalaGame:
         if tile.immediate_credits:
             self.gain_credits(player, tile.immediate_credits)
         if tile.placement == "world" and tile.produces and tile.grants:
-            self.move_owned_die_to_good(player, tile, tile.grants[0])
+            player.goods.append(Good(tile, DieColor.WHITE))
 
     def gain_die(self, player: Player, color: DieColor):
         section = COLOR_SECTION[color]
@@ -571,32 +508,7 @@ class MancalaGame:
                 if die in colors:
                     del player.sections[section][index]
                     return True
-        for index, good in enumerate(player.goods):
-            if good.color in colors:
-                del player.goods[index]
-                return True
-        for build in player.dev_stack + player.world_stack:
-            for index, die in enumerate(build.workers):
-                if die in colors:
-                    del build.workers[index]
-                    return True
         return False
-
-    def move_owned_die_to_good(self, player: Player, tile: Tile, color: DieColor) -> bool:
-        section = COLOR_SECTION[color]
-        if section is not None and color in player.sections[section]:
-            player.sections[section].remove(color)
-        elif player.spent[color] > 0:
-            player.spent[color] -= 1
-        else:
-            for section in SECTION_ORDER:
-                if color in player.sections[section]:
-                    player.sections[section].remove(color)
-                    break
-            else:
-                return False
-        player.goods.append(Good(tile, color))
-        return True
 
     def add_spent(self, player: Player, color: DieColor):
         player.spent[color] += 1
@@ -674,7 +586,7 @@ class MancalaGame:
         return len(self.producible_worlds(player))
 
     def producible_worlds(self, player: Player) -> list[Tile]:
-        occupied = {good.world.id for good in player.goods} | {tile.id for tile in player.bonus_goods}
+        occupied = {good.world.id for good in player.goods}
         return [tile for tile in player.tableau if tile.produces and tile.id not in occupied]
 
     def score(self, player: Player) -> int:
@@ -699,9 +611,9 @@ class MancalaGame:
                         "rounds": self.round_number,
                         "tableau": len(player.tableau),
                         "credits": player.credits,
-                        "goods": len(player.goods) + len(player.bonus_goods),
+                        "goods": len(player.goods),
                         "dead_rounds": player.dead_rounds,
-                        "used_workers": player.used_workers,
+                        "phase_actions": player.phase_actions,
                         "completed_tiles": player.completed_tiles,
                         "credits_earned": player.credits_earned,
                         "credits_spent": player.credits_spent,

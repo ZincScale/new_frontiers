@@ -19,21 +19,21 @@ SOLO_VP_POOL = 30
 
 
 SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
-    SoloWinCondition("great", "Great", 32),
-    SoloWinCondition("triumphant", "Triumphant", 34),
-    SoloWinCondition("epic", "Epic", 35),
-    SoloWinCondition("builder", "Builder", 28, min_completed_tiles=7),
-    SoloWinCondition("developer", "Developer", 28, min_developments=4),
-    SoloWinCondition("colonizer", "Colonizer", 28, min_worlds=6),
-    SoloWinCondition("satisfied_populace", "Satisfied Populace", 28, min_vp_chips=8),
-    SoloWinCondition("industrial", "Industrial", 28, min_max_capacity=17),
-    SoloWinCondition("production", "Production", 28, min_production_worlds=4),
-    SoloWinCondition("diverse", "Diverse", 28, min_distinct_world_colors=3),
-    SoloWinCondition("novelty", "Novelty", 28, min_novelty_worlds=2),
-    SoloWinCondition("rare", "Rare Elements", 28, min_rare_worlds=2),
-    SoloWinCondition("alien", "Alien Contact", 28, min_alien_worlds=1),
-    SoloWinCondition("military", "Military", 28, min_red_capacity=4),
-    SoloWinCondition("discovery", "Discovery", 28, min_blue_capacity=4),
+    SoloWinCondition("great", "Great", 38),
+    SoloWinCondition("triumphant", "Triumphant", 42),
+    SoloWinCondition("epic", "Epic", 46),
+    SoloWinCondition("builder", "Builder", 34, min_completed_tiles=7),
+    SoloWinCondition("developer", "Developer", 34, min_developments=4),
+    SoloWinCondition("colonizer", "Colonizer", 34, min_worlds=6),
+    SoloWinCondition("satisfied_populace", "Satisfied Populace", 34, min_vp_chips=8),
+    SoloWinCondition("industrial", "Industrial", 34, min_max_capacity=17),
+    SoloWinCondition("production", "Production", 34, min_production_worlds=4),
+    SoloWinCondition("diverse", "Diverse", 34, min_distinct_world_colors=3),
+    SoloWinCondition("novelty", "Novelty", 34, min_novelty_worlds=2),
+    SoloWinCondition("rare", "Rare Elements", 34, min_rare_worlds=2),
+    SoloWinCondition("alien", "Alien Contact", 34, min_alien_worlds=1),
+    SoloWinCondition("military", "Military", 34, min_red_capacity=4),
+    SoloWinCondition("discovery", "Discovery", 34, min_blue_capacity=4),
 )
 
 
@@ -79,7 +79,7 @@ class SoloRoundReport:
     human_source: SourceChoice
     dummy_phases: tuple[Phase, ...]
     selected: tuple[Phase, ...]
-    used_workers: int
+    phase_actions: int
     human_score: int
     dummy_claimed_tiles: int
     dummy_goods: int
@@ -138,11 +138,11 @@ class MancalaSoloGame:
             if phase in ({human_phase} if human_phase else set()) or phase in dummy_phases
         )
 
-        before = self.player.used_workers
+        before = self.player.phase_actions
         before_completed = self.player.completed_tiles
         for phase in selected:
             self.game.resolve_phase(self.player, phase)
-        used = self.player.used_workers - before
+        used = self.player.phase_actions - before
         if used == 0 and self.player.completed_tiles == before_completed:
             self.player.dead_rounds += 1
 
@@ -291,11 +291,6 @@ class MancalaSoloGame:
         for spent_color, count in self.player.spent.items():
             if color is None or spent_color is color:
                 total += count
-        for good in self.player.goods:
-            if color is None or good.color is color:
-                total += 1
-        for build in self.player.dev_stack + self.player.world_stack:
-            total += sum(1 for die in build.workers if color is None or die is color)
         return total
 
     def tableau_summary(self):

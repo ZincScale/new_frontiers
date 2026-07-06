@@ -93,7 +93,7 @@ def main():
                 "credits",
                 "goods",
                 "dead_rounds",
-                "used_workers",
+                "phase_actions",
                 "completed_tiles",
                 "credits_earned",
                 "credits_spent",
@@ -128,7 +128,7 @@ def main():
             f"  {strategy}: score {totals[strategy] / denom:.1f}, "
             f"tableau {metrics[strategy]['tableau'] / denom:.1f}, "
             f"completed {metrics[strategy]['completed_tiles'] / denom:.1f}, "
-            f"used workers {metrics[strategy]['used_workers'] / denom:.1f}, "
+            f"phase actions {metrics[strategy]['phase_actions'] / denom:.1f}, "
             f"credits earned/spent {metrics[strategy]['credits_earned'] / denom:.1f}/"
             f"{metrics[strategy]['credits_spent'] / denom:.1f}, "
             f"recovery sows {metrics[strategy]['recovery_sows'] / denom:.1f}, "
@@ -145,7 +145,7 @@ def main():
         phases = [phase.value for phase in report.selected]
         selections = {name: phase.value if phase else None for name, phase in report.selections.items()}
         dummy = [phase.value for phase in report.dummy_phases]
-        print(f"  R{report.round_number}: phases {phases}, dummy {dummy}, selected {selections}, used {report.used_workers}, scores {report.scores}")
+        print(f"  R{report.round_number}: phases {phases}, dummy {dummy}, selected {selections}, actions {report.phase_actions}, scores {report.scores}")
 
 
 if __name__ == "__main__":
