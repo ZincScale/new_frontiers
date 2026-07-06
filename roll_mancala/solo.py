@@ -40,14 +40,14 @@ SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
     SoloWinCondition("builder", "Builder", 34, min_completed_tiles=7),
     SoloWinCondition("developer", "Developer", 34, min_developments=4),
     SoloWinCondition("colonizer", "Colonizer", 34, min_worlds=6),
-    SoloWinCondition("merchant", "Merchant Fleet", 34, min_vp_chips=8),
-    SoloWinCondition("industrial", "Stone Economy", 34, min_max_capacity=17),
-    SoloWinCondition("production", "Production Network", 34, min_production_worlds=4),
-    SoloWinCondition("diverse", "Diverse Tableau", 34, min_distinct_world_colors=3),
-    SoloWinCondition("planner", "Mancala Planner", 34, min_color_match_bonuses=3),
-    SoloWinCondition("financier", "Credit Engine", 34, min_credits_spent=18),
-    SoloWinCondition("recycler", "Recovery Loop", 34, min_recovery_sows=2),
-    SoloWinCondition("momentum", "Momentum", 34, min_phase_actions=65),
+    SoloWinCondition("shipper", "Shipper", 34, min_vp_chips=8),
+    SoloWinCondition("workforce", "Expanded Workforce", 34, min_max_capacity=17),
+    SoloWinCondition("producer", "Producer", 34, min_production_worlds=4),
+    SoloWinCondition("diverse", "Diversified Economy", 34, min_distinct_world_colors=3),
+    SoloWinCondition("phase_specialist", "Phase Specialist", 34, min_color_match_bonuses=3),
+    SoloWinCondition("credit_economy", "Credit Economy", 34, min_credits_spent=18),
+    SoloWinCondition("logistics", "Logistics", 34, min_recovery_sows=2),
+    SoloWinCondition("phase_momentum", "Phase Momentum", 34, min_phase_actions=65),
 )
 
 
@@ -68,11 +68,11 @@ class SoloCampaign:
 
 
 SOLO_CAMPAIGNS: tuple[SoloCampaign, ...] = (
-    SoloCampaign("first_loop", "First Loop", ("great", "builder", "colonizer", "planner")),
-    SoloCampaign("credit_engine", "Credit Engine", ("triumphant", "developer", "financier", "recycler")),
-    SoloCampaign("goods_route", "Goods Route", ("triumphant", "production", "merchant", "diverse")),
-    SoloCampaign("stone_control", "Stone Control", ("epic", "industrial", "momentum", "planner")),
-    SoloCampaign("mastery", "Mastery", ("epic", "financier", "recycler", "momentum")),
+    SoloCampaign("expansion", "Expansion", ("great", "builder", "colonizer", "phase_specialist")),
+    SoloCampaign("development", "Development", ("triumphant", "developer", "credit_economy", "logistics")),
+    SoloCampaign("trade", "Galactic Trade", ("triumphant", "producer", "shipper", "diverse")),
+    SoloCampaign("management", "Imperial Management", ("epic", "workforce", "phase_momentum", "phase_specialist")),
+    SoloCampaign("mastery", "Galactic Mastery", ("epic", "credit_economy", "logistics", "phase_momentum")),
 )
 
 

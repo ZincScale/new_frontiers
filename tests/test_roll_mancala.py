@@ -341,11 +341,11 @@ def test_mancala_solo_thresholds_are_tuned_for_mancala_pace():
     assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 42
     assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 46
     assert SOLO_WIN_CONDITION_MAP["builder"].min_score == 34
-    assert SOLO_WIN_CONDITION_MAP["industrial"].min_max_capacity == 17
-    assert SOLO_WIN_CONDITION_MAP["planner"].min_color_match_bonuses == 3
-    assert SOLO_WIN_CONDITION_MAP["financier"].min_credits_spent == 18
-    assert SOLO_WIN_CONDITION_MAP["recycler"].min_recovery_sows == 2
-    assert SOLO_WIN_CONDITION_MAP["momentum"].min_phase_actions == 65
+    assert SOLO_WIN_CONDITION_MAP["workforce"].min_max_capacity == 17
+    assert SOLO_WIN_CONDITION_MAP["phase_specialist"].min_color_match_bonuses == 3
+    assert SOLO_WIN_CONDITION_MAP["credit_economy"].min_credits_spent == 18
+    assert SOLO_WIN_CONDITION_MAP["logistics"].min_recovery_sows == 2
+    assert SOLO_WIN_CONDITION_MAP["phase_momentum"].min_phase_actions == 65
 
 
 def test_mancala_solo_condition_success_uses_stone_economy_metrics():
@@ -366,7 +366,7 @@ def test_mancala_solo_condition_success_uses_stone_economy_metrics():
         "phase_actions": 65,
     }
 
-    for name in ("planner", "financier", "recycler", "momentum"):
+    for name in ("phase_specialist", "credit_economy", "logistics", "phase_momentum"):
         assert game.condition_success_without_summary(SOLO_WIN_CONDITION_MAP[name], summary)
 
 
@@ -381,8 +381,8 @@ def test_mancala_solo_campaigns_have_four_unique_conditions():
 def test_mancala_solo_campaigns_focus_on_current_mancala_design():
     campaigns = {campaign.key: campaign.condition_names for campaign in SOLO_CAMPAIGNS}
 
-    assert campaigns["first_loop"] == ("great", "builder", "colonizer", "planner")
-    assert campaigns["credit_engine"] == ("triumphant", "developer", "financier", "recycler")
-    assert campaigns["goods_route"] == ("triumphant", "production", "merchant", "diverse")
-    assert campaigns["stone_control"] == ("epic", "industrial", "momentum", "planner")
-    assert campaigns["mastery"] == ("epic", "financier", "recycler", "momentum")
+    assert campaigns["expansion"] == ("great", "builder", "colonizer", "phase_specialist")
+    assert campaigns["development"] == ("triumphant", "developer", "credit_economy", "logistics")
+    assert campaigns["trade"] == ("triumphant", "producer", "shipper", "diverse")
+    assert campaigns["management"] == ("epic", "workforce", "phase_momentum", "phase_specialist")
+    assert campaigns["mastery"] == ("epic", "credit_economy", "logistics", "phase_momentum")

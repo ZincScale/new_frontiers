@@ -300,14 +300,14 @@ Named scenarios require at least 34 VP plus the listed mark:
 Builder             7+ completed tiles
 Developer           4+ Developments
 Colonizer           6+ Worlds
-Merchant Fleet      8+ VP chips
-Stone Economy       17+ owned dice
-Production Network  4+ production Worlds
-Diverse Tableau     3+ distinct World colors
-Mancala Planner     3+ color match bonuses
-Credit Engine       18+ Credits spent
-Recovery Loop       2+ recovery sows
-Momentum            65+ phase actions
+Shipper             8+ VP chips
+Expanded Workforce  17+ owned dice
+Producer            4+ production Worlds
+Diversified Economy 3+ distinct World colors
+Phase Specialist    3+ color match bonuses
+Credit Economy      18+ Credits spent
+Logistics           2+ recovery sows
+Phase Momentum      65+ phase actions
 ```
 
 Owned dice means physical dice in your mancala sections plus Spent. Good markers
@@ -320,27 +320,27 @@ A campaign is four consecutive games. Each game must mark one campaign scenario
 not already marked. Win the campaign by marking all four scenarios.
 
 ```text
-First Loop
-  Great, Builder, Colonizer, Mancala Planner
+Expansion
+  Great, Builder, Colonizer, Phase Specialist
 
-Credit Engine
-  Triumphant, Developer, Credit Engine, Recovery Loop
+Development
+  Triumphant, Developer, Credit Economy, Logistics
 
-Goods Route
-  Triumphant, Production Network, Merchant Fleet, Diverse Tableau
+Galactic Trade
+  Triumphant, Producer, Shipper, Diversified Economy
 
-Stone Control
-  Epic, Stone Economy, Momentum, Mancala Planner
+Imperial Management
+  Epic, Expanded Workforce, Phase Momentum, Phase Specialist
 
-Mastery
-  Epic, Credit Engine, Recovery Loop, Momentum
+Galactic Mastery
+  Epic, Credit Economy, Logistics, Phase Momentum
 ```
 
 Current balanced-strategy tuning target:
 
 ```text
-First Loop / Goods Route: approachable campaign wins
-Credit Engine / Stone Control / Mastery: harder economy-control campaigns
+Expansion / Galactic Trade: approachable campaign wins
+Development / Imperial Management / Galactic Mastery: harder economy campaigns
 ```
 
 ## Current Test Coverage
