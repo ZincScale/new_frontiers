@@ -7,10 +7,6 @@ from statistics import mean
 from typing import Optional
 
 from roll_galaxy.solo import (
-    SOLO_CAMPAIGN_MAP,
-    SOLO_CAMPAIGNS,
-    SOLO_WIN_CONDITION_MAP,
-    SOLO_WIN_CONDITIONS,
     SoloWinCondition,
 )
 
@@ -20,6 +16,53 @@ from .model import PHASE_ORDER, SECTION_ORDER, DieColor, Phase, SourceChoice, Ti
 
 SOLO_ROUNDS = 16
 SOLO_VP_POOL = 30
+
+
+SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
+    SoloWinCondition("great", "Great", 32),
+    SoloWinCondition("triumphant", "Triumphant", 34),
+    SoloWinCondition("epic", "Epic", 35),
+    SoloWinCondition("builder", "Builder", 28, min_completed_tiles=7),
+    SoloWinCondition("developer", "Developer", 28, min_developments=4),
+    SoloWinCondition("colonizer", "Colonizer", 28, min_worlds=6),
+    SoloWinCondition("satisfied_populace", "Satisfied Populace", 28, min_vp_chips=8),
+    SoloWinCondition("industrial", "Industrial", 28, min_max_capacity=17),
+    SoloWinCondition("production", "Production", 28, min_production_worlds=4),
+    SoloWinCondition("diverse", "Diverse", 28, min_distinct_world_colors=3),
+    SoloWinCondition("novelty", "Novelty", 28, min_novelty_worlds=2),
+    SoloWinCondition("rare", "Rare Elements", 28, min_rare_worlds=2),
+    SoloWinCondition("alien", "Alien Contact", 28, min_alien_worlds=1),
+    SoloWinCondition("military", "Military", 28, min_red_capacity=4),
+    SoloWinCondition("discovery", "Discovery", 28, min_blue_capacity=4),
+)
+
+
+SOLO_WIN_CONDITION_MAP: dict[str, SoloWinCondition] = {
+    condition.name: condition for condition in SOLO_WIN_CONDITIONS
+}
+
+
+@dataclass(frozen=True)
+class SoloCampaign:
+    key: str
+    label: str
+    condition_names: tuple[str, ...]
+
+    @property
+    def conditions(self) -> tuple[SoloWinCondition, ...]:
+        return tuple(SOLO_WIN_CONDITION_MAP[name] for name in self.condition_names)
+
+
+SOLO_CAMPAIGNS: tuple[SoloCampaign, ...] = (
+    SoloCampaign("outreach", "Outreach", ("great", "colonizer", "builder", "industrial")),
+    SoloCampaign("industry", "Industrial Base", ("triumphant", "developer", "industrial", "production")),
+    SoloCampaign("survey", "Sector Survey", ("triumphant", "diverse", "novelty", "rare")),
+    SoloCampaign("contact", "Alien Contact", ("epic", "alien", "military", "discovery")),
+    SoloCampaign("mastery", "Mastery", ("epic", "novelty", "rare", "military")),
+)
+
+
+SOLO_CAMPAIGN_MAP: dict[str, SoloCampaign] = {campaign.key: campaign for campaign in SOLO_CAMPAIGNS}
 
 
 @dataclass
@@ -80,6 +123,7 @@ class MancalaSoloGame:
 
     def play_round(self) -> SoloRoundReport:
         self.game.round_number += 1
+        self.player.match_bonuses.clear()
         source = self.game.choose_source(self.player)
         sow = self.game.sow_choice(self.player, source)
         human_phase = sow.selected_phase

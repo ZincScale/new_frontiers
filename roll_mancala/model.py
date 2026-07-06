@@ -81,6 +81,7 @@ class SowResult:
     placed: tuple[tuple[Section, DieColor], ...]
     overflow: tuple[DieColor, ...]
     bonus_credit: bool = False
+    match_bonus_phase: Optional[Phase] = None
 
 
 @dataclass
@@ -93,6 +94,7 @@ class Player:
     world_stack: list[Construction] = field(default_factory=list)
     tableau: list[Tile] = field(default_factory=list)
     goods: list[Good] = field(default_factory=list)
+    bonus_goods: list[Tile] = field(default_factory=list)
     credits: int = 1
     vp_chips: int = 0
     selected_phases: list[Phase] = field(default_factory=list)
@@ -104,6 +106,7 @@ class Player:
     credits_spent: int = 0
     recovery_sows: int = 0
     color_match_bonuses: int = 0
+    match_bonuses: dict[Phase, int] = field(default_factory=dict)
 
 
 __all__ = [

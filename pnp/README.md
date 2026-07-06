@@ -56,6 +56,6 @@ sections. Keep Spent dice off board. Die faces do not matter.
 ## Roll Solo Tuning
 
 The Roll Mancala solo mode uses a 16-round clock with two Dummy phase cards per
-round. Score-only win conditions are Great, Triumphant, and Epic. Campaign
-sheets combine those with named win conditions such as Builder, Colonizer,
-Satisfied Populace, and Industrial.
+round. Score-only win conditions are Great at 32+ VP, Triumphant at 34+ VP, and
+Epic at 35+ VP. Campaign sheets combine those with named win conditions such as
+Builder, Colonizer, Satisfied Populace, and Industrial.

@@ -89,7 +89,8 @@ Set up the base game normally, with these changes:
 
 1. Do not give players Dice Cups.
 2. Do not use the Roll Dice or Assign Dice rules.
-3. Give each player a Mancala Phase board with five sections and a Spent area.
+3. Give each player a Mancala Phase board with five sections. Keep Spent dice
+   off board as a separate storage area.
 4. Use 8 VP chips per player for the shared VP pool.
 5. Set starting dice:
 
@@ -623,7 +624,8 @@ are available next round.
 
 ## Solo Mode
 
-Solo mode uses the same five-section mancala board and a fixed Dummy phase deck.
+Solo mode uses the same five-section mancala board, off-board Spent storage, and
+a fixed Dummy phase deck.
 
 Setup:
 
@@ -657,6 +659,83 @@ Ship      Drain 2 VP chips per Dummy Good, minimum 2, then Dummy Goods = 0.
 Solo ends when the round limit is reached, the VP pool is exhausted, or the
 player reaches 12 tableau squares. Capacity-based solo goals count owned
 physical dice across sections, Spent, Goods, and construction progress.
+
+Solo win conditions:
+
+```text
+Great              Score 32+ VP.
+Triumphant         Score 34+ VP.
+Epic               Score 35+ VP.
+Builder            Score 28+ VP and complete 7+ tiles.
+Developer          Score 28+ VP and have 4+ Developments.
+Colonizer          Score 28+ VP and have 6+ Worlds.
+Satisfied Populace Score 28+ VP and score 8+ VP chips.
+Industrial         Score 28+ VP and own 17+ physical dice.
+Production         Score 28+ VP and have 4+ production Worlds.
+Diverse            Score 28+ VP and have 3+ different World colors.
+Novelty            Score 28+ VP and have 2+ Novelty Worlds.
+Rare Elements      Score 28+ VP and have 2+ Rare Worlds.
+Alien Contact      Score 28+ VP and have 1+ Alien World.
+Military           Score 28+ VP and own 4+ red dice.
+Discovery          Score 28+ VP and own 4+ blue dice.
+```
+
+Campaign mode:
+
+Choose one campaign sheet. Play four games in a row. At the end of each game,
+mark exactly one satisfied condition on that campaign sheet that you have not
+already marked. If you cannot mark a new condition, you lose the campaign. If
+you mark all four conditions after four successive games, you win the campaign.
+
+Campaign sheets:
+
+```text
+Outreach
+Great, Colonizer, Builder, Industrial.
+
+Industrial Base
+Triumphant, Developer, Industrial, Production.
+
+Sector Survey
+Triumphant, Diverse, Novelty, Rare Elements.
+
+Alien Contact
+Epic, Alien Contact, Military, Discovery.
+
+Mastery
+Epic, Novelty, Rare Elements, Military.
+```
+
+For one-off solo practice, ignore the campaign sheet and record every solo win
+condition you satisfied.
+
+Prototype validation:
+
+```text
+Automated tests cover:
+- multiplayer setup, sowing, shared selected phases, partial builds, goods,
+  losses, recovery sows, and shipping;
+- solo Dummy phase selection and physical-dice capacity summaries.
+- final-die match bonuses for phase selection, Develop cost reduction, Produce
+  bonus Goods, and Ship bonus VP.
+
+Smoke simulations run:
+- 100 four-player multiplayer games with balanced, builder, producer, and
+  shipper strategies;
+- 100 one-off solo games with the balanced strategy;
+- 100 campaign attempts each for Outreach, Industrial Base, Sector Survey,
+  Alien Contact, and Mastery after the match-bonus implementation.
+
+Current status:
+- The rules execute without runtime failures in both multiplayer and solo.
+- Multiplayer produces normal endgame scoring and tableau completion.
+- One-off balanced solo averaged about 30.5 VP over 300 games. Score-only
+  condition rates were about Great 41%, Triumphant 32%, and Epic 26%.
+- Four-game campaign sweeps over 100 attempts each landed at about Outreach
+  16%, Industrial Base 16%, Sector Survey 8%, Alien Contact 8%, and Mastery 6%.
+  Treat these as simulator-tuned table-test targets, not final published
+  balance.
+```
 
 ## Open Questions
 

@@ -144,6 +144,7 @@ class MancalaGame:
         self.round_number += 1
         selections: dict[str, Optional[Phase]] = {}
         for player in self.players:
+            player.match_bonuses.clear()
             choice = self.choose_source(player)
             result = self.sow_choice(player, choice)
             player.selected_sections.append(result.final_section)
@@ -227,6 +228,8 @@ class MancalaGame:
         value = self.phase_value(player, phase)
         if result.bonus_credit:
             value += 2
+        if result.match_bonus_phase is not None:
+            value += 3
         if choice.kind == "spent":
             value += 1
         return value
@@ -256,8 +259,8 @@ class MancalaGame:
         spent = dict(player.spent)
         return self._sow(choice, sections, spent, mutate_player=None)
 
-    def sow_choice(self, player: Player, choice: SourceChoice) -> SowResult:
-        return self._sow(choice, player.sections, player.spent, mutate_player=player)
+    def sow_choice(self, player: Player, choice: SourceChoice, award_match_bonus: bool = True) -> SowResult:
+        return self._sow(choice, player.sections, player.spent, mutate_player=player, award_match_bonus=award_match_bonus)
 
     def _sow(
         self,
@@ -265,6 +268,7 @@ class MancalaGame:
         sections: dict[Section, list[DieColor]],
         spent: dict[DieColor, int],
         mutate_player: Optional[Player],
+        award_match_bonus: bool = True,
     ) -> SowResult:
         if choice.kind == "none":
             return SowResult(None, None, (), ())
@@ -296,6 +300,7 @@ class MancalaGame:
         placed: list[tuple[Section, DieColor]] = []
         overflow: list[DieColor] = []
         final_section: Optional[Section] = None
+        final_die: Optional[DieColor] = None
         bonus_credit = False
         bonus_awarded = False
         index = start_index
@@ -308,6 +313,7 @@ class MancalaGame:
             sections[landing].append(die)
             placed.append((landing, die))
             final_section = landing
+            final_die = die
             if (
                 self.config.conservative_bonus
                 and not bonus_awarded
@@ -318,13 +324,24 @@ class MancalaGame:
             index = self.section_index(landing) + 1
 
         selected_phase = self.selected_phase_for_section(final_section, choice.fallback_phase, mutate_player)
+        match_bonus_phase = None
+        if (
+            not self.config.conservative_bonus
+            and final_section is not None
+            and final_die is not None
+            and COLOR_SECTION[final_die] is final_section
+        ):
+            match_bonus_phase = SECTION_PHASE[final_section]
         if mutate_player is not None and bonus_credit:
             before = mutate_player.credits
             mutate_player.credits = min(self.config.credit_cap, mutate_player.credits + 1)
             gained = mutate_player.credits - before
             mutate_player.credits_earned += gained
             mutate_player.color_match_bonuses += gained
-        return SowResult(final_section, selected_phase, tuple(placed), tuple(overflow), bonus_credit)
+        if mutate_player is not None and award_match_bonus and match_bonus_phase is not None:
+            mutate_player.match_bonuses[match_bonus_phase] = mutate_player.match_bonuses.get(match_bonus_phase, 0) + 1
+            mutate_player.color_match_bonuses += 1
+        return SowResult(final_section, selected_phase, tuple(placed), tuple(overflow), bonus_credit, match_bonus_phase)
 
     def selected_phase_for_section(
         self,
@@ -358,6 +375,7 @@ class MancalaGame:
         return SECTION_ORDER.index(section)
 
     def resolve_phase(self, player: Player, phase: Phase):
+        self.apply_phase_match_bonus(player, phase)
         if phase is Phase.DEVELOP:
             self.resolve_build_phase(player, player.dev_stack, phase)
             return
@@ -377,13 +395,14 @@ class MancalaGame:
         if not stack:
             return
         build = stack[0]
-        while build.progress < build.tile.cost:
+        effective_cost = self.effective_build_cost(player, phase, build.tile)
+        while build.progress < effective_cost:
             worker = self.take_worker(player, phase, alien_only=self.is_alien_tile(build.tile))
             if worker is None:
                 break
             build.workers.append(worker)
             player.used_workers += 1
-        if build.progress < build.tile.cost:
+        if build.progress < effective_cost:
             return
         for worker in build.workers:
             self.add_spent(player, worker)
@@ -400,6 +419,33 @@ class MancalaGame:
         if phase is Phase.SHIP:
             return bool(player.goods)
         return False
+
+    def apply_phase_match_bonus(self, player: Player, phase: Phase):
+        if phase in (Phase.DEVELOP, Phase.SETTLE, Phase.SHIP):
+            return
+        count = player.match_bonuses.pop(phase, 0)
+        if count <= 0:
+            return
+        if phase is Phase.EXPLORE:
+            for _ in range(count):
+                if not player.dev_stack:
+                    self.scout_tile(player, TileKind.DEVELOPMENT)
+                elif not player.world_stack:
+                    self.scout_tile(player, TileKind.WORLD)
+                else:
+                    self.gain_credits(player, 1)
+            return
+        if phase is Phase.PRODUCE:
+            for _ in range(count):
+                candidates = self.producible_worlds(player)
+                if not candidates:
+                    return
+                player.bonus_goods.append(max(candidates, key=lambda tile: tile.vp))
+
+    def effective_build_cost(self, player: Player, phase: Phase, tile: Tile) -> int:
+        if phase not in (Phase.DEVELOP, Phase.SETTLE):
+            return tile.cost
+        return max(0, tile.cost - player.match_bonuses.pop(phase, 0))
 
     def available_workers(self, player: Player, phase: Phase, alien_only: bool = False) -> int:
         return len(player.sections[PHASE_SECTION[phase]])
@@ -453,19 +499,29 @@ class MancalaGame:
         return True
 
     def ship(self, player: Player, worker: DieColor) -> bool:
-        if not player.goods:
+        if not player.goods and not player.bonus_goods:
             return False
         candidates = player.goods
         if worker is DieColor.YELLOW:
             alien_goods = [good for good in candidates if self.is_alien_tile(good.world)]
             candidates = alien_goods or candidates
-        good = max(candidates, key=lambda item: item.world.vp)
-        player.goods.remove(good)
-        self.add_spent(player, good.color)
-        if player.credits <= 2:
-            self.gain_credits(player, 3 + good.world.vp // 2)
+        bonus = player.match_bonuses.pop(Phase.SHIP, 0)
+        if candidates:
+            good = max(candidates, key=lambda item: item.world.vp)
+            player.goods.remove(good)
+            self.add_spent(player, good.color)
+            good_color = good.color
+            world = good.world
         else:
-            vp = 1 + int(good.color is self.world_color(good.world) or good.color is DieColor.WHITE)
+            world = max(player.bonus_goods, key=lambda tile: tile.vp)
+            player.bonus_goods.remove(world)
+            good_color = None
+        if player.credits <= 2:
+            self.gain_credits(player, 3 + world.vp // 2)
+        else:
+            vp = 1 + int(good_color is self.world_color(world) or good_color is DieColor.WHITE)
+            if bonus:
+                vp += 1
             claimed = min(vp, self.vp_pool)
             player.vp_chips += claimed
             self.vp_pool -= claimed
@@ -553,7 +609,7 @@ class MancalaGame:
             player.credits -= self.config.recovery_sow_cost
             player.credits_spent += self.config.recovery_sow_cost
             player.recovery_sows += 1
-            self.sow_choice(player, choice)
+            self.sow_choice(player, choice, award_match_bonus=False)
 
     def best_recovery_choice(self, player: Player) -> Optional[SourceChoice]:
         choices = []
@@ -618,7 +674,7 @@ class MancalaGame:
         return len(self.producible_worlds(player))
 
     def producible_worlds(self, player: Player) -> list[Tile]:
-        occupied = {good.world.id for good in player.goods}
+        occupied = {good.world.id for good in player.goods} | {tile.id for tile in player.bonus_goods}
         return [tile for tile in player.tableau if tile.produces and tile.id not in occupied]
 
     def score(self, player: Player) -> int:
@@ -643,7 +699,7 @@ class MancalaGame:
                         "rounds": self.round_number,
                         "tableau": len(player.tableau),
                         "credits": player.credits,
-                        "goods": len(player.goods),
+                        "goods": len(player.goods) + len(player.bonus_goods),
                         "dead_rounds": player.dead_rounds,
                         "used_workers": player.used_workers,
                         "completed_tiles": player.completed_tiles,

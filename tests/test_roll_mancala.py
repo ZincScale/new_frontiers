@@ -1,7 +1,12 @@
 from roll_galaxy.model import DieColor, Good, Phase, Tile, TileKind
 from roll_mancala.engine import MancalaConfig, MancalaGame
 from roll_mancala.model import Construction, SECTION_ORDER, Section, SourceChoice
-from roll_mancala.solo import MancalaSoloGame, SOLO_ROUNDS
+from roll_mancala.solo import (
+    MancalaSoloGame,
+    SOLO_CAMPAIGNS,
+    SOLO_ROUNDS,
+    SOLO_WIN_CONDITION_MAP,
+)
 
 
 def clear_player(player):
@@ -12,8 +17,10 @@ def clear_player(player):
     player.dev_stack = []
     player.world_stack = []
     player.goods = []
+    player.bonus_goods = []
     player.tableau = []
     player.credits = 0
+    player.match_bonuses.clear()
 
 
 def test_setup_uses_only_five_mancala_phase_sections_and_spent_area():
@@ -91,6 +98,20 @@ def test_first_color_match_per_sow_gains_one_credit():
 
     assert result.bonus_credit
     assert player.credits == 1
+    assert player.color_match_bonuses == 1
+
+
+def test_final_color_match_records_phase_bonus_by_default():
+    game = MancalaGame(seed=4)
+    player = game.players[0]
+    clear_player(player)
+    player.spent[DieColor.RED] = 1
+
+    result = game.sow_choice(player, SourceChoice("spent", color=DieColor.RED, count=1))
+
+    assert result.match_bonus_phase is Phase.SETTLE
+    assert player.match_bonuses[Phase.SETTLE] == 1
+    assert player.credits == 0
     assert player.color_match_bonuses == 1
 
 
@@ -175,6 +196,22 @@ def test_develop_completes_with_enough_workers_and_returns_workers_to_spent():
     assert player.spent[DieColor.WHITE] == 1
 
 
+def test_develop_match_bonus_reduces_completion_cost():
+    game = MancalaGame(seed=8)
+    player = game.players[0]
+    clear_player(player)
+    tile = Tile("d", "Discounted Development", TileKind.DEVELOPMENT, 3, 3)
+    player.dev_stack = [Construction(tile, workers=[DieColor.BROWN, DieColor.BLUE])]
+    player.match_bonuses[Phase.DEVELOP] = 1
+
+    game.resolve_phase(player, Phase.DEVELOP)
+
+    assert player.dev_stack == []
+    assert tile in player.tableau
+    assert player.spent[DieColor.BROWN] == 1
+    assert player.spent[DieColor.BLUE] == 1
+
+
 def test_gain_die_goes_to_matching_section_or_spent_when_full():
     game = MancalaGame(seed=9, config=MancalaConfig(section_cap=1))
     player = game.players[0]
@@ -231,6 +268,20 @@ def test_produce_places_worker_die_as_good_outside_mancala_loop():
     assert player.spent[DieColor.GREEN] == 0
 
 
+def test_produce_match_bonus_makes_temporary_good_without_capacity():
+    game = MancalaGame(seed=11)
+    player = game.players[0]
+    clear_player(player)
+    world = Tile("w", "Novelty World", TileKind.WORLD, 1, 1, world_color="Novelty", produces=True)
+    player.tableau = [world]
+    player.match_bonuses[Phase.PRODUCE] = 1
+
+    game.resolve_phase(player, Phase.PRODUCE)
+
+    assert player.goods == []
+    assert player.bonus_goods == [world]
+
+
 def test_ship_moves_worker_and_shipped_good_to_spent():
     game = MancalaGame(seed=12)
     player = game.players[0]
@@ -246,6 +297,21 @@ def test_ship_moves_worker_and_shipped_good_to_spent():
     assert player.spent[DieColor.BLUE] == 1
     assert player.spent[DieColor.PURPLE] == 1
     assert player.vp_chips == 2
+
+
+def test_ship_match_bonus_adds_vp_to_first_consume():
+    game = MancalaGame(seed=12)
+    player = game.players[0]
+    clear_player(player)
+    player.credits = 3
+    world = Tile("w", "Novelty World", TileKind.WORLD, 1, 1, world_color="Novelty", produces=True)
+    player.goods = [Good(world, DieColor.BLUE)]
+    player.sections[Section.SHIP] = [DieColor.PURPLE]
+    player.match_bonuses[Phase.SHIP] = 1
+
+    game.resolve_phase(player, Phase.SHIP)
+
+    assert player.vp_chips == 3
 
 
 def test_mancala_solo_dummy_phase_selects_shared_phase():
@@ -270,3 +336,20 @@ def test_mancala_solo_summary_counts_physical_dice_capacity():
     assert summary["blue_capacity"] == game.owned_die_count(DieColor.BLUE)
     assert summary["red_capacity"] == game.owned_die_count(DieColor.RED)
     assert game.game.config.max_rounds == SOLO_ROUNDS
+
+
+def test_mancala_solo_thresholds_are_tuned_for_mancala_pace():
+    assert SOLO_WIN_CONDITION_MAP["great"].min_score == 32
+    assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 34
+    assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 35
+    assert SOLO_WIN_CONDITION_MAP["industrial"].min_max_capacity == 17
+    assert SOLO_WIN_CONDITION_MAP["military"].min_red_capacity == 4
+    assert SOLO_WIN_CONDITION_MAP["discovery"].min_blue_capacity == 4
+
+
+def test_mancala_solo_campaigns_have_four_unique_conditions():
+    canonical = set(SOLO_WIN_CONDITION_MAP)
+    for campaign in SOLO_CAMPAIGNS:
+        assert len(campaign.condition_names) == 4
+        assert len(campaign.condition_names) == len(set(campaign.condition_names))
+        assert set(campaign.condition_names) <= canonical
