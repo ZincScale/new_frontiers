@@ -14,13 +14,12 @@ Open the desired HTML file in a browser and print at 100% scale.
 ### Roll Mancala Dice Variant
 
 - 4 Mancala Phase player boards
-- 9 multiplayer quick-reference cards
-- 9 tile-verbiage guide cards
-- 9 solo procedure / Dummy phase cards
-- five-section boards with a Spent area
+- 1 multiplayer quick-reference aid sheet
+- 1 combined solo procedure / tile-verbiage aid sheet
+- 5 solo Dummy phase cards
+- five-section boards with off-board Spent storage
 
-The card layout uses poker-size-ish cards sized to fit 9 per letter page.
-Sleeve with spare cards for playtesting.
+The player boards, aid sheets, and Dummy phase cards are formatted for letter paper.
 
 ### Roll Phase Battery Variant
 
@@ -51,8 +50,8 @@ as balance changes.
 - Turn off "fit to page" if your print dialog shrinks the layout.
 - Cut along the card borders or crop marks.
 
-For the Roll mancala boards, place the physical dice in the five phase sections
-and Spent area. Die faces do not matter.
+For the Roll mancala boards, place active physical dice in the five phase
+sections. Keep Spent dice off board. Die faces do not matter.
 
 ## Roll Solo Tuning
 

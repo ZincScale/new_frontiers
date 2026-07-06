@@ -343,14 +343,10 @@ def test_solo_campaign_filters_to_campaign_conditions():
     assert summary["campaign"] == "outreach"
     assert summary["campaign_name"] == "Outreach"
     assert {condition.name for condition in game.active_conditions()} == {
-        "colonial_power",
-        "production_web",
-        "great_alien",
-        "great_production",
-        "great_colonizer",
-        "great_builder",
-        "great_industrial",
-        "great_diverse",
+        "great",
+        "colonizer",
+        "builder",
+        "industrial",
     }
     assert "epic_success" not in summary
 
@@ -361,10 +357,11 @@ def test_solo_score_only_thresholds_are_retuned_for_one_shot_builds():
     assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 46
 
 
-def test_solo_campaign_scenarios_do_not_repeat_within_sheet():
+def test_solo_campaign_conditions_do_not_repeat_within_sheet():
+    canonical = set(SOLO_WIN_CONDITION_MAP)
     for campaign in SOLO_CAMPAIGNS:
         names = campaign.condition_names
 
-        assert len(names) >= 8
+        assert len(names) == 4
         assert len(names) == len(set(names))
-        assert all(SOLO_WIN_CONDITION_MAP[name].min_score >= 40 for name in names)
+        assert set(names) <= canonical

@@ -236,6 +236,107 @@ body {
   font-weight: 900;
 }
 
+.aid-sheet {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border: 1.5px solid var(--line);
+  border-radius: 0.08in;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.aid-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.16in 0.2in 0.12in;
+  background: #263f47;
+  color: #fff;
+}
+
+.aid-title h1,
+.aid-title p,
+.aid-section h2,
+.aid-section p {
+  margin: 0;
+}
+
+.aid-title h1 {
+  font-size: 22pt;
+  letter-spacing: 0;
+}
+
+.aid-title p {
+  font-size: 10pt;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.aid-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.14in 0.18in;
+  align-content: start;
+  padding: 0.16in 0.18in 0.18in;
+}
+
+.aid-grid.compact {
+  gap: 0.08in 0.12in;
+}
+
+.aid-section {
+  break-inside: avoid;
+  padding: 0 0 0.08in;
+  border-bottom: 1px solid rgba(43, 48, 56, 0.28);
+}
+
+.aid-section.wide {
+  grid-column: span 2;
+}
+
+.aid-section h2 {
+  margin-bottom: 0.035in;
+  color: #263f47;
+  font-size: 12.4pt;
+  line-height: 1;
+}
+
+.aid-section ul,
+.aid-section ol {
+  margin: 0;
+  padding-left: 0.2in;
+  font-size: 9pt;
+}
+
+.aid-section li {
+  margin-bottom: 0.026in;
+}
+
+.aid-section p {
+  margin-top: 0.045in;
+  color: var(--muted);
+  font-size: 8.6pt;
+  font-weight: 800;
+}
+
+.aid-map {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.03in 0.08in;
+  margin: 0;
+  font-size: 8.8pt;
+}
+
+.aid-map dt {
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.aid-map dd {
+  margin: 0;
+  font-weight: 800;
+}
+
 .marker-sheet {
   display: grid;
   grid-template-rows: auto auto;
@@ -328,8 +429,7 @@ body {
 
 .mancala-board h1,
 .mancala-board p,
-.pit h2,
-.spent-pit h2 {
+.pit h2 {
   margin: 0;
 }
 
@@ -346,55 +446,91 @@ body {
 
 .mancala-loop {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: 1fr 1fr;
-  gap: 0.08in;
-  padding: 0.16in 0.18in;
+  position: relative;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(3, 1.12in);
+  align-content: center;
+  gap: 0.06in;
+  padding: 0.12in 0.16in;
 }
 
-.pit,
-.spent-pit {
+.mancala-loop::before {
+  content: "";
+  position: absolute;
+  inset: 0.26in 0.36in 0.21in;
+  border: 2px dashed rgba(43, 48, 56, 0.22);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.pit {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  min-height: 1.18in;
+  position: relative;
+  z-index: 1;
+  min-height: 1.12in;
   border: 1.5px solid var(--line);
-  border-radius: 0.06in;
   background: #fff;
-  padding: 0.08in;
+  padding: 0.085in 0.1in;
+  clip-path: polygon(10% 0, 90% 0, 100% 14%, 100% 86%, 90% 100%, 10% 100%, 0 86%, 0 14%);
 }
 
-.pit h2,
-.spent-pit h2 {
-  font-size: 12pt;
+.pit.blue {
+  grid-column: 1 / span 2;
+  grid-row: 2;
+}
+
+.pit.brown {
+  grid-column: 2 / span 2;
+  grid-row: 1;
+}
+
+.pit.red {
+  grid-column: 4 / span 2;
+  grid-row: 1;
+}
+
+.pit.purple {
+  grid-column: 3 / span 2;
+  grid-row: 3;
+}
+
+.pit.green {
+  grid-column: 5 / span 2;
+  grid-row: 2;
+}
+
+.pit h2 {
+  font-size: 12.4pt;
   line-height: 1;
 }
 
-.pit .identity,
-.spent-pit .identity {
-  font-size: 7.4pt;
+.pit .identity {
+  font-size: 7.8pt;
   font-weight: 900;
   text-transform: uppercase;
 }
 
-.pit .bowl,
-.spent-pit .bowl {
+.pit .bowl {
   display: grid;
-  min-height: 0.52in;
-  margin: 0.06in 0;
+  min-height: 0.5in;
+  margin: 0.04in 0;
   place-items: center;
   border: 1px dashed rgba(43, 48, 56, 0.45);
-  border-radius: 0.05in;
+  border-radius: 999px;
   color: var(--muted);
-  font-size: 8pt;
+  font-size: 7.8pt;
   font-weight: 900;
   text-align: center;
 }
 
-.pit .note,
-.spent-pit .note {
+.pit .note {
+  display: block;
   color: var(--muted);
-  font-size: 7.2pt;
+  font-size: 7.6pt;
   font-weight: 800;
+  line-height: 1.05;
+  text-align: center;
 }
 
 .pit.blue { border-color: var(--blue); }
@@ -413,11 +549,6 @@ body {
 .pit.green .identity { color: var(--green); }
 .pit.purple h2,
 .pit.purple .identity { color: var(--purple); }
-
-.spent-pit {
-  border-color: #5f6673;
-  background: #f2f4f5;
-}
 
 .mancala-board footer {
   display: grid;
