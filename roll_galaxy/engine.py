@@ -44,6 +44,60 @@ STRATEGY_BIAS: dict[str, dict[Phase, int]] = {
         Phase.PRODUCE: 3,
         Phase.SHIP: 5,
     },
+    "mining": {
+        Phase.EXPLORE: 4,
+        Phase.DEVELOP: 2,
+        Phase.SETTLE: 4,
+        Phase.PRODUCE: 3,
+        Phase.SHIP: 4,
+    },
+    "novelty": {
+        Phase.EXPLORE: 4,
+        Phase.DEVELOP: 2,
+        Phase.SETTLE: 4,
+        Phase.PRODUCE: 3,
+        Phase.SHIP: 4,
+    },
+    "genes": {
+        Phase.EXPLORE: 4,
+        Phase.DEVELOP: 2,
+        Phase.SETTLE: 4,
+        Phase.PRODUCE: 4,
+        Phase.SHIP: 3,
+    },
+    "alien": {
+        Phase.EXPLORE: 4,
+        Phase.DEVELOP: 3,
+        Phase.SETTLE: 4,
+        Phase.PRODUCE: 3,
+        Phase.SHIP: 3,
+    },
+    "military": {
+        Phase.EXPLORE: 3,
+        Phase.DEVELOP: 2,
+        Phase.SETTLE: 5,
+        Phase.PRODUCE: 2,
+        Phase.SHIP: 3,
+    },
+    "diverse": {
+        Phase.EXPLORE: 5,
+        Phase.DEVELOP: 2,
+        Phase.SETTLE: 4,
+        Phase.PRODUCE: 3,
+        Phase.SHIP: 3,
+    },
+}
+
+WORLD_FIRST_STRATEGIES = {
+    "settler",
+    "producer",
+    "shipper",
+    "mining",
+    "novelty",
+    "genes",
+    "alien",
+    "military",
+    "diverse",
 }
 
 
@@ -181,6 +235,9 @@ class BatteryGame:
         return sum(self.track(player, color).current for color in self.phase_colors(player, phase))
 
     def resolve_phase(self, player: Player, phase: Phase):
+        if phase is Phase.EXPLORE:
+            self.resolve_explore_phase(player)
+            return
         if phase is Phase.DEVELOP:
             self.resolve_build_phase(player, phase, player.dev_stack)
             return
@@ -216,6 +273,15 @@ class BatteryGame:
                 native.current -= 1
                 return color
         return None
+
+    def spend_phase_pips(self, player: Player, phase: Phase, count: int) -> int:
+        spent = 0
+        while spent < count:
+            spent_color = self.spend_phase_pip(player, phase)
+            if spent_color is None:
+                break
+            spent += 1
+        return spent
 
     def phase_colors(self, player: Player, phase: Phase) -> tuple[DieColor, ...]:
         if self.config.yellow_mode == "ship" and phase is Phase.SHIP:
@@ -274,16 +340,60 @@ class BatteryGame:
         return bool(stack and self.is_alien_tile(stack[0].tile))
 
     def explore(self, player: Player) -> bool:
-        if not player.dev_stack:
-            self.scout_tile(player, TileKind.DEVELOPMENT)
-            return True
-        if not player.world_stack:
-            self.scout_tile(player, TileKind.WORLD)
-            return True
         self.gain_credits(player, 2)
         return True
 
-    def scout_tile(self, player: Player, kind: TileKind):
+    def resolve_explore_phase(self, player: Player):
+        scout_kind = self.explore_scout_kind(player)
+        if scout_kind is not None:
+            search_depth = self.explore_search_depth(player)
+            spent_pips = self.spend_phase_pips(player, Phase.EXPLORE, search_depth)
+            if spent_pips:
+                self.scout_tile(player, scout_kind, search_depth=spent_pips)
+                player.used_pips += spent_pips
+
+        while self.explore_scout_kind(player) is None and self.available_capacity(player, Phase.EXPLORE) > 0:
+            spent_color = self.spend_phase_pip(player, Phase.EXPLORE)
+            if spent_color is None:
+                break
+            self.explore(player)
+            player.used_pips += 1
+
+    def explore_scout_kind(self, player: Player) -> Optional[TileKind]:
+        if not player.dev_stack and not player.world_stack:
+            if player.strategy in WORLD_FIRST_STRATEGIES:
+                return TileKind.WORLD
+            return TileKind.DEVELOPMENT
+        if not player.dev_stack:
+            return TileKind.DEVELOPMENT
+        if not player.world_stack:
+            return TileKind.WORLD
+        return None
+
+    def explore_search_depth(self, player: Player) -> int:
+        available = self.available_capacity(player, Phase.EXPLORE)
+        if available <= 0:
+            return 0
+        if not player.dev_stack and not player.world_stack:
+            return min(2, available)
+        return 1
+
+    def scout_tile(self, player: Player, kind: TileKind, search_depth: Optional[int] = None):
+        if search_depth is not None:
+            candidates = []
+            for index, tile in enumerate(self.tile_bag):
+                if tile.kind is kind:
+                    candidates.append((index, tile))
+                    if len(candidates) >= search_depth:
+                        break
+            if not candidates:
+                return None
+            index, tile = max(candidates, key=lambda item: self.scout_tile_value(player, item[1]))
+            player_stack = player.dev_stack if kind is TileKind.DEVELOPMENT else player.world_stack
+            player_stack.append(BuildSlot(tile))
+            del self.tile_bag[index]
+            return tile
+
         for index, tile in enumerate(self.tile_bag):
             if tile.kind is kind:
                 player_stack = player.dev_stack if kind is TileKind.DEVELOPMENT else player.world_stack
@@ -291,6 +401,74 @@ class BatteryGame:
                 del self.tile_bag[index]
                 return tile
         return None
+
+    def scout_tile_value(self, player: Player, tile: Tile):
+        return (
+            self.strategy_tile_value(player, tile),
+            tile.vp + len(tile.grants) + tile.immediate_credits,
+            -tile.cost,
+            STRATEGY_BIAS[player.strategy][Phase.DEVELOP if tile.kind is TileKind.DEVELOPMENT else Phase.SETTLE],
+        )
+
+    def strategy_tile_value(self, player: Player, tile: Tile) -> int:
+        strategy = player.strategy
+        value = 0
+        if strategy == "builder":
+            value += int(tile.kind is TileKind.DEVELOPMENT) * 8
+            value += int("end_game" in tile.tags) * 18
+            value += int(DieColor.BROWN in tile.grants) * 5
+        elif strategy == "settler":
+            value += int(tile.kind is TileKind.WORLD) * 8
+            value += len(tile.grants) * 3
+        elif strategy == "producer":
+            value += int(tile.produces) * 16
+            value += int(DieColor.GREEN in tile.grants) * 8
+            value += int(DieColor.PURPLE in tile.grants) * 5
+            value += int(tile.id in {"free_trade_association", "new_economy", "galactic_exchange"}) * 18
+            value += int("phase_v" in tile.tags) * 5
+        elif strategy == "shipper":
+            value += int(tile.produces) * 8
+            value += int(DieColor.PURPLE in tile.grants) * 12
+            value += int(tile.id in {"free_trade_association", "galactic_bankers", "new_economy"}) * 18
+            value += int("phase_v" in tile.tags) * 6
+        elif strategy == "mining":
+            value += int("rare_elemental" in tile.tags) * 20
+            value += int(DieColor.BROWN in tile.grants) * 8
+            value += int(tile.id == "mining_league") * 25
+        elif strategy == "novelty":
+            value += int("novelty" in tile.tags) * 20
+            value += int(DieColor.BLUE in tile.grants) * 8
+            value += int(tile.id == "free_trade_association") * 25
+        elif strategy == "genes":
+            value += int("genes" in tile.tags) * 20
+            value += int(DieColor.GREEN in tile.grants) * 8
+            value += int(tile.id in {"new_economy", "galactic_exchange"}) * 18
+        elif strategy == "alien":
+            value += int(self.is_alien_tile(tile)) * 24
+            value += int(DieColor.YELLOW in tile.grants) * 10
+            value += int("phase_i" in tile.tags or "phase_iii" in tile.tags) * 4
+        elif strategy == "military":
+            value += int(DieColor.RED in tile.grants) * 14
+            value += int("gray" in tile.tags) * 6
+            value += int("rebel" in tile.id) * 8
+            value += int(tile.id == "new_galactic_order") * 25
+        elif strategy == "diverse":
+            value += self.diversity_tile_value(player, tile)
+            value += int(tile.id in {"system_diversification", "galactic_exchange"}) * 24
+        return value
+
+    def diversity_tile_value(self, player: Player, tile: Tile) -> int:
+        if tile.kind is not TileKind.WORLD:
+            return 0
+        existing = {
+            tableau_tile.world_color.strip().lower()
+            for tableau_tile in player.tableau
+            if tableau_tile.kind is TileKind.WORLD and tableau_tile.world_color.strip()
+        }
+        color = tile.world_color.strip().lower()
+        if not color:
+            return 0
+        return 22 if color not in existing else 4
 
     def build(self, player: Player, stack: list[BuildSlot]) -> bool:
         if not stack:
@@ -454,7 +632,40 @@ class BatteryGame:
         return player.tracks[color]
 
     def score(self, player: Player) -> int:
-        return player.vp_chips + sum(tile.vp for tile in player.tableau)
+        return player.vp_chips + sum(tile.vp for tile in player.tableau) + self.endgame_bonus(player)
+
+    def endgame_bonus(self, player: Player) -> int:
+        return sum(self.endgame_tile_bonus(player, tile) for tile in player.tableau)
+
+    def endgame_tile_bonus(self, player: Player, tile: Tile) -> int:
+        if "end_game" not in tile.tags:
+            return 0
+        worlds = [tableau_tile for tableau_tile in player.tableau if tableau_tile.kind is TileKind.WORLD]
+        developments = [tableau_tile for tableau_tile in player.tableau if tableau_tile.kind is TileKind.DEVELOPMENT]
+        production_worlds = [world for world in worlds if world.produces]
+        world_colors = {world.world_color.strip().lower() for world in worlds if world.world_color.strip()}
+        color_presence = sum(1 for track in player.tracks.values() if track.maximum > 0)
+        if tile.id == "free_trade_association":
+            return sum(1 for world in worlds if "novelty" in world.tags)
+        if tile.id == "galactic_bankers":
+            return player.tracks[DieColor.PURPLE].maximum + player.credits
+        if tile.id == "galactic_exchange":
+            return len(world_colors) + color_presence
+        if tile.id == "galactic_federation":
+            return len(developments)
+        if tile.id == "galactic_renaissance":
+            return max(0, player.completed_tiles // 2) + len(world_colors)
+        if tile.id == "galactic_reserves":
+            return sum(track.current for track in player.tracks.values()) // 3
+        if tile.id == "mining_league":
+            return sum(1 for world in worlds if "rare_elemental" in world.tags) + player.tracks[DieColor.BROWN].maximum
+        if tile.id == "new_economy":
+            return len(production_worlds) + player.vp_chips // 5
+        if tile.id == "new_galactic_order":
+            return player.tracks[DieColor.RED].maximum
+        if tile.id == "system_diversification":
+            return len(world_colors) * 2
+        return 0
 
     def game_over(self) -> bool:
         if self.round_number >= self.config.max_rounds:
@@ -483,6 +694,8 @@ class BatteryGame:
                         "free_recharged": player.free_recharged,
                         "blocked_recharge": player.blocked_recharge,
                         "completed_tiles": player.completed_tiles,
+                        "tile_vp": sum(tile.vp for tile in player.tableau),
+                        "endgame_bonus": self.endgame_bonus(player),
                         "tracks": self.track_summary(player),
                     },
                 )

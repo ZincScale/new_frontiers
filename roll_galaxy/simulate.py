@@ -36,7 +36,10 @@ def main():
         "--players",
         nargs="+",
         default=["P1:builder", "P2:producer"],
-        help="Players as name:strategy. Strategies: balanced, builder, settler, producer, shipper.",
+        help=(
+            "Players as name:strategy. Strategies: balanced, builder, settler, producer, "
+            "shipper, mining, novelty, genes, alien, military, diverse."
+        ),
     )
     args = parser.parse_args()
 

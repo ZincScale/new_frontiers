@@ -23,8 +23,10 @@ The player boards, aid sheets, and Dummy phase cards are formatted for letter pa
 
 ### Roll Phase Battery Variant
 
-- archived deterministic phase-track boards
-- archived phase-battery quick-reference and solo cards
+- 4 deterministic phase-track boards
+- 1 combined multiplayer reference aid sheet
+- 1 combined solo guide / campaign aid sheet
+- 5 solo Dummy phase cards
 - printable max markers and setup strips
 
 ## Files
@@ -32,8 +34,8 @@ The player boards, aid sheets, and Dummy phase cards are formatted for letter pa
 - `print-and-play.html`: Tiny Galaxy printable card sheets.
 - `roll-mancala.html`: current Roll mancala boards and references.
 - `roll-mancala.pdf`: generated Roll mancala print-and-play PDF.
-- `roll-phase-battery.html`: archived Roll phase battery boards and references.
-- `roll-phase-battery.pdf`: generated archived Roll phase battery print-and-play PDF.
+- `roll-phase-battery.html`: Roll phase battery boards, aid sheets, and Dummy cards.
+- `roll-phase-battery.pdf`: generated Roll phase battery print-and-play PDF.
 - `styles/cards.css`: print layout and card styling.
 - `styles/roll.css`: Roll variant print layout.
 - `assets/source/upgrade-art-sheet.png`: 12-panel representative upgrade art.
@@ -57,7 +59,7 @@ Credits pay Develop/Settle costs and Good markers track produced Goods.
 ## Roll Solo Tuning
 
 The Roll Phase Battery solo mode uses a 12-round clock with two Dummy phase
-cards per round. Score-only win conditions are Great at 42+ VP, Triumphant at
-45+ VP, and Epic at 48+ VP. Named win conditions require 35+ VP plus their mark.
+cards per round. Score-only win conditions are Great at 45+ VP, Triumphant at
+50+ VP, and Epic at 54+ VP. Named win conditions require 38+ VP plus their mark.
 Campaign sheets combine those into arcs such as Outreach, Industrial Base,
 Sector Survey, Alien Contact, and Mastery.

@@ -183,8 +183,9 @@ Spend 1 Purple pip = one Ship worker
 Spend 1 White pip  = one worker in any selected phase
 ```
 
-For Explore, Produce, and Ship, spend pips one at a time. Stop when you run out
-of pips or cannot use more of that phase.
+For Produce and Ship, spend pips one at a time. Stop when you run out of pips
+or cannot use more of that phase. For Explore, Scout may spend multiple pips as
+search depth while still keeping only one tile; Stock spends pips one at a time.
 
 For Develop and Settle, pips are build currency. You must pay the full tile cost
 at once with phase pips, Galactic Credits, or a mix of both. If you cannot pay
@@ -237,17 +238,48 @@ Credits, you may spend 2 White to complete it. If you have only White `1/2` and
 
 When Explore occurs, spend Blue or White pips.
 
-Each pip may be used for one normal Explore worker:
+Explore can Scout or Stock.
 
-- Scout
-- Stock
+Scout is a single-tile action. Spend one or more Explore pips, then look through
+that many candidate tiles of the needed type. Keep one tile and put it on the
+bottom of that build stack. Return the other candidates to the tile supply.
+
+If both build stacks are empty, choose whether you are Scouting for a
+Development or a World. If exactly one build stack is empty, Scout for that
+type.
+
+If both build stacks already have tiles, each Explore pip may instead Stock for
+2 Galactic Credits.
+
+Explore is the tempo-cost escape hatch. It does not complete tableau cards by
+itself, but it prevents a player from being hard-stopped by an empty queue or no
+Credits.
+
+Because Scout lets you spend pips as search depth, Explore also supports
+strategic tile hunting. The prototype recognizes these broad lanes:
+
+```text
+Builder    Development cards, especially 6-cost end-game Developments.
+Settler    Worlds and die grants.
+Producer   Production Worlds, Green, Purple, and trade/consume Developments.
+Shipper    Purple, production support, and Phase V Developments.
+Mining     Rare Element Worlds, Brown, and Mining League.
+Novelty    Novelty Worlds, Blue, and Free Trade Association.
+Genes      Genes Worlds and Green.
+Alien      Alien Technology Worlds and Yellow.
+Military   Red grants, Rebel/gray Worlds, and New Galactic Order.
+Diverse    Missing World colors, System Diversification, and Galactic Exchange.
+```
 
 Example:
 
 ```text
 Blue is 2/2.
-You spend 1 Blue to Scout.
-You spend 1 Blue to Stock.
+Your Development stack has one tile.
+Your World stack is empty.
+You spend 2 Blue to Scout for a World.
+Look through 2 World candidates.
+Keep 1 World and put it on the bottom of your World stack.
 Blue becomes 0/2.
 ```
 
@@ -516,6 +548,10 @@ The simulator supports both versions. The current default is Alien mode.
 
 Galactic Credits no longer recruit dice from Citizenry.
 
+The main renewable Credit source is tempo: Stock through Explore after both
+build stacks have tiles, or Trade through Ship. Immediate tile effects can also
+grant Credits.
+
 During Develop or Settle, Credits may be spent as build currency. Each Credit
 pays 1 cost toward the top Development or World. The full cost must be paid at
 once; Credits cannot be left on a tile as progress.
@@ -620,6 +656,21 @@ Use this conversion:
 - Yellow counts as present only if you have gained at least one Alien Technology
   pip.
 
+For the prototype, score the 6-cost Developments this way:
+
+```text
+Free Trade Association   +1 VP per Novelty World.
+Galactic Bankers         +Purple max plus remaining Credits.
+Galactic Exchange        +different World colors plus color tracks present.
+Galactic Federation      +1 VP per Development.
+Galactic Renaissance     +completed tiles / 2, rounded down, plus World colors.
+Galactic Reserves        +current pips / 3, rounded down.
+Mining League            +Rare Worlds plus Brown max.
+New Economy              +production Worlds plus VP chips / 5, rounded down.
+New Galactic Order       +Red max.
+System Diversification   +2 VP per different World color.
+```
+
 Examples:
 
 ```text
@@ -699,32 +750,32 @@ win the campaign.
 Score-only win conditions:
 
 ```text
-Great        Score 42+ VP.
-Triumphant   Score 45+ VP.
-Epic         Score 48+ VP.
+Great        Score 45+ VP.
+Triumphant   Score 50+ VP.
+Epic         Score 54+ VP.
 ```
 
 Named win conditions:
 
 ```text
-Great       Score 42+ VP.
-Triumphant  Score 45+ VP.
-Epic        Score 48+ VP.
-Builder     Score 35+ VP and complete 9+ tiles.
-Developer   Score 35+ VP and have 5+ Developments.
-Colonizer   Score 35+ VP and have 7+ Worlds.
+Great       Score 45+ VP.
+Triumphant  Score 50+ VP.
+Epic        Score 54+ VP.
+Builder     Score 38+ VP and complete 8+ tiles.
+Developer   Score 38+ VP and have 5+ Developments.
+Colonizer   Score 38+ VP and have 6+ Worlds.
 Satisfied Populace
-            Score 35+ VP and score 12+ VP chips.
-Industrial  Score 35+ VP and have 19+ total max pips.
-Production  Score 35+ VP and have 5+ production Worlds.
-Diverse     Score 35+ VP and have 4+ different World colors.
-Novelty     Score 35+ VP and have 2+ Novelty Worlds.
+            Score 38+ VP and score 11+ VP chips.
+Industrial  Score 38+ VP and have 18+ total max pips.
+Production  Score 38+ VP and have 4+ production Worlds.
+Diverse     Score 38+ VP and have 4+ different World colors.
+Novelty     Score 38+ VP and have 2+ Novelty Worlds.
 Rare Elements
-            Score 35+ VP and have 2+ Rare Worlds.
+            Score 38+ VP and have 2+ Rare Worlds.
 Alien Contact
-            Score 35+ VP and have 1+ Alien World.
-Military    Score 35+ VP and have Red max 5.
-Discovery   Score 35+ VP and have Blue max 5.
+            Score 38+ VP and have 1+ Alien World.
+Military    Score 38+ VP and have Red max 4.
+Discovery   Score 38+ VP and have Blue max 4.
 ```
 
 Campaign sheets:
@@ -796,7 +847,7 @@ Solo example:
 ```text
 Campaign: Outreach.
 Unmarked conditions: Great, Colonizer, Builder, Industrial.
-You finish with 35 VP, 7 completed tiles, and 15 total max pips.
+You finish with 35 VP, 8 completed tiles, and 15 total max pips.
 You may mark Builder, but not Great or Industrial. Mark exactly one condition.
 
 You select Settle.
@@ -878,8 +929,10 @@ Explore, Develop, Settle
 Explore:
 
 ```text
-Spend 1 Blue to Scout.
-Blue 2/2 -> 1/2.
+Spend 2 Blue to Scout for a World.
+Look through 2 World candidates.
+Keep 1 World.
+Blue 2/2 -> 0/2.
 ```
 
 Develop:
@@ -944,22 +997,29 @@ The current Python prototype uses the spreadsheet in this directory:
 Current simulation result with real start tiles and all tracks at `2/2`:
 
 ```text
-Three players: average length about 16.0 rounds
-Four players:  average length about 14.8 rounds
-Five players:  average length about 14.6 rounds
-Estimated table time: 45-60 minutes for experienced players
+Two players:   average length about 20.0 rounds
+Three players: average length about 16.9 rounds
+Four players:  average length about 16.2 rounds
+Five players:  average length about 15.5 rounds
+Estimated table time: 50-70 minutes for experienced players
 ```
 
 In a 1000-game four-player sweep with Balanced, Builder, Settler, and Shipper
-strategies, Alien-mode Yellow with 16 VP/player averaged 14.8 rounds. Wins were
-tightly grouped: Builder 270, Settler 258, Balanced 244, Shipper 228. In a
+strategies, Alien-mode Yellow with 16 VP/player averaged 16.2 rounds. Wins were
+tightly grouped: Settler 262, Balanced 260, Builder 248, Shipper 230. In a
 100-game comparison, Yellow-as-Ship averaged about the same length, so Alien-mode
 remains the recommended default for theme and tile identity.
 
+A 1000-game five-archetype sweep with Mining, Producer, Military, Alien, and
+Builder averaged 15.0 rounds. Wins were spread across the lanes: Military 243,
+Builder 214, Producer 198, Mining 188, Alien 157. Average final scores were all
+within about 1.3 VP, which suggests the tile-search and 6-cost scoring rules are
+supporting multiple viable plans rather than one dominant build path.
+
 Solo challenge mode uses 12 rounds and two Dummy phase cards each round. In
-simulation sweeps, the Dummy claimed about 18 tiles and drained about 11 VP
+simulation sweeps, the Dummy claimed about 19 tiles and drained about 11 VP
 chips on average. After the one-shot Develop/Settle change, score-only win
-conditions were retuned to 42, 45, and 48 VP. In a 1000-game balanced-heuristic
+conditions were retuned to 45, 50, and 54 VP. In a 1000-game balanced-heuristic
 sweep, those landed around 45%, 25%, and 12% success for Great, Triumphant, and
 Epic. Treat these as simulation guideposts, not final balance data.
 

@@ -43,6 +43,92 @@ def test_white_pip_can_pay_for_empty_phase_track():
     assert player.tracks[DieColor.WHITE].current == 1
 
 
+def test_explore_scout_uses_pips_as_search_depth_but_keeps_one_tile():
+    game = BatteryGame(seed=30)
+    player = game.players[0]
+    player.dev_stack = []
+    player.world_stack = []
+    player.tracks[DieColor.BLUE].current = 2
+    player.tracks[DieColor.WHITE].current = 0
+    low = Tile("d-low", "Low Development", TileKind.DEVELOPMENT, 1, 1)
+    high = Tile("d-high", "High Development", TileKind.DEVELOPMENT, 2, 4)
+    game.tile_bag = [
+        low,
+        Tile("w-skip", "Skipped World", TileKind.WORLD, 1, 1),
+        high,
+    ]
+
+    game.resolve_phase(player, Phase.EXPLORE)
+
+    assert [slot.tile for slot in player.dev_stack] == [high]
+    assert player.world_stack == []
+    assert low in game.tile_bag
+    assert player.tracks[DieColor.BLUE].current == 0
+    assert player.used_pips == 2
+
+
+def test_explore_stocks_for_credits_when_build_stacks_are_filled():
+    game = BatteryGame(seed=31)
+    player = game.players[0]
+    player.credits = 0
+    player.dev_stack = [BuildSlot(Tile("d-queued", "Queued Development", TileKind.DEVELOPMENT, 1, 1))]
+    player.world_stack = [BuildSlot(Tile("w-queued", "Queued World", TileKind.WORLD, 1, 1))]
+    player.tracks[DieColor.BLUE].current = 2
+    player.tracks[DieColor.WHITE].current = 0
+
+    game.resolve_phase(player, Phase.EXPLORE)
+
+    assert player.credits == 4
+    assert player.credits_earned == 4
+    assert player.tracks[DieColor.BLUE].current == 0
+    assert player.used_pips == 2
+
+
+def test_mining_strategy_scout_prefers_rare_worlds():
+    game = BatteryGame([("Miner", "mining")], seed=32)
+    player = game.players[0]
+    player.dev_stack = []
+    player.world_stack = []
+    player.tracks[DieColor.BLUE].current = 2
+    player.tracks[DieColor.WHITE].current = 0
+    generic = Tile("generic", "Generic World", TileKind.WORLD, 2, 4, world_color="gray")
+    rare = Tile("rare", "Rare World", TileKind.WORLD, 2, 1, world_color="Rare Elemental", produces=True, tags=("rare_elemental",))
+    game.tile_bag = [generic, rare]
+
+    game.resolve_phase(player, Phase.EXPLORE)
+
+    assert [slot.tile for slot in player.world_stack] == [rare]
+
+
+def test_military_strategy_scout_prefers_red_grants():
+    game = BatteryGame([("Military", "military")], seed=33)
+    player = game.players[0]
+    player.dev_stack = []
+    player.world_stack = []
+    player.tracks[DieColor.BLUE].current = 2
+    player.tracks[DieColor.WHITE].current = 0
+    generic = Tile("generic", "Generic World", TileKind.WORLD, 2, 4, world_color="Novelty", produces=True, tags=("novelty",))
+    red = Tile("red", "Red World", TileKind.WORLD, 2, 1, grants=(DieColor.RED,), world_color="gray", tags=("gray",))
+    game.tile_bag = [generic, red]
+
+    game.resolve_phase(player, Phase.EXPLORE)
+
+    assert [slot.tile for slot in player.world_stack] == [red]
+
+
+def test_endgame_development_bonuses_score_strategy_payoffs():
+    game = BatteryGame(seed=34)
+    player = game.players[0]
+    mining_league = Tile("mining_league", "Mining League", TileKind.DEVELOPMENT, 6, 6, tags=("phase_v", "end_game"))
+    rare_a = Tile("rare-a", "Rare A", TileKind.WORLD, 2, 2, world_color="Rare Elemental", produces=True, tags=("rare_elemental",))
+    rare_b = Tile("rare-b", "Rare B", TileKind.WORLD, 2, 2, world_color="Rare Elemental", produces=True, tags=("rare_elemental",))
+    player.tableau = [mining_league, rare_a, rare_b]
+    player.tracks[DieColor.BROWN].maximum = 4
+
+    assert game.endgame_bonus(player) == 6
+    assert game.score(player) == 16
+
+
 def test_completed_world_grants_pip_instead_of_new_worker_die():
     game = BatteryGame(seed=4)
     player = game.players[0]
@@ -352,11 +438,15 @@ def test_solo_campaign_filters_to_campaign_conditions():
 
 
 def test_solo_score_only_thresholds_are_retuned_for_one_shot_builds():
-    assert SOLO_WIN_CONDITION_MAP["great"].min_score == 42
-    assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 45
-    assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 48
-    assert SOLO_WIN_CONDITION_MAP["builder"].min_completed_tiles == 9
-    assert SOLO_WIN_CONDITION_MAP["industrial"].min_max_capacity == 19
+    assert SOLO_WIN_CONDITION_MAP["great"].min_score == 45
+    assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 50
+    assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 54
+    assert SOLO_WIN_CONDITION_MAP["builder"].min_score == 38
+    assert SOLO_WIN_CONDITION_MAP["builder"].min_completed_tiles == 8
+    assert SOLO_WIN_CONDITION_MAP["colonizer"].min_worlds == 6
+    assert SOLO_WIN_CONDITION_MAP["industrial"].min_max_capacity == 18
+    assert SOLO_WIN_CONDITION_MAP["military"].min_red_capacity == 4
+    assert SOLO_WIN_CONDITION_MAP["discovery"].min_blue_capacity == 4
 
 
 def test_solo_campaign_conditions_do_not_repeat_within_sheet():

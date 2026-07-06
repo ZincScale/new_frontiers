@@ -95,249 +95,233 @@
       </article>
     </section>
 
-    <section class="sheet reference-sheet" aria-label="Reference cards">
-      <article class="ref-card">
-        <header><h2>Round Sequence</h2><span>Reference</span></header>
-        <ol>
-          <li>Select one phase secretly.</li>
-          <li>Reveal selected phases.</li>
-          <li>Resolve selected phases in order.</li>
-          <li>Manage Empire: spend Credits to recharge.</li>
-        </ol>
-        <p class="note">No Roll Dice step. No Assign Dice step. Multiplayer VP pool: 16/player.</p>
-      </article>
+    <section class="sheet aid-sheet dense-aid" aria-label="Phase Battery reference sheet">
+      <header class="aid-title">
+        <h1>Phase Battery Reference</h1>
+        <p>Multiplayer Rules</p>
+      </header>
+      <div class="aid-grid compact">
+        <section class="aid-section">
+          <h2>Round Sequence</h2>
+          <ol>
+            <li>Select one phase secretly.</li>
+            <li>Reveal selected phases.</li>
+            <li>Resolve selected phases in order.</li>
+            <li>Manage Empire: spend Credits to recharge.</li>
+          </ol>
+          <p>No Roll Dice or Assign Dice step. Multiplayer VP pool: 16/player.</p>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Spend / Build</h2><span>Reference</span></header>
-        <ul>
-          <li>Blue: Explore worker.</li>
-          <li>Brown/Red: pay Develop/Settle costs.</li>
-          <li>Green: Produce worker.</li>
-          <li>Purple: Ship worker.</li>
-          <li>White: any selected phase.</li>
-          <li>Develop/Settle must be paid in one shot.</li>
-        </ul>
-      </article>
+        <section class="aid-section">
+          <h2>Spend Pips</h2>
+          <dl class="aid-map">
+            <dt>Blue</dt><dd>Explore worker.</dd>
+            <dt>Brown</dt><dd>Develop build currency.</dd>
+            <dt>Red</dt><dd>Settle build currency.</dd>
+            <dt>Green</dt><dd>Produce worker.</dd>
+            <dt>Purple</dt><dd>Ship worker.</dd>
+            <dt>White</dt><dd>Any selected phase.</dd>
+          </dl>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Gain Dice</h2><span>Reference</span></header>
-        <p>When a tile says to gain a die, pip up that color.</p>
-        <ol>
-          <li>Increase max by 1, max 6.</li>
-          <li>Increase current by 1, not above max.</li>
-          <li>Excess beyond 6 is lost.</li>
-        </ol>
-        <p class="example">Green 0/2 + Genes die = Green 1/3.</p>
-      </article>
+        <section class="aid-section wide">
+          <h2>Explore</h2>
+          <ol>
+            <li>Scout: spend 1+ Explore pips to search that many candidate tiles of one type.</li>
+            <li>Keep 1 tile and put it on the bottom of that build stack.</li>
+            <li>If both build stacks already have tiles, each Explore pip may Stock for +2 Credits.</li>
+          </ol>
+          <p>Explore is the tempo-cost escape hatch: pips buy search depth or money, but not direct tableau progress.</p>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Credits</h2><span>Reference</span></header>
-        <ul>
-          <li>Credits do not recruit dice.</li>
-          <li>Spend Credits with pips to complete Develop/Settle.</li>
-          <li>Partial Develop/Settle progress is not kept.</li>
-          <li>Spend 1 Credit to recharge 1 current pip.</li>
-          <li>Never recharge above max.</li>
-        </ul>
-      </article>
+        <section class="aid-section wide">
+          <h2>Scout Lanes</h2>
+          <dl class="aid-map">
+            <dt>Mining</dt><dd>Rare Worlds, Brown, Mining League.</dd>
+            <dt>Novelty</dt><dd>Novelty Worlds, Blue, Free Trade Association.</dd>
+            <dt>Genes / Alien</dt><dd>Genes+Green or Alien+Yellow.</dd>
+            <dt>Military</dt><dd>Red grants, Rebel/gray Worlds, New Galactic Order.</dd>
+            <dt>Builder / Diverse</dt><dd>6-cost Developments or missing World colors.</dd>
+          </dl>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Produce / Ship</h2><span>Reference</span></header>
-        <ul>
-          <li>Produce: place a Good marker, not a worker die.</li>
-          <li>The Good color is the pip color spent.</li>
-          <li>Ship: spend Purple or White to Trade or Consume.</li>
-          <li>White Goods count as matching.</li>
-        </ul>
-      </article>
+        <section class="aid-section">
+          <h2>Develop / Settle</h2>
+          <ul>
+            <li>Pay the top tile's full cost in one shot.</li>
+            <li>Use matching phase pips, White pips, eligible Yellow pips, Credits, or a mix.</li>
+            <li>If you cannot pay the full cost, spend nothing and keep the tile queued.</li>
+            <li>On completion, move the tile to tableau and apply converted effects.</li>
+          </ul>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Alien Yellow</h2><span>Reference</span></header>
-        <ul>
-          <li>Yellow starts 0/0.</li>
-          <li>Gain Alien Technology die: pip up Yellow.</li>
-          <li>Yellow pays only for Alien Develop, Settle, Produce, or Ship work.</li>
-          <li>Alternative: Yellow as extra Ship capacity.</li>
-        </ul>
-      </article>
+        <section class="aid-section">
+          <h2>Credits / Recharge</h2>
+          <ul>
+            <li>Credits do not recruit dice.</li>
+            <li>Credits pay Develop/Settle costs.</li>
+            <li>Spend 1 Credit to recharge 1 current pip during Manage Empire.</li>
+            <li>Never recharge above max.</li>
+            <li>If your Credit marker is at 0 after Manage Empire, set it to 1.</li>
+          </ul>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Color Map</h2><span>Reference</span></header>
-        <dl class="map">
-          <dt>Home</dt><dd>White</dd>
-          <dt>Novelty</dt><dd>Blue</dd>
-          <dt>Rare Elements</dt><dd>Brown</dd>
-          <dt>Genes</dt><dd>Green</dd>
-          <dt>Alien Tech</dt><dd>Yellow</dd>
-          <dt>Military</dt><dd>Red</dd>
-          <dt>Consumption</dt><dd>Purple</dd>
-        </dl>
-        <p class="note">Military is red capacity, not conquest strength. Worlds use printed Settle costs.</p>
-      </article>
+        <section class="aid-section">
+          <h2>Gain Dice</h2>
+          <ol>
+            <li>Increase that color's max by 1, max 6.</li>
+            <li>Increase current by 1, not above max.</li>
+            <li>Excess beyond 6 is lost.</li>
+          </ol>
+          <p>Green 0/2 + Genes die = Green 1/3.</p>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Tile Powers</h2><span>Reference</span></header>
-        <ul>
-          <li>Ignore reassign powers.</li>
-          <li>Gain/recruit/place die: pip up that color.</li>
-          <li>Extra worker: gain 1 temporary pip for that phase.</li>
-          <li>Cost reduction: reduce pips/Credits required.</li>
-        </ul>
-      </article>
+        <section class="aid-section">
+          <h2>Produce / Ship</h2>
+          <ul>
+            <li>Produce: place a Good marker, not a worker die.</li>
+            <li>The Good color is the pip color spent.</li>
+            <li>Ship: spend Purple or White to Trade or Consume.</li>
+            <li>White Goods count as matching.</li>
+          </ul>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>End Game</h2><span>Reference</span></header>
-        <ul>
-          <li>VP pool exhausted.</li>
-          <li>Any player reaches 12 tableau squares.</li>
-          <li>Use 16 VP chips per player for multiplayer.</li>
-          <li>More VP chips only lengthens VP-pool endings.</li>
-          <li>Normal VP chips and tile VP.</li>
-          <li>Specific-color dice bonus: count that color's max pips.</li>
-        </ul>
-      </article>
+        <section class="aid-section">
+          <h2>Alien Yellow</h2>
+          <ul>
+            <li>Yellow starts 0/0.</li>
+            <li>Gain Alien Technology die: pip up Yellow.</li>
+            <li>Yellow pays only for Alien Develop, Settle, Produce, or Ship work.</li>
+            <li>Alternative: Yellow as extra Ship capacity.</li>
+          </ul>
+        </section>
+
+        <section class="aid-section">
+          <h2>Color Map</h2>
+          <dl class="aid-map">
+            <dt>Home</dt><dd>White</dd>
+            <dt>Novelty</dt><dd>Blue</dd>
+            <dt>Rare Elements</dt><dd>Brown</dd>
+            <dt>Genes</dt><dd>Green</dd>
+            <dt>Alien Tech</dt><dd>Yellow</dd>
+            <dt>Military</dt><dd>Red</dd>
+            <dt>Consumption</dt><dd>Purple</dd>
+          </dl>
+        </section>
+
+        <section class="aid-section">
+          <h2>Tile Powers / End Game</h2>
+          <ul>
+            <li>Ignore reassign powers.</li>
+            <li>Gain/recruit/place die: pip up that color.</li>
+            <li>Extra worker: gain 1 temporary pip for that phase.</li>
+            <li>Cost reduction: reduce pips/Credits required.</li>
+            <li>Game ends when VP pool is exhausted or a player reaches 12 tableau squares.</li>
+            <li>6-cost bonuses use converted battery scoring.</li>
+          </ul>
+        </section>
+      </div>
     </section>
 
-    <section class="sheet reference-sheet" aria-label="Solo win condition reference cards">
-      <article class="ref-card">
-        <header><h2>Solo Setup</h2><span>Solo</span></header>
-        <ol>
-          <li>Use one normal player setup.</li>
-          <li>Use a 30 VP chip pool.</li>
-          <li>Set Dummy Goods to 0.</li>
-          <li>Shuffle 5 Dummy phase cards.</li>
-          <li>Choose one campaign sheet.</li>
-          <li>Play exactly 12 rounds.</li>
-        </ol>
-      </article>
+    <section class="sheet aid-sheet dense-aid" aria-label="Solo guide and campaign sheet">
+      <header class="aid-title">
+        <h1>Solo Guide And Campaigns</h1>
+        <p>12-Round Challenge</p>
+      </header>
+      <div class="aid-grid compact">
+        <section class="aid-section">
+          <h2>Solo Setup</h2>
+          <ol>
+            <li>Use one normal player setup.</li>
+            <li>Use a 30 VP chip pool.</li>
+            <li>Set Dummy Goods to 0.</li>
+            <li>Shuffle 5 Dummy phase cards.</li>
+            <li>Choose one campaign sheet.</li>
+            <li>Play exactly 12 rounds.</li>
+          </ol>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Score Conditions</h2><span>Solo</span></header>
-        <dl class="map">
-          <dt>Great</dt><dd>42+ VP</dd>
-          <dt>Triumphant</dt><dd>45+ VP</dd>
-          <dt>Epic</dt><dd>48+ VP</dd>
-        </dl>
-        <p class="note">These win conditions only check final score.</p>
-      </article>
+        <section class="aid-section">
+          <h2>Solo Round</h2>
+          <ol>
+            <li>Select your phase.</li>
+            <li>Reveal 2 Dummy phase cards.</li>
+            <li>Resolve all selected phases in order.</li>
+            <li>Resolve both Dummy card effects.</li>
+            <li>Manage Empire normally.</li>
+          </ol>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Condition Key 1</h2><span>Solo</span></header>
-        <ul>
-          <li>Builder: 35+ VP and complete 9+ tiles.</li>
-          <li>Developer: 35+ VP and have 5+ Developments.</li>
-          <li>Colonizer: 35+ VP and have 7+ Worlds.</li>
-          <li>Satisfied Populace: 35+ VP and score 12+ VP chips.</li>
-          <li>Industrial: 35+ VP and have 19+ total max pips.</li>
-        </ul>
-      </article>
+        <section class="aid-section">
+          <h2>Score Conditions</h2>
+          <dl class="aid-map">
+            <dt>Great</dt><dd>45+ VP</dd>
+            <dt>Triumphant</dt><dd>50+ VP</dd>
+            <dt>Epic</dt><dd>54+ VP</dd>
+          </dl>
+          <p>These check final score only.</p>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Condition Key 2</h2><span>Solo</span></header>
-        <ul>
-          <li>Production: 35+ VP and have 5+ production Worlds.</li>
-          <li>Diverse: 35+ VP and have 4+ World colors.</li>
-          <li>Novelty: 35+ VP and have 2+ Novelty Worlds.</li>
-          <li>Rare Elements: 35+ VP and have 2+ Rare Worlds.</li>
-          <li>Alien Contact: 35+ VP and have 1+ Alien World.</li>
-          <li>Military: 35+ VP and Red max 5.</li>
-          <li>Discovery: 35+ VP and Blue max 5.</li>
-        </ul>
-      </article>
+        <section class="aid-section">
+          <h2>Campaign Play</h2>
+          <ol>
+            <li>Play 4 games in a row.</li>
+            <li>After each game, mark 1 satisfied unmarked condition.</li>
+            <li>If you cannot mark a new condition, lose the campaign.</li>
+            <li>Mark all 4 conditions to win.</li>
+          </ol>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Campaign Play</h2><span>Solo</span></header>
-        <ol>
-          <li>Play 4 games in a row.</li>
-          <li>After each game, mark 1 satisfied unmarked condition.</li>
-          <li>If you cannot mark a new condition, lose the campaign.</li>
-          <li>Mark all 4 conditions to win.</li>
-        </ol>
-      </article>
+        <section class="aid-section wide">
+          <h2>Named Conditions</h2>
+          <ul>
+            <li>Builder: 38+ VP and complete 8+ tiles.</li>
+            <li>Developer: 38+ VP and have 5+ Developments.</li>
+            <li>Colonizer: 38+ VP and have 6+ Worlds.</li>
+            <li>Satisfied Populace: 38+ VP and score 11+ VP chips.</li>
+            <li>Industrial: 38+ VP and have 18+ total max pips.</li>
+            <li>Production: 38+ VP and have 4+ production Worlds.</li>
+            <li>Diverse: 38+ VP and have 4+ World colors.</li>
+            <li>Novelty: 38+ VP and have 2+ Novelty Worlds.</li>
+            <li>Rare Elements: 38+ VP and have 2+ Rare Worlds.</li>
+            <li>Alien Contact: 38+ VP and have 1+ Alien World.</li>
+            <li>Military: 38+ VP and Red max 4.</li>
+            <li>Discovery: 38+ VP and Blue max 4.</li>
+          </ul>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Solo Round</h2><span>Solo</span></header>
-        <ol>
-          <li>Select your phase.</li>
-          <li>Reveal 2 Dummy phase cards.</li>
-          <li>Resolve all selected phases in order.</li>
-          <li>Resolve both Dummy card effects.</li>
-          <li>Manage Empire normally.</li>
-        </ol>
-      </article>
+        <section class="aid-section">
+          <h2>Dummy Effects</h2>
+          <ul>
+            <li>Explore: claim 1 Development and 1 World.</li>
+            <li>Develop: claim 1 Development.</li>
+            <li>Settle: claim 1 World.</li>
+            <li>Produce: Dummy Goods +1, max 4.</li>
+            <li>Ship: drain 2 VP chips per Dummy Good, minimum 2.</li>
+          </ul>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Dummy Effects</h2><span>Solo</span></header>
-        <ul>
-          <li>Explore: claim 1 Development and 1 World.</li>
-          <li>Develop: claim 1 Development.</li>
-          <li>Settle: claim 1 World.</li>
-          <li>Produce: Dummy Goods +1, max 4.</li>
-          <li>Ship: drain 2 VP chips per Dummy Good, minimum 2.</li>
-        </ul>
-      </article>
+        <section class="aid-section">
+          <h2>Solo End</h2>
+          <ul>
+            <li>Round limit is reached.</li>
+            <li>VP chip pool is exhausted.</li>
+            <li>Your tableau reaches 12 squares.</li>
+            <li>Finish the round, then mark 1 campaign condition.</li>
+          </ul>
+        </section>
 
-      <article class="ref-card">
-        <header><h2>Solo End</h2><span>Solo</span></header>
-        <ul>
-          <li>Round limit is reached.</li>
-          <li>VP chip pool is exhausted.</li>
-          <li>Your tableau reaches 12 squares.</li>
-          <li>Finish the round, then mark 1 campaign condition.</li>
-        </ul>
-      </article>
-    </section>
-
-    <section class="sheet reference-sheet" aria-label="Solo campaign cards">
-      <article class="ref-card">
-        <header><h2>Outreach</h2><span>Campaign 1</span></header>
-        <ul>
-          <li>Great</li>
-          <li>Colonizer</li>
-          <li>Builder</li>
-          <li>Industrial</li>
-        </ul>
-      </article>
-
-      <article class="ref-card">
-        <header><h2>Industrial Base</h2><span>Campaign 2</span></header>
-        <ul>
-          <li>Triumphant</li>
-          <li>Developer</li>
-          <li>Industrial</li>
-          <li>Production</li>
-        </ul>
-      </article>
-
-      <article class="ref-card">
-        <header><h2>Sector Survey</h2><span>Campaign 3</span></header>
-        <ul>
-          <li>Triumphant</li>
-          <li>Diverse</li>
-          <li>Novelty</li>
-          <li>Rare Elements</li>
-        </ul>
-      </article>
-
-      <article class="ref-card">
-        <header><h2>Alien Contact</h2><span>Campaign 4</span></header>
-        <ul>
-          <li>Triumphant</li>
-          <li>Alien Contact</li>
-          <li>Diverse</li>
-          <li>Discovery</li>
-        </ul>
-      </article>
-
-      <article class="ref-card">
-        <header><h2>Mastery</h2><span>Campaign 5</span></header>
-        <ul>
-          <li>Epic</li>
-          <li>Novelty</li>
-          <li>Rare Elements</li>
-          <li>Military</li>
-        </ul>
-      </article>
+        <section class="aid-section wide">
+          <h2>Campaign Sheets</h2>
+          <dl class="aid-map">
+            <dt>Outreach</dt><dd>Great, Colonizer, Builder, Industrial.</dd>
+            <dt>Industrial Base</dt><dd>Triumphant, Developer, Industrial, Production.</dd>
+            <dt>Sector Survey</dt><dd>Triumphant, Diverse, Novelty, Rare Elements.</dd>
+            <dt>Alien Contact</dt><dd>Triumphant, Alien Contact, Diverse, Discovery.</dd>
+            <dt>Mastery</dt><dd>Epic, Novelty, Rare Elements, Military.</dd>
+          </dl>
+        </section>
+      </div>
     </section>
 
     <section class="sheet reference-sheet" aria-label="Solo Dummy phase cards">

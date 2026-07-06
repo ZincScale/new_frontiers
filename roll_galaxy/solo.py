@@ -31,21 +31,21 @@ class SoloWinCondition:
 
 
 SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
-    SoloWinCondition("great", "Great", 42),
-    SoloWinCondition("triumphant", "Triumphant", 45),
-    SoloWinCondition("epic", "Epic", 48),
-    SoloWinCondition("builder", "Builder", 35, min_completed_tiles=9),
-    SoloWinCondition("developer", "Developer", 35, min_developments=5),
-    SoloWinCondition("colonizer", "Colonizer", 35, min_worlds=7),
-    SoloWinCondition("satisfied_populace", "Satisfied Populace", 35, min_vp_chips=12),
-    SoloWinCondition("industrial", "Industrial", 35, min_max_capacity=19),
-    SoloWinCondition("production", "Production", 35, min_production_worlds=5),
-    SoloWinCondition("diverse", "Diverse", 35, min_distinct_world_colors=4),
-    SoloWinCondition("novelty", "Novelty", 35, min_novelty_worlds=2),
-    SoloWinCondition("rare", "Rare Elements", 35, min_rare_worlds=2),
-    SoloWinCondition("alien", "Alien Contact", 35, min_alien_worlds=1),
-    SoloWinCondition("military", "Military", 35, min_red_capacity=5),
-    SoloWinCondition("discovery", "Discovery", 35, min_blue_capacity=5),
+    SoloWinCondition("great", "Great", 45),
+    SoloWinCondition("triumphant", "Triumphant", 50),
+    SoloWinCondition("epic", "Epic", 54),
+    SoloWinCondition("builder", "Builder", 38, min_completed_tiles=8),
+    SoloWinCondition("developer", "Developer", 38, min_developments=5),
+    SoloWinCondition("colonizer", "Colonizer", 38, min_worlds=6),
+    SoloWinCondition("satisfied_populace", "Satisfied Populace", 38, min_vp_chips=11),
+    SoloWinCondition("industrial", "Industrial", 38, min_max_capacity=18),
+    SoloWinCondition("production", "Production", 38, min_production_worlds=4),
+    SoloWinCondition("diverse", "Diverse", 38, min_distinct_world_colors=4),
+    SoloWinCondition("novelty", "Novelty", 38, min_novelty_worlds=2),
+    SoloWinCondition("rare", "Rare Elements", 38, min_rare_worlds=2),
+    SoloWinCondition("alien", "Alien Contact", 38, min_alien_worlds=1),
+    SoloWinCondition("military", "Military", 38, min_red_capacity=4),
+    SoloWinCondition("discovery", "Discovery", 38, min_blue_capacity=4),
 )
 
 SOLO_ROUNDS = 12
