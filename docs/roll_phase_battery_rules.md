@@ -22,8 +22,9 @@ expansion branch and should be treated as parked until rewritten.
 
 This variant replaces face-roll luck with deterministic phase capacity. Players
 still build a tableau of Worlds and Developments, pay Galactic Credits, Produce
-Goods, Ship Goods for Credits, and score from their tableau. The big change is
-that dice colors become phase tracks instead of rolled workers, and secret phase
+Goods, Ship Goods to Trade for Credits or Consume for VP chips, and score from
+tableau VP, VP chips, and 6-cost Development bonuses. The big change is that
+dice colors become phase tracks instead of rolled workers, and secret phase
 selection is constrained by available pips.
 
 Core rule:
@@ -73,7 +74,6 @@ Develop   Brown   0 1 2 3 4 5 6
 Military  Red     0 1 2 3 4 5 6
 Produce   Green   0 1 2 3 4 5 6
 Ship      Purple  0 1 2 3 4 5 6
-Credits   White   0 1 2 3 4 5 6
 Alien     Yellow  0 1 2 3 4 5 6
 ```
 
@@ -87,9 +87,8 @@ Military World checks Red max against the World's cost, then exhausts 1 current
 Red. Red current can be recharged during Manage Empire like other colored
 tracks.
 
-White is Credits. Move the White marker as Credits are gained and spent. It is
-a fixed resource pool to distribute across Credit uses, not a separate worker
-track.
+White tracks/dice are not used. Credits are unlimited chips, tracked as a
+separate chip count instead of on a track.
 
 Recommended physical tracking:
 
@@ -97,7 +96,7 @@ Recommended physical tracking:
 - Put a cube or marker on the track to show max pips.
 - For Red, the max marker shows Military level and the die shows current
   readiness.
-- For White, only the Credit marker matters.
+- Keep Credit chips beside the board.
 
 Example:
 
@@ -119,7 +118,6 @@ Brown   Develop
 Red     Military level/readiness
 Green   Produce
 Purple  Ship
-White   Credits
 Yellow  Alien
 ```
 
@@ -169,21 +167,39 @@ that World and pip up the granted color normally.
 
 ## Round Structure
 
-There is no phase selection or reveal step. Each round, go through the normal
-Roll phases in order. During each phase, players act in turn order, starting
-with the start player and proceeding clockwise.
+Each round has four steps:
+
+1. Select Phases
+2. Reveal Phases
+3. Resolve Selected Phases
+4. Manage Empire
+
+There is no Roll Dice step and no Assign Dice step.
+
+During Select Phases, each player secretly selects eligible phases:
+
+- Solo and 2-player games: each player selects 2 eligible phases.
+- Games with 3 or more players: each player selects 1 eligible phase.
+
+A phase is eligible only if you have at least 1 ready pip for that phase. For
+example, Explore requires at least 1 current Blue pip, Develop requires at least
+1 usable Develop pip and a Development in your Construction Zone, and Ship
+requires at least 1 current Purple pip and at least 1 Good.
+
+Reveal selected phases simultaneously. Resolve only phases selected by at least
+one player, in normal Roll order:
 
 ```text
 Explore -> Develop -> Settle -> Produce -> Ship
 ```
 
-When a phase is reached, every player may use that phase if they have usable
-current pips or resources for it. If no one can or wants to act in that phase,
-skip it and continue to the next phase.
+Unselected phases do not occur. During each selected phase, players act in turn
+order, starting with the start player and proceeding clockwise. A player may use
+a selected phase even if they did not select it, as long as they have usable
+current pips or resources for that phase.
 
-After Ship, each player resolves Manage Empire in turn order.
-
-There is no Roll Dice step and no Assign Dice step.
+After all selected phases resolve, each player resolves Manage Empire in turn
+order.
 
 ## Phase Use
 
@@ -196,8 +212,8 @@ Spend 1 Green pip  = one Produce worker
 Spend 1 Purple pip = one Ship worker
 ```
 
-White is not a worker. White is the Credit count, spent as a shared resource for
-Develop, normal Settle, and recharge. Red is not normal build currency:
+Credits are not workers. Credits are chip resources spent for Develop, normal
+Settle, and recharge. Red is not normal build currency:
 Military Worlds check Red max as level, then spend 1 current Red as readiness.
 
 For Produce and Ship, spend native pips one at a time. Stop when you run out of
@@ -221,36 +237,36 @@ Brown   0/2
 Red     3/3
 Green   2/2
 Purple  1/2
-White   1 Credit
+Credits 1
 Yellow  0/0
 ```
 
 You select Settle. Other players select Develop and Ship.
 
-Resolve all phases in order:
+Only selected phases resolve, in normal order:
 
 ```text
-Explore, Develop, Settle, Produce, Ship
+Develop, Settle, Ship
 ```
 
 You may:
 
-- Skip Explore if you do not want to spend Blue.
 - Develop by spending Brown or eligible Yellow into Developments. If
   total progress reaches its cost, spend any needed Credits and complete it.
 - Settle a Military World only if your Red max is at least its cost and you can
   exhaust 1 current Red.
 - Settle a normal World only if you can pay its cost with Credits or eligible
   Yellow.
-- Produce with Green if you have eligible empty Worlds.
 - Ship with Purple.
+
+Explore and Produce do not occur this round because no one selected them.
 
 After spending:
 
 ```text
 Brown   0/2
 Purple  0/2
-White   0 Credits
+Credits 0
 ```
 
 If a Development costs 2 and you have Brown `1/2` and 1 Credit, you may
@@ -331,10 +347,7 @@ progress; spend Credits only when they finish the Development.
 If a Development's progress reaches the full cost, complete that Development:
 
 1. Move it to your tableau.
-2. Mark that you completed a Development this round. During Manage Empire, gain
-   Galactic Credits equal to half your Developments in tableau, rounded down,
-   minimum 1, if you completed one or more Developments this round.
-3. Apply any immediate converted effects.
+2. Apply any immediate converted effects.
 
 Use normal Development costs. Six-cost Developments cost 6.
 
@@ -399,12 +412,12 @@ If you pay the full cost, complete the World:
 Example:
 
 ```text
-White is 2 Credits.
+Credits are 2.
 One normal World costs 2 and grants one Novelty die.
 Spend 2 Credits to complete it.
 Novelty maps to Blue.
 Blue 2/2 becomes 3/3.
-White becomes 0 Credits.
+Credits become 0.
 ```
 
 Example:
@@ -450,16 +463,23 @@ Green becomes 0/2.
 
 When Ship occurs, spend Purple pips.
 
-Each pip Ships one Good. Shipped Goods generate Galactic Credits; they do not
-score points.
+Each pip Ships one Good. For each shipped Good, choose Trade or Consume.
 
-For matching, use the Good marker's color:
+Trade removes the Good and gains Galactic Credits by World/good type:
 
 - Regular Good: 1 Credit.
 - Novelty Good: 2 Credits.
 - Rare Elements or Genes Good: 3 Credits.
 - Alien Technology Good: 4 Credits.
 - Credits are unlimited chips.
+
+Consume removes the Good and claims VP chips from the pool. The current
+prototype uses the base Consume value plus converted matching bonuses:
+
+- 1 VP chip for consuming a Good.
+- +1 VP chip if the Good color matches the World color, or the Good is wild.
+- +1 VP chip if the Ship pip color matches the World color, or the Ship pip is
+  Purple.
 
 Purple is the normal Ship color.
 
@@ -468,8 +488,8 @@ Example:
 ```text
 Purple is 2/2.
 You have two Goods.
-Spend 1 Purple to Ship one Good for Credits.
-Spend 1 Purple to Ship the other Good for Credits.
+Spend 1 Purple to Trade one Novelty Good for 2 Credits.
+Spend 1 Purple to Consume the other Good for VP chips.
 Purple becomes 0/2.
 ```
 
@@ -621,17 +641,17 @@ Credit pays 1 cost. Developments may keep pip progress, but Credits are spent
 only to finish the Development. Worlds must still be paid in one shot; Credits
 cannot be left on a World as progress.
 
-White is the Credit pool. It is not assigned to phases. Each round, choose how
-to distribute available Credits among Develop payments, normal Settle payments,
-and Manage Empire recharge.
+Credits are unlimited chips. They are not assigned to phases. Each round,
+choose how to distribute available Credits among Develop payments, normal
+Settle payments, and Manage Empire recharge.
 
 During Manage Empire:
 
-1. Spend Galactic Credits to recharge non-White tracks.
+1. Spend Galactic Credits to recharge colored tracks.
 2. Each Credit recharges 1 current pip on one track.
 3. A track cannot recharge above its max.
 4. You may distribute Credits among tracks however you choose.
-5. If your Credit marker is at 0 after Manage Empire, set it to 1 as in the
+5. If your Credit count is at 0 after Manage Empire, set it to 1 as in the
    base game.
 
 There is no free recharge in the recommended version.
@@ -708,10 +728,12 @@ Gain Galactic Credits normally.
 Use normal Roll for the Galaxy end conditions:
 
 - any player has 12 or more tile squares in their tableau.
+- the VP chip pool is empty.
 
 Finish the round, then score normally:
 
 - World and Development VP;
+- VP chips;
 - 6-cost Development bonuses, converted as closely as possible.
 
 For a 6-cost Development bonus that refers to dice you own, use the battery
@@ -720,11 +742,11 @@ track that matches what the bonus is counting.
 Use this conversion:
 
 - If a bonus counts dice of a specific color, count that color's max pips.
-- If a bonus counts total dice owned, count total max pips across non-White
-  die tracks.
+- If a bonus counts total dice owned, count total max pips across colored die
+  tracks.
 - If a bonus counts different colors of dice, count color presence instead:
   each color track with max above 0 counts once.
-- White is Credits, not owned dice, unless the bonus explicitly counts Credits.
+- Credits are not owned dice, unless the bonus explicitly counts Credits.
 - Yellow counts as present only if you have gained at least one Alien Technology
   pip.
 
@@ -736,7 +758,7 @@ Galactic Bankers         +Purple max plus remaining Credits.
 Galactic Exchange        +different World colors plus color tracks present.
 Galactic Federation      +1 VP per Development.
 Galactic Renaissance     +completed tiles / 2, rounded down, plus World colors.
-Galactic Reserves        +current non-White pips / 3, rounded down.
+Galactic Reserves        +current colored pips / 3, rounded down.
 Mining League            +Rare Worlds plus Brown max.
 New Economy              +production Worlds.
 New Galactic Order       +Red max.
@@ -936,7 +958,7 @@ Brown   2/2
 Red     2/2
 Green   2/2
 Purple  2/2
-White   1 Credit
+Credits 1
 Yellow  0/0
 ```
 
@@ -997,7 +1019,7 @@ Brown   1/2
 Red     2/3
 Green   3/3
 Purple  2/2
-White   1 Credit
+Credits 1
 Yellow  0/0
 ```
 
