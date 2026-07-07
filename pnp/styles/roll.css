@@ -133,6 +133,8 @@ body {
 .green .phase { color: var(--green); }
 .purple .color,
 .purple .phase { color: var(--purple); }
+.white .color,
+.white .phase { color: var(--muted); }
 .yellow .color,
 .yellow .phase { color: #8a6400; }
 
@@ -141,6 +143,7 @@ body {
 .red .spaces b { border-color: var(--red); }
 .green .spaces b { border-color: var(--green); }
 .purple .spaces b { border-color: var(--purple); }
+.white .spaces b { border-color: #9aa1aa; }
 .yellow .spaces b { border-color: var(--yellow); }
 
 .battery-board footer {
@@ -409,7 +412,7 @@ body {
 
 .marker-grid {
   display: grid;
-  grid-template-columns: repeat(7, 0.7in);
+  grid-template-columns: repeat(6, 0.7in);
   gap: 0.12in;
 }
 
@@ -430,6 +433,7 @@ body {
 .marker.red { border-color: var(--red); color: var(--red); }
 .marker.green { border-color: var(--green); color: var(--green); }
 .marker.purple { border-color: var(--purple); color: var(--purple); }
+.marker.white { border-color: #9aa1aa; color: var(--muted); }
 .marker.yellow { border-color: var(--yellow); color: #8a6400; }
 
 .setup-grid {

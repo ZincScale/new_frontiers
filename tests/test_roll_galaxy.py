@@ -1,6 +1,6 @@
 from roll_galaxy.engine import BatteryConfig, BatteryGame
 from roll_galaxy.model import BuildSlot, DieColor, Phase, Tile, TileKind
-from roll_galaxy.solo import BatterySoloGame, SOLO_CAMPAIGNS, SOLO_WIN_CONDITION_MAP
+from roll_galaxy.solo import BatterySoloGame, SOLO_CAMPAIGNS, SOLO_DIFFICULTY_MAP, SOLO_WIN_CONDITION_MAP
 from roll_galaxy.tiles import HOME_WORLDS, NON_START_TILES, START_FACTION_PAIRS
 
 
@@ -18,29 +18,31 @@ def test_gain_die_pips_color_track_up_to_max_six():
     assert red.maximum == 6
 
 
-def test_spending_phase_uses_native_color_before_white():
+def test_red_track_is_persistent_military_level_not_spent():
     game = BatteryGame(seed=2)
     player = game.players[0]
-    player.tracks[DieColor.RED].current = 1
-    player.tracks[DieColor.WHITE].current = 3
+    player.credits = 0
+    player.tracks[DieColor.RED].current = 2
+    player.tracks[DieColor.RED].maximum = 2
+    player.world_stack = [BuildSlot(Tile("rebel-test", "Rebel Test World", TileKind.WORLD, 2, 2, grants=(DieColor.RED,)))]
 
-    spent = game.spend_phase_pip(player, Phase.SETTLE)
+    game.resolve_phase(player, Phase.SETTLE)
 
-    assert spent is DieColor.RED
-    assert player.tracks[DieColor.RED].current == 0
-    assert player.tracks[DieColor.WHITE].current == 3
+    assert player.world_stack == []
+    assert player.tracks[DieColor.RED].current == 3
+    assert player.tracks[DieColor.RED].maximum == 3
 
 
-def test_white_pip_can_pay_for_empty_phase_track():
+def test_white_track_mirrors_credit_total():
     game = BatteryGame(seed=3)
     player = game.players[0]
-    player.tracks[DieColor.BROWN].current = 0
-    player.tracks[DieColor.WHITE].current = 2
 
-    spent = game.spend_phase_pip(player, Phase.DEVELOP)
+    game.gain_credits(player, 3)
+    game.spend_credits(player, 2)
 
-    assert spent is DieColor.WHITE
-    assert player.tracks[DieColor.WHITE].current == 1
+    assert player.credits == 2
+    assert player.tracks[DieColor.WHITE].current == 2
+    assert player.tracks[DieColor.WHITE].maximum == game.config.max_credits
 
 
 def test_explore_scout_uses_pips_as_search_depth_but_keeps_one_tile():
@@ -129,6 +131,23 @@ def test_endgame_development_bonuses_score_strategy_payoffs():
     assert game.score(player) == 16
 
 
+def test_credit_track_does_not_count_as_owned_dice_for_endgame_bonuses():
+    game = BatteryGame(seed=35)
+    player = game.players[0]
+    exchange = Tile("galactic_exchange", "Galactic Exchange", TileKind.DEVELOPMENT, 6, 6, tags=("end_game",))
+    reserves = Tile("galactic_reserves", "Galactic Reserves", TileKind.DEVELOPMENT, 6, 6, tags=("end_game",))
+    player.tableau = [exchange, reserves]
+    for color in (DieColor.BLUE, DieColor.BROWN, DieColor.RED, DieColor.GREEN, DieColor.PURPLE):
+        player.tracks[color].maximum = 1
+        player.tracks[color].current = 1
+    player.tracks[DieColor.YELLOW].maximum = 0
+    player.tracks[DieColor.YELLOW].current = 0
+    game.set_credits(player, 6)
+
+    assert game.endgame_tile_bonus(player, exchange) == 5
+    assert game.endgame_tile_bonus(player, reserves) == 1
+
+
 def test_completed_world_grants_pip_instead_of_new_worker_die():
     game = BatteryGame(seed=4)
     player = game.players[0]
@@ -141,21 +160,22 @@ def test_completed_world_grants_pip_instead_of_new_worker_die():
     assert player.tracks[DieColor.GREEN].current == before + 1
 
 
-def test_settle_spends_track_pips_to_build_world():
+def test_normal_settle_spends_credits_not_red_military_level():
     game = BatteryGame(seed=5)
     player = game.players[0]
-    player.credits = 0
+    game.set_credits(player, 2)
     player.tracks[DieColor.RED].current = 2
     player.tracks[DieColor.RED].maximum = 3
-    player.tracks[DieColor.WHITE].current = 0
-    player.world_stack = [BuildSlot(Tile("w-test", "Test World", TileKind.WORLD, 2, 1, grants=(DieColor.RED,)))]
+    player.world_stack = [BuildSlot(Tile("w-test", "Test World", TileKind.WORLD, 2, 1, grants=(DieColor.BLUE,), world_color="Novelty"))]
 
     game.resolve_phase(player, Phase.SETTLE)
 
     assert player.world_stack == []
     assert player.completed_tiles == 1
-    assert player.tracks[DieColor.RED].current == 1
-    assert player.tracks[DieColor.RED].maximum == 4
+    assert player.tracks[DieColor.RED].current == 2
+    assert player.tracks[DieColor.RED].maximum == 3
+    assert player.credits == 0
+    assert player.tracks[DieColor.WHITE].current == 0
 
 
 def test_develop_can_use_credits_to_finish_tile_in_one_shot():
@@ -207,13 +227,13 @@ def test_credits_recharge_depleted_tracks_and_record_spending():
 def test_free_recharge_can_be_tuned_separately_from_credits():
     game = BatteryGame(seed=7, config=BatteryConfig(minimum_recharge=1))
     player = game.players[0]
-    player.tracks[DieColor.RED].current = 0
-    player.tracks[DieColor.RED].maximum = 3
+    player.tracks[DieColor.BROWN].current = 0
+    player.tracks[DieColor.BROWN].maximum = 3
     player.credits = 0
 
     game.manage_empire(player)
 
-    assert player.tracks[DieColor.RED].current == 1
+    assert player.tracks[DieColor.BROWN].current == 1
     assert player.free_recharged == 1
     assert player.credits_spent == 0
     assert player.credits == 1
@@ -278,6 +298,23 @@ def test_setup_uses_real_start_tiles_and_initial_construction_tiles():
     assert len(player.dev_stack) == 1
     assert len(player.world_stack) == 1
     assert len(player.tableau) == 3
+
+
+def test_default_multiplayer_vp_pool_scales_for_two_player_games():
+    two_player = BatteryGame([("P1", "balanced"), ("P2", "builder")], seed=35)
+    three_player = BatteryGame([("P1", "balanced"), ("P2", "builder"), ("P3", "settler")], seed=36)
+    overridden = BatteryGame(
+        [("P1", "balanced"), ("P2", "builder")],
+        seed=37,
+        config=BatteryConfig(vp_pool_per_player=12),
+    )
+
+    assert two_player.vp_pool_per_player == 8
+    assert two_player.vp_pool == 16
+    assert three_player.vp_pool_per_player == 12
+    assert three_player.vp_pool == 36
+    assert overridden.vp_pool_per_player == 12
+    assert overridden.vp_pool == 24
 
 
 def test_yellow_ship_mode_counts_as_ship_capacity():
@@ -438,15 +475,22 @@ def test_solo_campaign_filters_to_campaign_conditions():
 
 
 def test_solo_score_only_thresholds_are_retuned_for_one_shot_builds():
-    assert SOLO_WIN_CONDITION_MAP["great"].min_score == 45
-    assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 50
-    assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 54
-    assert SOLO_WIN_CONDITION_MAP["builder"].min_score == 38
+    assert SOLO_WIN_CONDITION_MAP["great"].min_score == 31
+    assert SOLO_WIN_CONDITION_MAP["triumphant"].min_score == 36
+    assert SOLO_WIN_CONDITION_MAP["epic"].min_score == 42
+    assert SOLO_WIN_CONDITION_MAP["builder"].min_score == 32
     assert SOLO_WIN_CONDITION_MAP["builder"].min_completed_tiles == 8
     assert SOLO_WIN_CONDITION_MAP["colonizer"].min_worlds == 6
-    assert SOLO_WIN_CONDITION_MAP["industrial"].min_max_capacity == 18
+    assert SOLO_WIN_CONDITION_MAP["industrial"].min_max_capacity == 14
     assert SOLO_WIN_CONDITION_MAP["military"].min_red_capacity == 4
     assert SOLO_WIN_CONDITION_MAP["discovery"].min_blue_capacity == 4
+
+
+def test_solo_difficulty_tiers_have_distinct_score_targets():
+    assert SOLO_DIFFICULTY_MAP["easy"].great_score == 23
+    assert SOLO_DIFFICULTY_MAP["normal"].great_score == 31
+    assert SOLO_DIFFICULTY_MAP["advanced"].great_score == 36
+    assert SOLO_DIFFICULTY_MAP["very_hard"].great_score == 42
 
 
 def test_solo_campaign_conditions_do_not_repeat_within_sheet():

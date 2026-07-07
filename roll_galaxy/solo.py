@@ -30,22 +30,53 @@ class SoloWinCondition:
     min_red_capacity: int = 0
 
 
-SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = (
-    SoloWinCondition("great", "Great", 45),
-    SoloWinCondition("triumphant", "Triumphant", 50),
-    SoloWinCondition("epic", "Epic", 54),
-    SoloWinCondition("builder", "Builder", 38, min_completed_tiles=8),
-    SoloWinCondition("developer", "Developer", 38, min_developments=5),
-    SoloWinCondition("colonizer", "Colonizer", 38, min_worlds=6),
-    SoloWinCondition("satisfied_populace", "Satisfied Populace", 38, min_vp_chips=11),
-    SoloWinCondition("industrial", "Industrial", 38, min_max_capacity=18),
-    SoloWinCondition("production", "Production", 38, min_production_worlds=4),
-    SoloWinCondition("diverse", "Diverse", 38, min_distinct_world_colors=4),
-    SoloWinCondition("novelty", "Novelty", 38, min_novelty_worlds=2),
-    SoloWinCondition("rare", "Rare Elements", 38, min_rare_worlds=2),
-    SoloWinCondition("alien", "Alien Contact", 38, min_alien_worlds=1),
-    SoloWinCondition("military", "Military", 38, min_red_capacity=4),
-    SoloWinCondition("discovery", "Discovery", 38, min_blue_capacity=4),
+@dataclass(frozen=True)
+class SoloDifficulty:
+    key: str
+    label: str
+    great_score: int
+    triumphant_score: int
+    epic_score: int
+    named_score: int
+    industrial_capacity: int
+
+
+SOLO_DIFFICULTIES: tuple[SoloDifficulty, ...] = (
+    SoloDifficulty("easy", "Easy", 23, 30, 36, 24, 12),
+    SoloDifficulty("normal", "Normal", 31, 36, 42, 32, 14),
+    SoloDifficulty("advanced", "Advanced", 36, 42, 48, 36, 15),
+    SoloDifficulty("very_hard", "Very Hard", 42, 48, 54, 40, 16),
+)
+
+SOLO_DIFFICULTY_MAP: dict[str, SoloDifficulty] = {
+    difficulty.key: difficulty for difficulty in SOLO_DIFFICULTIES
+}
+DEFAULT_SOLO_DIFFICULTY = "normal"
+
+
+def solo_win_conditions(difficulty: SoloDifficulty) -> tuple[SoloWinCondition, ...]:
+    named = difficulty.named_score
+    return (
+        SoloWinCondition("great", "Great", difficulty.great_score),
+        SoloWinCondition("triumphant", "Triumphant", difficulty.triumphant_score),
+        SoloWinCondition("epic", "Epic", difficulty.epic_score),
+        SoloWinCondition("builder", "Builder", named, min_completed_tiles=8),
+        SoloWinCondition("developer", "Developer", named, min_developments=5),
+        SoloWinCondition("colonizer", "Colonizer", named, min_worlds=6),
+        SoloWinCondition("satisfied_populace", "Satisfied Populace", named, min_vp_chips=11),
+        SoloWinCondition("industrial", "Industrial", named, min_max_capacity=difficulty.industrial_capacity),
+        SoloWinCondition("production", "Production", named, min_production_worlds=4),
+        SoloWinCondition("diverse", "Diverse", named, min_distinct_world_colors=4),
+        SoloWinCondition("novelty", "Novelty", named, min_novelty_worlds=2),
+        SoloWinCondition("rare", "Rare Elements", named, min_rare_worlds=2),
+        SoloWinCondition("alien", "Alien Contact", named, min_alien_worlds=1),
+        SoloWinCondition("military", "Military", named, min_red_capacity=4),
+        SoloWinCondition("discovery", "Discovery", named, min_blue_capacity=4),
+    )
+
+
+SOLO_WIN_CONDITIONS: tuple[SoloWinCondition, ...] = solo_win_conditions(
+    SOLO_DIFFICULTY_MAP[DEFAULT_SOLO_DIFFICULTY]
 )
 
 SOLO_ROUNDS = 12
@@ -108,8 +139,13 @@ class BatterySoloGame:
         condition: str = "all",
         campaign: Optional[str] = None,
         dummy_count: int = 2,
+        difficulty: str = DEFAULT_SOLO_DIFFICULTY,
     ):
         self.condition_filter = condition
+        self.difficulty = SOLO_DIFFICULTY_MAP[difficulty]
+        self.condition_map = {
+            condition.name: condition for condition in solo_win_conditions(self.difficulty)
+        }
         self.campaign = SOLO_CAMPAIGN_MAP[campaign] if campaign else None
         self.dummy_count = dummy_count
         base_config = config or BatteryConfig()
@@ -236,18 +272,24 @@ class BatterySoloGame:
 
     def active_conditions(self) -> tuple[SoloWinCondition, ...]:
         if self.campaign is not None:
-            return self.campaign.conditions
+            return tuple(self.condition_map[name] for name in self.campaign.condition_names)
         if self.condition_filter == "all":
-            return SOLO_WIN_CONDITIONS
-        return (SOLO_WIN_CONDITION_MAP[self.condition_filter],)
+            return tuple(self.condition_map.values())
+        return (self.condition_map[self.condition_filter],)
 
     def human_summary(self):
         summary = self.game.final_scores()[0][2]
         summary = dict(summary)
         summary["vp_chips"] = self.player.vp_chips
-        summary["max_capacity"] = sum(track.maximum for track in self.player.tracks.values())
+        summary["max_capacity"] = sum(
+            track.maximum
+            for color, track in self.player.tracks.items()
+            if color is not DieColor.WHITE
+        )
         summary.update(self.tableau_summary())
         summary["condition_filter"] = self.condition_filter
+        summary["difficulty"] = self.difficulty.key
+        summary["difficulty_name"] = self.difficulty.label
         summary["campaign"] = self.campaign.key if self.campaign else None
         summary["campaign_name"] = self.campaign.label if self.campaign else None
         satisfied = []
@@ -307,6 +349,7 @@ def run_one(
     config: BatteryConfig,
     condition: str,
     dummy_count: int,
+    difficulty: str,
     campaign: Optional[str] = None,
 ):
     game = BatterySoloGame(
@@ -316,6 +359,7 @@ def run_one(
         condition=condition,
         campaign=campaign,
         dummy_count=dummy_count,
+        difficulty=difficulty,
     )
     scores, reports = game.play()
     return game, scores, reports
@@ -327,21 +371,22 @@ def main():
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--strategy", default="balanced")
     parser.add_argument("--condition", choices=("all", *SOLO_WIN_CONDITION_MAP), default="all")
+    parser.add_argument("--difficulty", choices=tuple(SOLO_DIFFICULTY_MAP), default=DEFAULT_SOLO_DIFFICULTY)
     parser.add_argument("--campaign", choices=tuple(SOLO_CAMPAIGN_MAP), default=None)
     parser.add_argument("--dummy-count", type=int, default=2)
     parser.add_argument("--max-track-capacity", type=int, default=6)
     parser.add_argument("--starting-capacity", type=int, default=2)
-    parser.add_argument("--starting-white-capacity", type=int, default=2)
     parser.add_argument("--starting-credits", type=int, default=1)
+    parser.add_argument("--max-credits", type=int, default=6)
     parser.add_argument("--free-recharge", type=int, default=0)
     parser.add_argument("--yellow-mode", choices=("ship", "alien"), default="alien")
     args = parser.parse_args()
 
     config = BatteryConfig(
         starting_capacity=args.starting_capacity,
-        starting_white_capacity=args.starting_white_capacity,
         max_track_capacity=args.max_track_capacity,
         starting_credits=args.starting_credits,
+        max_credits=args.max_credits,
         minimum_recharge=args.free_recharge,
         yellow_mode=args.yellow_mode,
     )
@@ -369,6 +414,7 @@ def main():
                     config,
                     args.condition,
                     args.dummy_count,
+                    args.difficulty,
                     args.campaign,
                 )
                 summary = scores[0][2]
@@ -403,6 +449,7 @@ def main():
             config,
             args.condition,
             args.dummy_count,
+            args.difficulty,
         )
         last_game = game
         last_scores = scores
@@ -422,6 +469,7 @@ def main():
     print(f"Games: {args.games}")
     print(f"Strategy: {args.strategy}")
     print(f"Condition filter: {args.condition}")
+    print(f"Difficulty: {SOLO_DIFFICULTY_MAP[args.difficulty].label}")
     if args.campaign:
         print(f"Campaign: {SOLO_CAMPAIGN_MAP[args.campaign].label}")
         print(f"Campaign wins: {campaign_wins / args.games:.1%}")

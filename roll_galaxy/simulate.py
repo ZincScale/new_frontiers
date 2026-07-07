@@ -25,11 +25,11 @@ def main():
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--max-track-capacity", type=int, default=6)
     parser.add_argument("--starting-capacity", type=int, default=2)
-    parser.add_argument("--starting-white-capacity", type=int, default=2)
     parser.add_argument("--starting-credits", type=int, default=1)
+    parser.add_argument("--max-credits", type=int, default=6)
     parser.add_argument("--free-recharge", type=int, default=0)
     parser.add_argument("--yellow-mode", choices=("ship", "alien"), default="alien")
-    parser.add_argument("--vp-pool-per-player", type=int, default=16)
+    parser.add_argument("--vp-pool-per-player", type=int, default=None)
     parser.add_argument("--max-rounds", type=int, default=40)
     parser.add_argument("--fixed-seats", action="store_true")
     parser.add_argument(
@@ -50,9 +50,9 @@ def main():
 
     config = BatteryConfig(
         starting_capacity=args.starting_capacity,
-        starting_white_capacity=args.starting_white_capacity,
         max_track_capacity=args.max_track_capacity,
         starting_credits=args.starting_credits,
+        max_credits=args.max_credits,
         minimum_recharge=args.free_recharge,
         yellow_mode=args.yellow_mode,
         vp_pool_per_player=args.vp_pool_per_player,
@@ -91,18 +91,26 @@ def main():
                 "completed_tiles",
             ):
                 metrics[strategy][key] += summary[key]
-            metrics[strategy]["current_capacity"] += sum(current for current, _maximum in summary["tracks"].values())
-            metrics[strategy]["max_capacity"] += sum(maximum for _current, maximum in summary["tracks"].values())
+            phase_tracks = {
+                color: values
+                for color, values in summary["tracks"].items()
+                if color != "white"
+            }
+            metrics[strategy]["current_capacity"] += sum(current for current, _maximum in phase_tracks.values())
+            metrics[strategy]["max_capacity"] += sum(maximum for _current, maximum in phase_tracks.values())
 
     print(f"Games: {args.games}")
     print(f"Players: {', '.join(args.players)}")
     print(f"Starting capacity: {config.starting_capacity}")
-    print(f"Starting white capacity: {config.starting_white_capacity}")
     print(f"Max track capacity: {config.max_track_capacity}")
     print(f"Starting credits: {config.starting_credits}")
+    print(f"Max credits: {config.max_credits}")
     print(f"Free recharge: {config.minimum_recharge}")
     print(f"Yellow mode: {config.yellow_mode}")
-    print(f"VP pool per player: {config.vp_pool_per_player}")
+    vp_pool_per_player = config.vp_pool_per_player
+    if vp_pool_per_player is None:
+        vp_pool_per_player = 8 if len(specs) == 2 else 12
+    print(f"VP pool per player: {vp_pool_per_player}")
     print(f"Average rounds: {sum(rounds) / len(rounds):.1f}")
     print()
     print("Wins")

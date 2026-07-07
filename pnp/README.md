@@ -28,6 +28,8 @@ The player boards, aid sheets, and Dummy phase cards are formatted for letter pa
 - 1 combined solo guide / campaign aid sheet
 - 5 solo Dummy phase cards
 - printable max markers and setup strips
+- Red is persistent Military level; White is the Credit track
+- multiplayer VP pool is 8/player at 2p and 12/player at 3p+
 
 ## Files
 
@@ -59,7 +61,8 @@ Credits pay Develop/Settle costs and Good markers track produced Goods.
 ## Roll Solo Tuning
 
 The Roll Phase Battery solo mode uses a 12-round clock with two Dummy phase
-cards per round. Score-only win conditions are Great at 45+ VP, Triumphant at
-50+ VP, and Epic at 54+ VP. Named win conditions require 38+ VP plus their mark.
-Campaign sheets combine those into arcs such as Outreach, Industrial Base,
-Sector Survey, Alien Contact, and Mastery.
+cards per round. Solo has Easy, Normal, Advanced, and Very Hard threshold tiers:
+Easy targets roughly 90% single-condition success, Normal about 50-60%, and
+Advanced / Very Hard below 50%. Campaign sheets combine named conditions into
+arcs such as Outreach, Industrial Base, Sector Survey, Alien Contact, and
+Mastery.

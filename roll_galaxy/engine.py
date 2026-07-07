@@ -104,13 +104,13 @@ WORLD_FIRST_STRATEGIES = {
 @dataclass(frozen=True)
 class BatteryConfig:
     starting_capacity: int = 2
-    starting_white_capacity: int = 2
     max_track_capacity: int = 6
     starting_credits: int = 1
+    max_credits: int = 6
     minimum_recharge: int = 0
     yellow_mode: str = "alien"
     target_tableau_squares: int = 12
-    vp_pool_per_player: int = 16
+    vp_pool_per_player: Optional[int] = None
     max_rounds: int = 40
 
 
@@ -133,7 +133,8 @@ class BatteryGame:
         self.config = config or BatteryConfig()
         specs = list(players or [("P1", "builder"), ("P2", "producer")])
         self.players = [self.make_player(name, strategy) for name, strategy in specs]
-        self.vp_pool = self.config.vp_pool_per_player * len(self.players)
+        self.vp_pool_per_player = self.effective_vp_pool_per_player(len(self.players))
+        self.vp_pool = self.vp_pool_per_player * len(self.players)
         self.round_number = 0
         self.tile_bag = list(SAMPLE_TILES)
         self.rng.shuffle(self.tile_bag)
@@ -161,11 +162,16 @@ class BatteryGame:
             player.tracks[color] = CapacityTrack(color, self.config.starting_capacity, self.config.starting_capacity)
         player.tracks[DieColor.WHITE] = CapacityTrack(
             DieColor.WHITE,
-            self.config.starting_white_capacity,
-            self.config.starting_white_capacity,
+            self.config.starting_credits,
+            self.config.max_credits,
         )
         player.tracks[DieColor.YELLOW] = CapacityTrack(DieColor.YELLOW, 0, 0)
         return player
+
+    def effective_vp_pool_per_player(self, player_count: int) -> int:
+        if self.config.vp_pool_per_player is not None:
+            return self.config.vp_pool_per_player
+        return 8 if player_count == 2 else 12
 
     def play(self):
         reports = []
@@ -219,9 +225,14 @@ class BatteryGame:
         if phase is Phase.PRODUCE:
             if self.available_capacity(player, phase) <= 0:
                 return -20
-            return bias + max(0, self.producible_world_count(player) - len(player.goods)) * 3
+            empty_worlds = self.producible_world_count(player) - len(player.goods)
+            if empty_worlds <= 0:
+                return -20
+            return bias + empty_worlds * 3
         if phase is Phase.SHIP:
             if self.available_capacity(player, phase) <= 0:
+                return -20
+            if not player.goods:
                 return -20
             return bias + len(player.goods) * 5 + int(player.credits <= 2)
         raise ValueError(f"unknown phase: {phase}")
@@ -285,10 +296,14 @@ class BatteryGame:
 
     def phase_colors(self, player: Player, phase: Phase) -> tuple[DieColor, ...]:
         if self.config.yellow_mode == "ship" and phase is Phase.SHIP:
-            return (DieColor.PURPLE, DieColor.YELLOW, DieColor.WHITE)
+            return (DieColor.PURPLE, DieColor.YELLOW)
         if self.config.yellow_mode == "alien" and self.has_alien_work(player, phase):
-            return (PHASE_COLOR[phase], DieColor.YELLOW, DieColor.WHITE)
-        return (PHASE_COLOR[phase], DieColor.WHITE)
+            if phase is Phase.SETTLE:
+                return (DieColor.YELLOW,)
+            return (PHASE_COLOR[phase], DieColor.YELLOW)
+        if phase is Phase.SETTLE:
+            return ()
+        return (PHASE_COLOR[phase],)
 
     def has_alien_work(self, player: Player, phase: Phase) -> bool:
         if phase is Phase.DEVELOP:
@@ -477,7 +492,7 @@ class BatteryGame:
         phase = Phase.DEVELOP if tile.kind is TileKind.DEVELOPMENT else Phase.SETTLE
         if not self.can_complete_build(player, phase, stack):
             return False
-        spent_pips = self.spend_build_cost(player, phase, tile.cost)
+        spent_pips = self.spend_build_cost(player, phase, tile)
         player.used_pips += spent_pips
         self.complete_tile(player, stack.pop(0).tile)
         return True
@@ -488,20 +503,27 @@ class BatteryGame:
         tile = stack[0].tile
         if not self.can_complete_build(player, phase, stack):
             return
-        spent_pips = self.spend_build_cost(player, phase, tile.cost)
+        spent_pips = self.spend_build_cost(player, phase, tile)
         player.used_pips += spent_pips
         self.complete_tile(player, stack.pop(0).tile)
 
     def can_complete_build(self, player: Player, phase: Phase, stack: list[BuildSlot]) -> bool:
         if not stack:
             return False
-        return stack[0].tile.cost <= self.available_build_funds(player, phase)
+        tile = stack[0].tile
+        if phase is Phase.SETTLE and self.is_military_world(tile):
+            return self.military_level(player) >= tile.cost
+        return tile.cost <= self.available_build_funds(player, phase, tile)
 
-    def available_build_funds(self, player: Player, phase: Phase) -> int:
+    def available_build_funds(self, player: Player, phase: Phase, tile: Tile) -> int:
+        if phase is Phase.SETTLE and self.is_military_world(tile):
+            return self.military_level(player)
         return player.credits + self.available_capacity(player, phase)
 
-    def spend_build_cost(self, player: Player, phase: Phase, cost: int) -> int:
-        remaining = cost
+    def spend_build_cost(self, player: Player, phase: Phase, tile: Tile) -> int:
+        if phase is Phase.SETTLE and self.is_military_world(tile):
+            return 0
+        remaining = tile.cost
         spent_pips = 0
         for color in self.phase_colors(player, phase):
             if remaining <= 0:
@@ -512,9 +534,20 @@ class BatteryGame:
             remaining -= spent
             spent_pips += spent
         if remaining > 0:
-            player.credits -= remaining
-            player.credits_spent += remaining
+            self.spend_credits(player, remaining)
         return spent_pips
+
+    def is_military_world(self, tile: Tile) -> bool:
+        if tile.kind is not TileKind.WORLD:
+            return False
+        return (
+            DieColor.RED in tile.grants
+            or "rebel" in tile.id
+            or "rebel" in tile.name.lower()
+        )
+
+    def military_level(self, player: Player) -> int:
+        return self.track(player, DieColor.RED).maximum
 
     def complete_tile(self, player: Player, tile: Tile):
         player.tableau.append(tile)
@@ -538,17 +571,27 @@ class BatteryGame:
     def gain_die(self, player: Player, color: DieColor):
         track = self.track(player, color)
         track.maximum = min(self.config.max_track_capacity, track.maximum + 1)
-        track.current = min(track.maximum, track.current + 1)
+        if color is DieColor.RED:
+            track.current = track.maximum
+        else:
+            track.current = min(track.maximum, track.current + 1)
 
     def lose_die(self, player: Player, avoid: tuple[DieColor, ...] = ()):
-        candidates = [track for track in player.tracks.values() if track.maximum > 0 and track.color not in avoid]
+        candidates = [
+            track
+            for track in player.tracks.values()
+            if track.maximum > 0 and track.color not in avoid and track.color is not DieColor.WHITE
+        ]
         if not candidates:
-            candidates = [track for track in player.tracks.values() if track.maximum > 0]
+            candidates = [track for track in player.tracks.values() if track.maximum > 0 and track.color is not DieColor.WHITE]
         if not candidates:
             return False
         track = min(candidates, key=lambda item: (self.track_value(player, item.color), item.maximum, item.current))
         track.maximum -= 1
-        track.current = min(track.current, track.maximum)
+        if track.color is DieColor.RED:
+            track.current = track.maximum
+        else:
+            track.current = min(track.current, track.maximum)
         return True
 
     def add_windfall_good(self, player: Player, tile: Tile, color: DieColor):
@@ -600,18 +643,35 @@ class BatteryGame:
             if not self.recharge_best_track(player, 1):
                 player.blocked_recharge += player.credits
                 break
-            player.credits -= 1
-            player.credits_spent += 1
+            self.spend_credits(player, 1)
         if player.credits == 0:
-            player.credits = 1
+            self.set_credits(player, 1)
 
     def gain_credits(self, player: Player, amount: int):
         before = player.credits
-        player.credits = min(10, player.credits + amount)
+        self.set_credits(player, min(self.config.max_credits, player.credits + amount))
         player.credits_earned += player.credits - before
 
+    def spend_credits(self, player: Player, amount: int):
+        player.credits -= amount
+        player.credits_spent += amount
+        self.sync_credit_track(player)
+
+    def set_credits(self, player: Player, amount: int):
+        player.credits = max(0, min(self.config.max_credits, amount))
+        self.sync_credit_track(player)
+
+    def sync_credit_track(self, player: Player):
+        track = self.track(player, DieColor.WHITE)
+        track.maximum = self.config.max_credits
+        track.current = player.credits
+
     def recharge_best_track(self, player: Player, amount: int) -> bool:
-        candidates = [track for track in player.tracks.values() if track.current < track.maximum]
+        candidates = [
+            track
+            for track in player.tracks.values()
+            if track.current < track.maximum and track.color not in (DieColor.RED, DieColor.WHITE)
+        ]
         if not candidates:
             return False
         track = max(candidates, key=lambda item: (self.track_value(player, item.color), item.maximum - item.current))
@@ -644,7 +704,8 @@ class BatteryGame:
         developments = [tableau_tile for tableau_tile in player.tableau if tableau_tile.kind is TileKind.DEVELOPMENT]
         production_worlds = [world for world in worlds if world.produces]
         world_colors = {world.world_color.strip().lower() for world in worlds if world.world_color.strip()}
-        color_presence = sum(1 for track in player.tracks.values() if track.maximum > 0)
+        die_tracks = [track for track in player.tracks.values() if track.color is not DieColor.WHITE]
+        color_presence = sum(1 for track in die_tracks if track.maximum > 0)
         if tile.id == "free_trade_association":
             return sum(1 for world in worlds if "novelty" in world.tags)
         if tile.id == "galactic_bankers":
@@ -656,7 +717,7 @@ class BatteryGame:
         if tile.id == "galactic_renaissance":
             return max(0, player.completed_tiles // 2) + len(world_colors)
         if tile.id == "galactic_reserves":
-            return sum(track.current for track in player.tracks.values()) // 3
+            return sum(track.current for track in die_tracks) // 3
         if tile.id == "mining_league":
             return sum(1 for world in worlds if "rare_elemental" in world.tags) + player.tracks[DieColor.BROWN].maximum
         if tile.id == "new_economy":
