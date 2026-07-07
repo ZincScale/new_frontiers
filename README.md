@@ -4,10 +4,59 @@ This repository contains a Python rules prototype for a small-box dice galaxy
 game with a generic die-face upgrade system, plus Roll for the Galaxy variant
 prototypes.
 
+## Roll For The Galaxy Phase Battery Variant
+
+The active Roll prototype is being backed up to a minimal no-roll variant:
+keep phase selection, but replace rolled dice with deterministic phase
+batteries. Selected phases resolve in normal order:
+
+```text
+Explore -> Develop -> Settle -> Produce -> Ship
+```
+
+Players may only select a phase if they have at least one ready pip for that
+phase. In solo and 2p games, each player selects two eligible phases; at 3p+
+each player selects one eligible phase. During selected phases, players act in
+turn order, spending usable pips or resources or passing. White dice/tracks are
+unused; Credits are unlimited chips like base Roll. Red max is Military level;
+current Red is Military readiness and is exhausted when settling a Military
+World.
+
+Current playtest tuning starts colored tracks at `3/3` and uses a VP chip pool
+of `7` per player.
+
+Rules draft:
+
+- `docs/roll_phase_battery_rules.md`
+- `docs/roll_phase_battery_rules.pdf`
+
+Print-and-play files:
+
+- `pnp/roll-phase-battery.html`
+- `pnp/roll-phase-battery.pdf`
+
+Run the active multiplayer simulator:
+
+```bash
+python3 -m phase_battery.simulate --games 100 --players P1:balanced P2:builder P3:settler P4:producer P5:shipper
+```
+
+Compare the stricter Red tuning knob:
+
+```bash
+python3 -m phase_battery.simulate --games 100 --red-grants-max-only --players P1:mining P2:producer P3:military P4:alien P5:builder
+```
+
+Run the active solo simulator:
+
+```bash
+python3 -m phase_battery.solo --games 100 --strategy balanced
+```
+
 ## Roll For The Galaxy Mancala Dice Variant
 
-The main Roll prototype replaces the Dice Cup, roll, and assign steps with a
-five-section mancala loop:
+The parked mancala Roll prototype replaces the Dice Cup, roll, and assign steps
+with a five-section mancala loop:
 
 ```text
 Explore -> Develop -> Settle -> Produce -> Ship -> Explore
@@ -21,13 +70,11 @@ Rules draft:
 
 - `docs/roll_mancala_dice_design.md`
 - `docs/roll_mancala_dice_design.pdf`
-- `docs/roll_phase_battery_rules.md` for the archived phase-battery branch.
 
 Print-and-play files:
 
 - `pnp/roll-mancala.html`
 - `pnp/roll-mancala.pdf`
-- `pnp/roll-phase-battery.html` for the archived phase-battery branch.
 
 Run the mancala multiplayer simulator:
 
@@ -45,13 +92,13 @@ Run the mancala solo campaign simulator:
 python3 -m roll_mancala.solo --games 100 --strategy balanced --campaign outreach
 ```
 
-Run the archived phase-battery multiplayer simulator:
+Run the parked phase-battery predecessor simulator:
 
 ```bash
 python3 -m roll_galaxy.simulate --games 100 --players P1:balanced P2:builder P3:settler P4:shipper
 ```
 
-Run the archived phase-battery solo campaign simulator:
+Run the parked phase-battery predecessor solo campaign simulator:
 
 ```bash
 python3 -m roll_galaxy.solo --games 100 --strategy balanced --campaign outreach
