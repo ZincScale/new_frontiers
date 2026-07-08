@@ -890,9 +890,22 @@ Setup:
 
 Each campaign sheet has four win conditions. Play four games in a row. At the
 end of each game, mark exactly one satisfied condition on that campaign sheet
-that you have not already marked. If you cannot mark a new condition, you lose
-the campaign. If you mark all four conditions after four successive games, you
-win the campaign.
+that you have not already marked.
+
+Some named conditions are tied to a specific six-cost Development goal. To mark
+one of those conditions, you must:
+
+1. meet the condition's VP threshold;
+2. have committed the matching six-cost Development goal this game;
+3. fulfill that goal's named-condition requirement.
+
+The committed six-cost goal also scores normally: if fulfilled, score its
+converted bonus; if missed, lose 6 VP. Score-only conditions do not require a
+six-cost Development. Colonizer and Discovery are not currently tied to a
+six-cost Development and use only their printed condition.
+
+If you cannot mark a new condition, you lose the campaign. If you mark all four
+conditions after four successive games, you win the campaign.
 
 Choose a solo difficulty before the first game. These first-pass thresholds are
 calibrated for the 15-round solo cap, two player phase selections, two Dummy
@@ -909,44 +922,49 @@ Very Hard   42+    48+         54+   44+    23+ max pips
 Named win conditions:
 
 ```text
-Great       Score the difficulty's Great VP.
-Triumphant  Score the difficulty's Triumphant VP.
-Epic        Score the difficulty's Epic VP.
-Builder     Score the difficulty's Named VP and complete 8+ tiles.
-Developer   Score the difficulty's Named VP and have 4+ Developments.
-Colonizer   Score the difficulty's Named VP and have 5+ Worlds.
+Great       Score the difficulty's Great VP. No six-cost goal required.
+Triumphant  Score the difficulty's Triumphant VP. No six-cost goal required.
+Epic        Score the difficulty's Epic VP. No six-cost goal required.
+Builder     Named VP, Galactic Renaissance, and complete 8+ tiles.
+Developer   Named VP, Galactic Federation, and have 4+ Developments.
+Colonizer   Named VP and have 5+ Worlds. No six-cost goal required.
 Satisfied Populace
-            Score the difficulty's Named VP and have 4+ shipped Goods this game.
-Industrial  Score the difficulty's Named VP and have the difficulty's
-            Industrial max pips.
-Production  Score the difficulty's Named VP and have 4+ production Worlds.
-Diverse     Score the difficulty's Named VP and have 4+ different World colors.
-Novelty     Score the difficulty's Named VP and have 2+ Novelty Worlds.
+            Named VP, Galactic Bankers, and ship 4+ Goods this game.
+Industrial  Named VP, Galactic Reserves, and have the difficulty's Industrial
+            max pips.
+Production  Named VP, New Economy, and have 4+ production Worlds.
+Diverse     Named VP, System Diversification, and have 4+ different World
+            colors.
+Novelty     Named VP, Free Trade Association, and have 2+ Novelty Worlds.
 Rare Elements
-            Score the difficulty's Named VP and have 2+ Rare Worlds.
+            Named VP, Mining League, and have 2+ Rare Worlds.
 Alien Contact
-            Score the difficulty's Named VP and have 1+ Alien World.
-Military    Score the difficulty's Named VP and have Red 5.
-Discovery   Score the difficulty's Named VP and have Blue max 5.
+            Named VP, Galactic Exchange, and have 1+ Alien World.
+Military    Named VP, New Galactic Order, and have Red 5.
+Discovery   Named VP and have Blue max 5. No six-cost goal required.
 ```
 
 Campaign sheets:
 
 ```text
 Outreach
-Great, Colonizer, Builder, Discovery.
+Great, Colonizer, Builder / Galactic Renaissance, Discovery.
 
 Industrial Base
-Triumphant, Developer, Industrial, Production.
+Triumphant, Developer / Galactic Federation, Industrial / Galactic Reserves,
+Production / New Economy.
 
 Sector Survey
-Great, Diverse, Novelty, Rare Elements.
+Great, Diverse / System Diversification, Novelty / Free Trade Association,
+Rare Elements / Mining League.
 
 Alien Contact
-Triumphant, Alien Contact, Diverse, Discovery.
+Triumphant, Alien Contact / Galactic Exchange,
+Diverse / System Diversification, Discovery.
 
 Mastery
-Epic, Military, Industrial, Satisfied Populace.
+Epic, Military / New Galactic Order, Industrial / Galactic Reserves,
+Satisfied Populace / Galactic Bankers.
 ```
 
 For one-off practice, ignore the campaign sheet and simply note every condition

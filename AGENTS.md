@@ -56,8 +56,11 @@ Current main-rules direction:
   Satisfied Populace; Galactic Exchange = Alien Contact; Galactic Federation =
   Developer; Galactic Renaissance = Builder; Galactic Reserves = Industrial;
   Mining League = Rare Elements; New Economy = Production; New Galactic Order =
-  Military; System Diversification = Diverse. Still clarify whether multiple
-  players may choose the same goal from the `2 + player count` pool.
+  Military; System Diversification = Diverse. To mark one of those solo
+  campaign conditions, the player must score the named VP threshold, commit the
+  matching six-cost goal, and fulfill that goal's requirement. Still clarify
+  whether multiple players may choose the same goal from the
+  `2 + player count` pool.
 - Current playtest read: this is intentionally a soft brake. If Military still
   runs away, the next tuning knob is Red-grant Military Worlds increasing Red
   max only, with current Red gained later through recharge.
