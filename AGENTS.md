@@ -22,27 +22,43 @@ Current main-rules direction:
 - Secret phase selection is back. In solo and 2p, each player selects two
   eligible phases; at 3p+, each player selects one eligible phase. A phase is
   eligible only if the player has at least one ready pip for that phase.
-  Selected phases resolve in normal order.
+  Selected phases resolve in normal order. Phase selection itself does not
+  consume pips; pips are workers spent only when the selected phase resolves.
 - Unselected phases do not occur.
-- VP chip pool is back. Scoring is tableau VP + VP chips + converted 6-cost
-  Development bonuses. Current playtest tuning uses 7 VP chips per player and
+- VP chip pool is back. Current playtest tuning uses 7 VP chips per player and
   starting colored tracks at 3/3.
-- White dice/tracks are unused in the active minimal no-roll variant. Credits
-  are unlimited chips like base Roll, stored as a scalar count.
+- White dice/tracks are back as the Settle track for non-Military Worlds. Use
+  White pips as Settle workers for non-red Worlds. Credits are unlimited chips
+  like base Roll, stored as a scalar count.
 - Ship can Trade for Credits or Consume for VP chips. Current simulator
-  heuristic trades when Credits are low, then consumes.
+  heuristic trades when Credits are low, then consumes. Ship pips ship Goods;
+  current Trade values are Blue 3, Brown 4, Green 5, Yellow 6.
 - Solo uses the same low-player selected-phase model: the player selects two
   eligible phases, Dummy phase cards add selected phases and resolve their
   Dummy effects, and only selected phases occur. Current solo cap is 15 rounds
   with a 24-chip VP pool: 12 for the player and 12 for the Dummy seat.
 - Construction cards are parallel, not top-only. Developments can store pip
-  progress from Brown or eligible Yellow. Credits are spent on Develop only when
-  they complete the card. Multiple Developments can complete in one Develop
-  phase. Multiple Worlds can complete in one Settle phase, but each World is
-  still paid in one shot.
-- Red max is persistent Military level. Current Red is Military readiness:
-  settling a Military World requires Red max at least equal to cost and exhausts
-  1 current Red. Red current can be recharged with Credits.
+  progress from Brown or eligible Yellow. Multiple Developments can complete in
+  one Develop phase. Multiple Worlds can complete in one Settle phase. Explore
+  pips dig that many tiles from the bag; Develop pips develop; Produce pips
+  produce Goods on planets; Ship pips ship Goods.
+- Red pips are Military value/readiness. Settling a Military World uses Red as
+  the Military value and exhausts 1 Red pip after the settle.
+- Remove six-cost Developments from the normal bag. They are now endgame-goal
+  candidates: reveal/set aside 2 + player count six-cost Developments, each
+  player chooses 2, then after half the VP chips are gone or someone has 6
+  completed Developments/Worlds, each player chooses one of their two as their
+  endgame goal. The other returns to the Development market row, or its reverse
+  side can be used as a World. Explore may optionally take another six-cost
+  Development goal. A player loses 6 VP per chosen Development goal whose
+  conditions are not fulfilled. Current minimum requirements: Free Trade
+  Association 2 Novelty Worlds; Galactic Bankers Purple max + Credits 6;
+  Galactic Exchange World colors + track colors 6; Galactic Federation 4
+  Developments; Galactic Renaissance 8 completed tiles; Galactic Reserves 6
+  current non-White pips; Mining League 2 Rare Worlds; New Economy 4 production
+  Worlds; New Galactic Order Red max 5; System Diversification 4 World colors.
+  Still clarify whether multiple players may choose the same goal from the
+  `2 + player count` pool.
 - Current playtest read: this is intentionally a soft brake. If Military still
   runs away, the next tuning knob is Red-grant Military Worlds increasing Red
   max only, with current Red gained later through recharge.

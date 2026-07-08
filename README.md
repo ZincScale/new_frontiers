@@ -17,13 +17,15 @@ Explore -> Develop -> Settle -> Produce -> Ship
 Players may only select a phase if they have at least one ready pip for that
 phase. In solo and 2p games, each player selects two eligible phases; at 3p+
 each player selects one eligible phase. During selected phases, players act in
-turn order, spending usable pips or resources or passing. White dice/tracks are
-unused; Credits are unlimited chips like base Roll. Red max is Military level;
-current Red is Military readiness and is exhausted when settling a Military
-World.
+turn order, spending usable pips or passing. Selecting a phase
+does not spend pips. White is the Settle track for non-Military Worlds; Credits
+are unlimited chips like base Roll. Red pips are Military value/readiness:
+settling a Military World requires enough current Red, then exhausts 1 Red pip.
+Six-cost Developments are removed from the normal bag and used as delayed
+end-game goals.
 
-Current playtest tuning starts colored tracks at `3/3` and uses a VP chip pool
-of `7` per player.
+Current playtest tuning starts main tracks, including White, at `3/3` and uses
+a VP chip pool of `7` per player.
 
 Rules draft:
 

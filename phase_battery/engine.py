@@ -11,7 +11,7 @@ from roll_galaxy.tiles import HOME_WORLDS, NON_START_TILES, START_FACTION_PAIRS
 PHASE_COLOR: dict[Phase, DieColor] = {
     Phase.EXPLORE: DieColor.BLUE,
     Phase.DEVELOP: DieColor.BROWN,
-    Phase.SETTLE: DieColor.RED,
+    Phase.SETTLE: DieColor.WHITE,
     Phase.PRODUCE: DieColor.GREEN,
     Phase.SHIP: DieColor.PURPLE,
 }
@@ -116,6 +116,8 @@ class PhaseBatteryConfig:
     max_rounds: int = 40
     red_grants_current: bool = True
     construction_limit: int = 3
+    endgame_goal_pool_extra: int = 2
+    endgame_goal_penalty: int = 6
 
 
 @dataclass(frozen=True)
@@ -140,9 +142,17 @@ class PhaseBatteryGame:
         self.players = [self.make_player(name, strategy) for name, strategy in specs]
         self.vp_pool_per_player = self.effective_vp_pool_per_player(len(self.players))
         self.vp_pool = self.vp_pool_per_player * len(self.players)
+        self.starting_vp_pool = self.vp_pool
         self.round_number = 0
-        self.tile_bag = list(NON_START_TILES)
+        endgame_tiles = [tile for tile in NON_START_TILES if self.is_endgame_goal(tile)]
+        self.tile_bag = [tile for tile in NON_START_TILES if not self.is_endgame_goal(tile)]
         self.rng.shuffle(self.tile_bag)
+        self.rng.shuffle(endgame_tiles)
+        self.endgame_goal_market = endgame_tiles[: self.config.endgame_goal_pool_extra + len(self.players)]
+        self.extra_endgame_goals = endgame_tiles[self.config.endgame_goal_pool_extra + len(self.players) :]
+        self.goal_candidates: dict[str, list[Tile]] = {}
+        self.committed_goals: dict[str, list[Tile]] = {player.name: [] for player in self.players}
+        self.goal_commit_round: Optional[int] = None
         self._red_exhausts = {player.name: 0 for player in self.players}
 
         start_pairs = list(START_FACTION_PAIRS)
@@ -155,13 +165,15 @@ class PhaseBatteryGame:
             self.add_start_tile(player, home_worlds.pop())
             self.scout_tile(player, TileKind.DEVELOPMENT)
             self.scout_tile(player, TileKind.WORLD)
+        for player in self.players:
+            self.goal_candidates[player.name] = self.choose_goal_candidates(player, 2)
 
     def make_player(self, name: str, strategy: str) -> Player:
         if strategy not in STRATEGY_BIAS:
             raise ValueError(f"unknown strategy: {strategy}")
         player = Player(name=name, strategy=strategy, credits=self.config.starting_credits)
         player.tracks = {color: CapacityTrack(color=color) for color in DieColor}
-        for color in (DieColor.BLUE, DieColor.BROWN, DieColor.RED, DieColor.GREEN, DieColor.PURPLE):
+        for color in (DieColor.BLUE, DieColor.BROWN, DieColor.RED, DieColor.WHITE, DieColor.GREEN, DieColor.PURPLE):
             player.tracks[color] = CapacityTrack(
                 color=color,
                 current=self.config.starting_capacity,
@@ -196,6 +208,7 @@ class PhaseBatteryGame:
             if used == 0 and player.completed_tiles == before_completed[player.name]:
                 player.dead_rounds += 1
             self.manage_empire(player)
+        self.maybe_commit_goals()
 
         return RoundReport(
             self.round_number,
@@ -234,7 +247,7 @@ class PhaseBatteryGame:
         if phase is Phase.DEVELOP:
             return bool(player.dev_stack) and self.available_develop_pips(player) > 0
         if phase is Phase.SETTLE:
-            return bool(player.world_stack) and self.available_capacity(player, phase) > 0
+            return self.best_settle_target(player) is not None
         if phase is Phase.PRODUCE:
             return self.producible_world_count(player) > 0 and self.available_capacity(player, phase) > 0
         if phase is Phase.SHIP:
@@ -254,10 +267,10 @@ class PhaseBatteryGame:
             value += int(bool(player.dev_stack)) * 5
             value += min(6, self.available_develop_pips(player) * 2)
         elif phase is Phase.SETTLE:
-            if not player.world_stack or self.available_capacity(player, Phase.SETTLE) <= 0:
+            if not player.world_stack or self.best_settle_target(player) is None:
                 value -= 8
             value += int(bool(player.world_stack)) * 5
-            value += min(6, self.available_capacity(player, Phase.SETTLE) * 2)
+            value += min(6, self.available_settle_pips(player) * 2)
         elif phase is Phase.PRODUCE:
             if self.producible_world_count(player) <= 0 or self.available_capacity(player, phase) <= 0:
                 value -= 8
@@ -291,6 +304,15 @@ class PhaseBatteryGame:
 
     def resolve_explore_phase(self, player: Player):
         while self.track(player, DieColor.BLUE).current > 0:
+            if self.should_take_extra_goal(player):
+                if not self.spend_one(player, DieColor.BLUE):
+                    return
+                goal = self.take_extra_goal(player)
+                if goal is None:
+                    self.refund_pip(player, DieColor.BLUE)
+                    return
+                player.used_pips += 1
+                continue
             scout_kind = self.explore_scout_kind(player)
             if scout_kind is not None:
                 depth = self.explore_search_depth(player)
@@ -362,9 +384,6 @@ class PhaseBatteryGame:
                 self._red_exhausts[player.name] += 1
             else:
                 pips = self.spend_build_pips(player, Phase.SETTLE, tile)
-                remaining = tile.cost - pips
-                if remaining:
-                    self.spend_credits(player, remaining)
                 player.used_pips += pips
             player.world_stack.remove(build)
             self.complete_tile(player, tile)
@@ -399,10 +418,6 @@ class PhaseBatteryGame:
         pips = self.spend_build_pips(player, Phase.DEVELOP, build.tile, needed)
         build.progress += pips
         player.used_pips += pips
-        remaining = build.tile.cost - build.progress
-        if complete and remaining > 0:
-            self.spend_credits(player, remaining)
-            build.progress += remaining
 
     def available_develop_pips(self, player: Player) -> int:
         return sum(
@@ -456,16 +471,13 @@ class PhaseBatteryGame:
         raise ValueError(f"unknown worker phase: {phase}")
 
     def can_pay_develop(self, player: Player, tile: Tile, progress: int = 0) -> bool:
-        return progress + self.available_build_funds(player, Phase.DEVELOP, tile) >= tile.cost
+        return progress + self.available_build_pips(player, Phase.DEVELOP, tile) >= tile.cost
 
     def can_pay_normal_world(self, player: Player, tile: Tile) -> bool:
-        return self.available_build_funds(player, Phase.SETTLE, tile) >= tile.cost
+        return self.available_build_pips(player, Phase.SETTLE, tile) >= tile.cost
 
     def can_settle_military(self, player: Player, tile: Tile) -> bool:
-        return self.track(player, DieColor.RED).maximum >= tile.cost and self.track(player, DieColor.RED).current > 0
-
-    def available_build_funds(self, player: Player, phase: Phase, tile: Tile) -> int:
-        return player.credits + self.available_build_pips(player, phase, tile)
+        return self.track(player, DieColor.RED).current >= tile.cost
 
     def available_build_pips(self, player: Player, phase: Phase, tile: Tile) -> int:
         return sum(self.track(player, color).current for color in self.build_colors(player, phase, tile))
@@ -491,11 +503,16 @@ class PhaseBatteryGame:
             return tuple(colors)
         if phase is Phase.SETTLE:
             if self.config.yellow_mode == "alien" and self.is_alien_tile(tile):
-                return (DieColor.YELLOW,)
-            return ()
+                return (DieColor.WHITE, DieColor.YELLOW)
+            return (DieColor.WHITE,)
         raise ValueError(f"unknown build phase: {phase}")
 
     def phase_colors(self, player: Player, phase: Phase) -> tuple[DieColor, ...]:
+        if phase is Phase.SETTLE:
+            colors = [DieColor.WHITE, DieColor.RED]
+            if self.config.yellow_mode == "alien" and any(self.is_alien_tile(build.tile) for build in player.world_stack):
+                colors.append(DieColor.YELLOW)
+            return tuple(colors)
         if phase is Phase.PRODUCE:
             if self.config.yellow_mode == "alien" and any(self.is_alien_tile(tile) for tile in self.producible_worlds(player)):
                 return (DieColor.GREEN, DieColor.YELLOW)
@@ -510,6 +527,9 @@ class PhaseBatteryGame:
 
     def available_capacity(self, player: Player, phase: Phase) -> int:
         return sum(self.track(player, color).current for color in self.phase_colors(player, phase))
+
+    def available_settle_pips(self, player: Player) -> int:
+        return self.available_capacity(player, Phase.SETTLE)
 
     def spend_phase_pip(self, player: Player, phase: Phase) -> Optional[DieColor]:
         for color in self.phase_colors(player, phase):
@@ -558,6 +578,58 @@ class PhaseBatteryGame:
             -tile.cost,
             STRATEGY_BIAS[player.strategy][phase],
         )
+
+    def is_endgame_goal(self, tile: Tile) -> bool:
+        return tile.kind is TileKind.DEVELOPMENT and "end_game" in tile.tags
+
+    def choose_goal_candidates(self, player: Player, count: int) -> list[Tile]:
+        ranked = sorted(
+            self.endgame_goal_market,
+            key=lambda tile: (self.strategy_tile_value(player, tile), self.builder_endgame_fit(player, tile), tile.vp),
+            reverse=True,
+        )
+        return ranked[:count]
+
+    def should_take_extra_goal(self, player: Player) -> bool:
+        if not self.extra_endgame_goals:
+            return False
+        if player.strategy not in {"builder", "diverse"}:
+            return False
+        chosen_count = len(self.goal_candidates.get(player.name, [])) + len(self.committed_goals.get(player.name, []))
+        if chosen_count >= 3:
+            return False
+        return len(player.dev_stack) >= self.config.construction_limit or self.goal_commit_round is not None
+
+    def take_extra_goal(self, player: Player) -> Optional[Tile]:
+        if not self.extra_endgame_goals:
+            return None
+        goal = max(
+            self.extra_endgame_goals,
+            key=lambda tile: (self.strategy_tile_value(player, tile), self.builder_endgame_fit(player, tile), tile.vp),
+        )
+        self.extra_endgame_goals.remove(goal)
+        if self.goal_commit_round is None:
+            self.goal_candidates.setdefault(player.name, []).append(goal)
+        else:
+            self.committed_goals.setdefault(player.name, []).append(goal)
+        return goal
+
+    def maybe_commit_goals(self):
+        if self.goal_commit_round is not None:
+            return
+        if self.vp_pool > self.starting_vp_pool // 2 and all(player.completed_tiles < 6 for player in self.players):
+            return
+        self.goal_commit_round = self.round_number
+        for player in self.players:
+            candidates = self.goal_candidates.get(player.name, [])
+            if not candidates:
+                continue
+            chosen = max(
+                candidates,
+                key=lambda tile: (self.endgame_tile_bonus(player, tile), self.strategy_tile_value(player, tile), tile.vp),
+            )
+            self.committed_goals[player.name] = [chosen]
+            self.goal_candidates[player.name] = [chosen]
 
     def strategy_tile_value(self, player: Player, tile: Tile) -> int:
         strategy = player.strategy
@@ -691,16 +763,8 @@ class PhaseBatteryGame:
         return value
 
     def builder_endgame_plan_ids(self, player: Player) -> set[str]:
-        ids = {
-            tile.id
-            for tile in player.tableau
-            if tile.kind is TileKind.DEVELOPMENT and "end_game" in tile.tags
-        }
-        ids.update(
-            build.tile.id
-            for build in player.dev_stack
-            if "end_game" in build.tile.tags
-        )
+        ids = {tile.id for tile in self.goal_candidates.get(player.name, [])}
+        ids.update(tile.id for tile in self.committed_goals.get(player.name, []))
         return ids
 
     def non_white_tracks(self, player: Player) -> list[CapacityTrack]:
@@ -745,7 +809,7 @@ class PhaseBatteryGame:
         good = max(candidates, key=lambda item: item.world.vp)
         player.goods.remove(good)
         if player.credits <= 2:
-            self.gain_credits(player, self.ship_credit_value(good.world))
+            self.gain_credits(player, self.ship_credit_value(good))
             return True
         vp = 1
         if good.color is self.world_color(good.world) or good.color is DieColor.WHITE:
@@ -757,14 +821,24 @@ class PhaseBatteryGame:
         self.vp_pool -= claimed
         return True
 
-    def ship_credit_value(self, world: Tile) -> int:
+    def ship_credit_value(self, item: Tile | Good) -> int:
+        world = item.world if isinstance(item, Good) else item
+        good_color = item.color if isinstance(item, Good) else self.world_color(world)
+        if good_color is DieColor.BLUE:
+            return 3
+        if good_color is DieColor.BROWN:
+            return 4
+        if good_color is DieColor.GREEN:
+            return 5
+        if good_color is DieColor.YELLOW:
+            return 6
         normalized = world.world_color.strip().lower()
         if normalized == "novelty":
-            return 2
-        if normalized in {"rare elemental", "rare elements", "genes"}:
             return 3
+        if normalized in {"rare elemental", "rare elements", "genes"}:
+            return 4 if normalized in {"rare elemental", "rare elements"} else 5
         if normalized == "alien technology" or self.is_alien_tile(world):
-            return 4
+            return 6
         return 1
 
     def complete_tile(self, player: Player, tile: Tile):
@@ -800,10 +874,10 @@ class PhaseBatteryGame:
         candidates = [
             track
             for track in player.tracks.values()
-            if track.maximum > 0 and track.color not in avoid and track.color is not DieColor.WHITE
+            if track.maximum > 0 and track.color not in avoid
         ]
         if not candidates:
-            candidates = [track for track in player.tracks.values() if track.maximum > 0 and track.color is not DieColor.WHITE]
+            candidates = [track for track in player.tracks.values() if track.maximum > 0]
         if not candidates:
             return False
         track = min(candidates, key=lambda item: (self.track_value(player, item.color), item.maximum, item.current))
@@ -835,7 +909,7 @@ class PhaseBatteryGame:
         candidates = [
             track
             for track in player.tracks.values()
-            if track.current < track.maximum and track.color is not DieColor.WHITE
+            if track.current < track.maximum
         ]
         if not candidates:
             return False
@@ -845,7 +919,7 @@ class PhaseBatteryGame:
 
     def track_value(self, player: Player, color: DieColor) -> int:
         if color is DieColor.WHITE:
-            return 0
+            return STRATEGY_BIAS[player.strategy][Phase.SETTLE]
         if color is DieColor.YELLOW:
             return 4 if player.strategy == "alien" else 2
         if color is DieColor.RED:
@@ -873,7 +947,7 @@ class PhaseBatteryGame:
         self.sync_credit_track(player)
 
     def sync_credit_track(self, player: Player):
-        player.tracks.pop(DieColor.WHITE, None)
+        player.tracks.setdefault(DieColor.WHITE, CapacityTrack(DieColor.WHITE, 0, 0))
 
     def is_military_world(self, tile: Tile) -> bool:
         if tile.kind is not TileKind.WORLD:
@@ -906,15 +980,56 @@ class PhaseBatteryGame:
         return [tile for tile in player.tableau if tile.produces and tile.id not in occupied]
 
     def track(self, player: Player, color: DieColor) -> CapacityTrack:
-        if color is DieColor.WHITE:
-            return CapacityTrack(DieColor.WHITE, 0, 0)
         return player.tracks[color]
 
     def score(self, player: Player) -> int:
-        return player.vp_chips + sum(tile.vp for tile in player.tableau) + self.endgame_bonus(player)
+        return player.vp_chips + sum(tile.vp for tile in player.tableau) + self.endgame_goal_score(player)
 
-    def endgame_bonus(self, player: Player) -> int:
-        return sum(self.endgame_tile_bonus(player, tile) for tile in player.tableau)
+    def endgame_goal_score(self, player: Player) -> int:
+        total = 0
+        for tile in self.committed_goals.get(player.name, []):
+            if not self.endgame_goal_fulfilled(player, tile):
+                total -= self.config.endgame_goal_penalty
+            else:
+                total += self.endgame_tile_bonus(player, tile)
+        return total
+
+    def endgame_goal_fulfilled(self, player: Player, tile: Tile) -> bool:
+        progress, required, _label = self.endgame_goal_requirement(player, tile)
+        return progress >= required
+
+    def endgame_goal_requirement(self, player: Player, tile: Tile) -> tuple[int, int, str]:
+        worlds = [tableau_tile for tableau_tile in player.tableau if tableau_tile.kind is TileKind.WORLD]
+        developments = [tableau_tile for tableau_tile in player.tableau if tableau_tile.kind is TileKind.DEVELOPMENT]
+        production_worlds = [world for world in worlds if world.produces]
+        world_colors = {world.world_color.strip().lower() for world in worlds if world.world_color.strip()}
+        die_tracks = [track for track in player.tracks.values() if track.color is not DieColor.WHITE]
+        color_presence = sum(1 for track in die_tracks if track.maximum > 0)
+        current_pips = sum(track.current for track in die_tracks)
+        rare_worlds = sum(1 for world in worlds if "rare_elemental" in world.tags)
+        novelty_worlds = sum(1 for world in worlds if "novelty" in world.tags)
+
+        if tile.id == "free_trade_association":
+            return novelty_worlds, 2, "Novelty Worlds"
+        if tile.id == "galactic_bankers":
+            return player.tracks[DieColor.PURPLE].maximum + player.credits, 6, "Purple max + Credits"
+        if tile.id == "galactic_exchange":
+            return len(world_colors) + color_presence, 6, "World colors + track colors"
+        if tile.id == "galactic_federation":
+            return len(developments), 4, "Developments"
+        if tile.id == "galactic_renaissance":
+            return player.completed_tiles, 8, "completed tiles"
+        if tile.id == "galactic_reserves":
+            return current_pips, 6, "current non-White pips"
+        if tile.id == "mining_league":
+            return rare_worlds, 2, "Rare Worlds"
+        if tile.id == "new_economy":
+            return len(production_worlds), 4, "production Worlds"
+        if tile.id == "new_galactic_order":
+            return player.tracks[DieColor.RED].maximum, 5, "Red max"
+        if tile.id == "system_diversification":
+            return len(world_colors), 4, "World colors"
+        return self.endgame_tile_bonus(player, tile), 1, "converted score"
 
     def endgame_tile_bonus(self, player: Player, tile: Tile) -> int:
         if "end_game" not in tile.tags:
@@ -955,6 +1070,7 @@ class PhaseBatteryGame:
         return any(len(player.tableau) >= self.config.target_tableau_squares for player in self.players)
 
     def final_scores(self):
+        self.maybe_commit_goals()
         scored = []
         for player in self.players:
             summary = self.player_summary(player)
@@ -978,6 +1094,11 @@ class PhaseBatteryGame:
             "red_exhausts": self._red_exhausts[player.name],
             "credits_earned": player.credits_earned,
             "credits_spent": player.credits_spent,
+            "goal_candidates": [tile.name for tile in self.goal_candidates.get(player.name, [])],
+            "committed_goals": [tile.name for tile in self.committed_goals.get(player.name, [])],
+            "goal_requirements": self.goal_requirement_summary(player),
+            "goal_score": self.endgame_goal_score(player),
+            "goal_commit_round": self.goal_commit_round,
             "free_recharged": player.free_recharged,
             "blocked_recharge": player.blocked_recharge,
             "completed_tiles": player.completed_tiles,
@@ -986,7 +1107,7 @@ class PhaseBatteryGame:
             "production_worlds": sum(1 for tile in worlds if tile.produces),
             "tile_vp": sum(tile.vp for tile in player.tableau),
             "vp_chips": player.vp_chips,
-            "endgame_bonus": self.endgame_bonus(player),
+            "endgame_bonus": self.endgame_goal_score(player),
             "tracks": self.track_summary(player),
         }
 
@@ -994,5 +1115,17 @@ class PhaseBatteryGame:
         return {
             color.value: (track.current, track.maximum)
             for color, track in player.tracks.items()
-            if color is not DieColor.WHITE and (track.maximum > 0 or track.current > 0)
+            if track.maximum > 0 or track.current > 0
         }
+
+    def goal_requirement_summary(self, player: Player):
+        summary = {}
+        for tile in self.committed_goals.get(player.name, []):
+            progress, required, label = self.endgame_goal_requirement(player, tile)
+            summary[tile.name] = {
+                "progress": progress,
+                "required": required,
+                "label": label,
+                "fulfilled": progress >= required,
+            }
+        return summary

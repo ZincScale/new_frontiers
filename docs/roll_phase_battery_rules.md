@@ -9,11 +9,15 @@ The active direction has been backed up to **minimal no-roll Roll**:
   player selects one eligible phase;
 - a phase is eligible only if the player has at least one ready pip for that
   phase;
+- selecting a phase does not consume pips; pips are workers spent only when a
+  selected phase resolves;
 - resolve only selected phases, in normal Roll order;
 - restore the VP chip pool and VP-chip scoring;
 - restore Ship as Trade-or-Consume;
-- remove White tracks/dice entirely; Credits are unlimited chips like base
-  Roll;
+- use White as the Settle track for non-Military Worlds; Credits are unlimited
+  chips like base Roll;
+- remove 6-cost Developments from the normal bag and use them as delayed
+  end-game goal cards;
 - do not use the larger all-phases/no-VP-pool/Development-reward branch.
 
 The goal is to remove dice-roll swing while staying close to base Roll for the
@@ -23,9 +27,10 @@ expansion branch and should be treated as parked until rewritten.
 This variant replaces face-roll luck with deterministic phase capacity. Players
 still build a tableau of Worlds and Developments, pay Galactic Credits, Produce
 Goods, Ship Goods to Trade for Credits or Consume for VP chips, and score from
-tableau VP, VP chips, and 6-cost Development bonuses. The big change is that
-dice colors become phase tracks instead of rolled workers, and secret phase
-selection is constrained by available pips.
+tableau VP, VP chips, and chosen 6-cost Development goals. The big change is
+that dice colors become phase tracks instead of rolled workers. Secret phase
+selection is constrained by available pips, but selecting a phase does not
+spend those pips.
 
 Core rule:
 
@@ -40,14 +45,13 @@ The recommended minimal ruleset is:
 - dice colors become deterministic phase batteries;
 - each track has current pips and max pips;
 - gaining a die increases that color's max and current pips by 1;
-- Red max is persistent Military level, while current Red is Military
-  readiness;
-- White dice/tracks are not used; Credits are chips;
-- Military Worlds require enough Red max and exhaust 1 current Red;
-- normal Worlds use Credits;
-- Credits can supplement Develop builds or recharge spent colored pips during
-  Manage Empire;
-- Credits are not wild workers for Explore, Produce, or Ship;
+- Red pips are Military value/readiness;
+- White pips are Settle workers for non-Military Worlds;
+- Military Worlds require enough Red and exhaust 1 current Red after settling;
+- normal Worlds use White pips;
+- Credits are Trade income and can recharge spent colored pips during Manage
+  Empire unless a specific tile conversion says otherwise;
+- Credits are not wild workers by default;
 - Yellow is Alien-specific by default.
 
 The goal is not to make a new Roll for the Galaxy game. It is to keep tile
@@ -72,23 +76,23 @@ Add one Phase Battery board per player. Each board has tracks from 0 to 6:
 Explore   Blue    0 1 2 3 4 5 6
 Develop   Brown   0 1 2 3 4 5 6
 Military  Red     0 1 2 3 4 5 6
+Settle    White   0 1 2 3 4 5 6
 Produce   Green   0 1 2 3 4 5 6
 Ship      Purple  0 1 2 3 4 5 6
 Alien     Yellow  0 1 2 3 4 5 6
 ```
 
-Blue, Brown, Red, Green, Purple, and Yellow have two values:
+Blue, Brown, Red, White, Green, Purple, and Yellow have two values:
 
 - Current pips: how many pips are available to spend now.
 - Max pips: the highest that color can recharge to.
 
-Red max is Military level. Red current is Military readiness. Settling a
-Military World checks Red max against the World's cost, then exhausts 1 current
-Red. Red current can be recharged during Manage Empire like other colored
-tracks.
+Red pips are Military value/readiness. Settling a Military World checks Red
+against the World's Military cost, then exhausts 1 current Red. Red current can
+be recharged during Manage Empire like other tracks.
 
-White tracks/dice are not used. Credits are unlimited chips, tracked as a
-separate chip count instead of on a track.
+White pips are Settle workers for non-Military Worlds. Credits are unlimited
+chips, tracked as a separate chip count instead of on a track.
 
 Recommended physical tracking:
 
@@ -116,6 +120,7 @@ Use these phase mappings:
 Blue    Explore
 Brown   Develop
 Red     Military level/readiness
+White   Settle non-Military Worlds
 Green   Produce
 Purple  Ship
 Yellow  Alien
@@ -137,6 +142,7 @@ Set up the base game normally, with these changes:
 Blue    3/3
 Brown   3/3
 Red     3/3 Military readiness/level
+White   3/3
 Green   3/3
 Purple  3/3
 Credits 1 unlimited chip
@@ -152,6 +158,10 @@ Then set up starting tiles normally:
 3. Apply any starting die gains from those tiles as pips.
 4. Draw starting Game Tiles into the Construction Zone as usual: one
    Development and one World.
+5. Remove six-cost Developments from the normal tile bag. Reveal or set aside
+   `2 + player count` six-cost Developments as the end-game goal pool. Each
+   player chooses 2 candidate goals from that pool; unused goals are left out
+   unless an Explore effect later adds them.
 
 Example:
 
@@ -183,8 +193,11 @@ During Select Phases, each player secretly selects eligible phases:
 
 A phase is eligible only if you have at least 1 ready pip for that phase. For
 example, Explore requires at least 1 current Blue pip, Develop requires at least
-1 usable Develop pip and a Development in your Construction Zone, and Ship
-requires at least 1 current Purple pip and at least 1 Good.
+1 usable Develop pip and a Development in your Construction Zone, Settle
+requires at least 1 usable Red or White pip and a World in your Construction
+Zone, and Ship requires at least 1 current Purple pip and at least 1 Good.
+Selecting a phase does not spend or exhaust the pip that made the phase
+eligible.
 
 Reveal selected phases simultaneously. Resolve only phases selected by at least
 one player, in normal Roll order:
@@ -208,24 +221,26 @@ Spend one current pip for one worker use.
 ```text
 Spend 1 Blue pip   = one Explore worker
 Spend 1 Brown pip  = one Develop worker
+Spend 1 White pip  = one non-Military Settle worker
 Spend 1 Green pip  = one Produce worker
 Spend 1 Purple pip = one Ship worker
 ```
 
-Credits are not workers. Credits are chip resources spent for Develop, normal
-Settle, and recharge. Red is not normal build currency:
-Military Worlds check Red max as level, then spend 1 current Red as readiness.
+Credits are not workers. Credits are chip resources for Trade income, recharge,
+and tile effects unless a specific rule calls for Credit spending. Red is not
+normal build currency: Military Worlds use Red as Military value, then exhaust
+1 current Red as readiness after settling.
 
 For Produce and Ship, spend native pips one at a time. Stop when you run out of
 pips or cannot use more of that phase. For Explore, Scout may spend multiple
 pips as search depth while still keeping only one tile; Stock spends pips one
 at a time.
 
-For Develop, Brown pips are build currency and can be saved as progress on any
-Development in your Construction Zone. Credits can cover the remaining cost
-when a Development completes. For Settle, Military Worlds check Red max and
-exhaust current Red; normal Worlds spend Credits. You may Settle any World in
-your Construction Zone that you can legally pay for.
+For Develop, Brown pips are build workers and can be saved as progress on any
+Development in your Construction Zone. For Settle, non-Military Worlds spend
+White pips as Settle workers. Military Worlds use Red as Military value and
+exhaust current Red after settling. You may Settle any World in your
+Construction Zone that you can legally pay for.
 
 ## Example Round
 
@@ -235,6 +250,7 @@ Your tracks:
 Blue    1/2
 Brown   0/2
 Red     3/3
+White   1/2
 Green   2/2
 Purple  1/2
 Credits 1
@@ -251,12 +267,10 @@ Develop, Settle, Ship
 
 You may:
 
-- Develop by spending Brown or eligible Yellow into Developments. If
-  total progress reaches its cost, spend any needed Credits and complete it.
-- Settle a Military World only if your Red max is at least its cost and you can
-  exhaust 1 current Red.
-- Settle a normal World only if you can pay its cost with Credits or eligible
-  Yellow.
+- Develop by spending Brown or eligible Yellow into Developments.
+- Settle a Military World only if your Red is at least its cost and you can
+  exhaust 1 current Red after settling.
+- Settle a normal World by spending White or eligible Yellow pips.
 - Ship with Purple.
 
 Explore and Produce do not occur this round because no one selected them.
@@ -265,13 +279,13 @@ After spending:
 
 ```text
 Brown   0/2
+White   0/2
 Purple  0/2
-Credits 0
 ```
 
-If a Development costs 2 and you have Brown `1/2` and 1 Credit, you may
-spend 1 Brown and 1 Credit to complete it. If you have Brown `0/2` and 2
-Credits, you may spend 2 Credits to complete it.
+If a Development costs 2 and you have Brown `1/2`, you may spend 1 Brown and
+mark 1 progress. Later, when you spend another Develop pip into that card, it
+completes.
 
 ## Explore
 
@@ -298,7 +312,7 @@ Because Scout lets you spend pips as search depth, Explore also supports
 strategic tile hunting. The prototype recognizes these broad lanes:
 
 ```text
-Builder    Development cards, especially 6-cost end-game Developments.
+Builder    Development cards and end-game goal setup.
 Settler    Worlds and die grants.
 Producer   Production Worlds, Green, Purple, and trade/consume Developments.
 Shipper    Purple, production support, and Phase V Developments.
@@ -333,40 +347,36 @@ round. Mark that progress on the Development. You may split Develop pips among
 multiple Developments, and you may complete multiple Developments in the same
 Develop phase.
 
-Payment may be any mix of:
+Payment may be any mix of pips:
 
 - Brown pips;
-- Yellow pips, if the Development is Alien-tagged;
-- Galactic Credits.
+- Yellow pips, if the Development is Alien-tagged.
 
-Spend pips first. If the Development's stored progress plus spent pips reaches
-or can reach the full cost with available Credits, you may spend Credits to
-cover the remainder and complete it. Credits are not placed as unfinished
-progress; spend Credits only when they finish the Development.
+If the Development's stored progress plus spent pips reaches the full cost,
+complete it. Credits are not wild Develop workers by default.
 
 If a Development's progress reaches the full cost, complete that Development:
 
 1. Move it to your tableau.
 2. Apply any immediate converted effects.
 
-Use normal Development costs. Six-cost Developments cost 6.
+Use normal Development costs. Six-cost Developments are removed from the normal
+bag and handled as end-game goals.
 
 Example:
 
 ```text
 Brown is 1/2.
-Credits are 2.
 One Development costs 3.
-Spend 1 Brown and 2 Credits.
-Complete the Development.
-Brown becomes 0/2 and Credits become 0.
+Spend 1 Brown.
+Mark 1 progress on the Development.
+Brown becomes 0/2.
 ```
 
 Example:
 
 ```text
 Brown is 2/2.
-Credits are 0.
 One Development costs 4.
 Spend 2 Brown.
 Mark 2 progress on the Development.
@@ -377,29 +387,29 @@ Later:
 
 ```text
 Brown is 1/2.
-Credits are 1.
 The Development has 2 progress and needs 2 more.
-Spend 1 Brown and 1 Credit.
+Spend 1 Brown now, then spend another Develop pip in a later Develop phase.
 Complete the Development.
 ```
 
 ## Settle
 
-When Settle occurs, use Red level and readiness for Military Worlds or spend
-Credits for normal Worlds.
+When Settle occurs, use Red for Military Worlds or White pips for normal
+Worlds.
 
 You may complete any World in your Construction Zone if you can pay its full
-cost immediately, or if it is Military and you can meet its Military cost and
-exhaust 1 current Red. You may complete multiple Worlds in the same Settle
-phase.
+cost immediately with Settle pips, or if it is Military and you can meet its
+Military cost and exhaust 1 current Red after settling. You may complete
+multiple Worlds in the same Settle phase.
 
-For normal Worlds, each World's payment may be any mix of:
+For normal Worlds, each World's payment may be any mix of pips:
 
+- White pips;
 - Yellow pips, if the World is Alien Technology;
-- Galactic Credits.
 
-For each Military World, your Red max must be at least the World's cost. Then
-exhaust 1 current Red. Red max does not spend down.
+For each Military World, your Red must be at least the World's cost. Then
+exhaust 1 current Red. The max marker does not spend down; the current Red pip
+does.
 
 If you pay the full cost, complete the World:
 
@@ -412,12 +422,12 @@ If you pay the full cost, complete the World:
 Example:
 
 ```text
-Credits are 2.
+White is 2/2.
 One normal World costs 2 and grants one Novelty die.
-Spend 2 Credits to complete it.
+Spend 2 White to complete it.
 Novelty maps to Blue.
 Blue 2/2 becomes 3/3.
-Credits become 0.
+White becomes 0/2.
 ```
 
 Example:
@@ -467,10 +477,10 @@ Each pip Ships one Good. For each shipped Good, choose Trade or Consume.
 
 Trade removes the Good and gains Galactic Credits by World/good type:
 
-- Regular Good: 1 Credit.
-- Novelty Good: 2 Credits.
-- Rare Elements or Genes Good: 3 Credits.
-- Alien Technology Good: 4 Credits.
+- Blue/Novelty Good: 3 Credits.
+- Brown/Rare Elements Good: 4 Credits.
+- Green/Genes Good: 5 Credits.
+- Yellow/Alien Technology Good: 6 Credits.
 - Credits are unlimited chips.
 
 Consume removes the Good and claims VP chips from the pool. The current
@@ -488,7 +498,7 @@ Example:
 ```text
 Purple is 2/2.
 You have two Goods.
-Spend 1 Purple to Trade one Novelty Good for 2 Credits.
+Spend 1 Purple to Trade one Novelty Good for 3 Credits.
 Spend 1 Purple to Consume the other Good for VP chips.
 Purple becomes 0/2.
 ```
@@ -507,7 +517,7 @@ Procedure:
 Color conversion:
 
 ```text
-Home              No track; represented by starting capacity
+Home              White
 Novelty           Blue
 Rare Elements     Brown
 Genes             Green
@@ -541,17 +551,18 @@ pip that color twice, still capped at 6.
 
 ## Military / Red Dice
 
-In this variant, Military maps to Red max and Red readiness.
+In this variant, Military maps to Red pips as Military value/readiness.
 
 - gaining a Military die increases Red max and current Red by 1;
 - losing a Military die reduces Red max by 1 and caps current Red to the new
   max;
-- Red max is checked to settle Military Worlds;
-- settling a Military World exhausts 1 current Red;
-- end-game bonuses that count Military dice count Red max.
+- Red is checked as the Military value to settle Military Worlds;
+- settling a Military World exhausts 1 current Red after settling;
+- end-game goals that count Military dice count Red max.
 
 For the prototype, a World is Military if it grants a Red die or has Rebel
-identity. Normal Worlds, including non-military gray Worlds, use Credit chips instead.
+identity. Normal Worlds, including non-military gray Worlds, use White Settle
+pips instead.
 
 ## Losing Dice
 
@@ -636,14 +647,14 @@ The main renewable Credit source is tempo: Stock through Explore after both
 construction areas are full, or Trade through Ship. Immediate tile effects can
 also grant Credits.
 
-During Develop or normal Settle, Credits may be spent as build currency. Each
-Credit pays 1 cost. Developments may keep pip progress, but Credits are spent
-only to finish the Development. Worlds must still be paid in one shot; Credits
-cannot be left on a World as progress.
+Credits are not wild workers by default. Develop uses Develop pips. Settle uses
+White pips for non-Military Worlds and Red for Military Worlds. A specific tile
+conversion may still grant or spend Credits if that is the closest translation
+of its printed effect.
 
 Credits are unlimited chips. They are not assigned to phases. Each round,
-choose how to distribute available Credits among Develop payments, normal
-Settle payments, and Manage Empire recharge.
+choose how many Credits to spend on Manage Empire recharge and any specific
+tile effects that call for Credits.
 
 During Manage Empire:
 
@@ -677,7 +688,7 @@ Use the normal Construction Zone rules:
 - Game Tiles in the Development area are built by Develop pips and may keep pip
   progress.
 - Game Tiles in the World area are settled by Red Military level/readiness or
-  Credits.
+  White Settle pips.
 - Developments complete when stored progress plus current payment reaches cost.
 - Worlds must be completed in one payment.
 - Partial Settle progress is not tracked.
@@ -734,48 +745,57 @@ Finish the round, then score normally:
 
 - World and Development VP;
 - VP chips;
-- 6-cost Development bonuses, converted as closely as possible.
+- chosen six-cost Development goal results.
 
-For a 6-cost Development bonus that refers to dice you own, use the battery
-track that matches what the bonus is counting.
+Six-cost Developments are not built from the normal bag. They are delayed
+end-game goals.
 
-Use this conversion:
+Setup:
 
-- If a bonus counts dice of a specific color, count that color's max pips.
-- If a bonus counts total dice owned, count total max pips across colored die
-  tracks.
-- If a bonus counts different colors of dice, count color presence instead:
-  each color track with max above 0 counts once.
-- Credits are not owned dice, unless the bonus explicitly counts Credits.
-- Yellow counts as present only if you have gained at least one Alien Technology
-  pip.
+1. Remove six-cost Developments from the normal bag.
+2. Set aside `2 + player count` six-cost Developments as the goal pool.
+3. Each player chooses 2 six-cost Development goal candidates.
 
-For the prototype, score the 6-cost Developments this way:
+Commit trigger:
+
+- once half of the VP chips are gone; or
+- once any player has 6 completed Developments/Worlds.
+
+When either trigger occurs, each player chooses one of their two candidate
+goals as their committed end-game goal. The other candidate goes back into the
+Development market row, or its reverse side may be used as a World.
+
+Explore option:
+
+- as an Explore option, a player may take another six-cost Development goal.
+
+Scoring:
+
+- score committed six-cost Development goals only if their minimum condition is
+  met;
+- lose 6 VP for each chosen Development goal whose minimum condition is not
+  fulfilled.
+
+Minimum conditions:
 
 ```text
-Free Trade Association   +1 VP per Novelty World.
-Galactic Bankers         +Purple max plus remaining Credits.
-Galactic Exchange        +different World colors plus color tracks present.
-Galactic Federation      +1 VP per Development.
-Galactic Renaissance     +completed tiles / 2, rounded down, plus World colors.
-Galactic Reserves        +current colored pips / 3, rounded down.
-Mining League            +Rare Worlds plus Brown max.
-New Economy              +production Worlds.
-New Galactic Order       +Red max.
-System Diversification   +2 VP per different World color.
+Free Trade Association   2+ Novelty Worlds.
+Galactic Bankers         Purple max + Credits 6+.
+Galactic Exchange        World colors + track colors 6+.
+Galactic Federation      4+ Developments.
+Galactic Renaissance     8+ completed tiles.
+Galactic Reserves        6+ current non-White pips.
+Mining League            2+ Rare Worlds.
+New Economy              4+ production Worlds.
+New Galactic Order       Red max 5+.
+System Diversification   4+ World colors.
 ```
 
-Examples:
+Open playtest wording:
 
-```text
-New Galactic Order counts Military dice.
-Red max 4 = you own 4 Military dice for this bonus.
-
-Galactic Exchange counts different colors of dice.
-Blue, Brown, Red, Green, and Purple present = 5 colors.
-Yellow max 0 = Yellow is not present.
-Yellow max 2 = Yellow is present, for 6 colors total.
-```
+- clarify whether multiple players may choose the same goal from the
+  `2 + player count` pool, since that pool is smaller than two unique goals per
+  player at 3p+.
 
 ## Game Length Tuning
 
@@ -850,7 +870,7 @@ Rare Elements
             Score the difficulty's Named VP and have 2+ Rare Worlds.
 Alien Contact
             Score the difficulty's Named VP and have 1+ Alien World.
-Military    Score the difficulty's Named VP and have Red max 5.
+Military    Score the difficulty's Named VP and have Red 5.
 Discovery   Score the difficulty's Named VP and have Blue max 5.
 ```
 
@@ -879,15 +899,16 @@ you satisfied.
 Solo round structure:
 
 1. Select two player phases. You may select a phase only if you have at least 1
-   ready pip for that phase.
+   ready pip for that phase. Selecting a phase does not spend that pip.
 2. Reveal two Dummy phase cards. If the deck is empty, shuffle all five Dummy
    phase cards to form a new deck first.
 3. The selected phase set is your phases plus the Dummy phases.
 4. Resolve selected phases in normal order: Explore, Develop, Settle, Produce,
    Ship.
-5. During each selected phase, you may spend usable pips or resources for that
-   phase. If the Dummy selected that phase, also resolve that Dummy effect.
-6. Manage Empire normally.
+5. During each selected phase, you may spend usable pips for that phase. If the
+   Dummy selected that phase, also resolve that Dummy effect.
+6. Manage Empire normally, then check whether the six-cost goal commit trigger
+   has been reached.
 
 The Dummy never spends pips, never has Credits, never builds an empire, never
 scores, and never uses tile powers. It exists to add phase uncertainty, create
@@ -931,9 +952,9 @@ You select Develop. Then reveal two Dummy cards: Produce and Develop.
 
 Selected phases are Develop and Produce.
 
-During Develop, you may spend Brown pips and Credits. Because the Dummy also
-selected Develop, draw one Development tile from the bag and place it face down
-in the Dummy row.
+During Develop, you may spend Brown pips. Because the Dummy also selected
+Develop, draw one Development tile from the bag and place it face down in the
+Dummy row.
 
 During Produce, you may spend Green pips. Because the Dummy selected Produce,
 Dummy Goods 0 -> 1.
@@ -956,6 +977,7 @@ Initial tracks:
 Blue    2/2
 Brown   2/2
 Red     2/2
+White   2/2
 Green   2/2
 Purple  2/2
 Credits 1
@@ -1017,6 +1039,7 @@ End of round tracks:
 Blue    1/2
 Brown   1/2
 Red     2/3
+White   2/2
 Green   3/3
 Purple  2/2
 Credits 1
@@ -1028,14 +1051,14 @@ Yellow  0/0
 Use these defaults:
 
 ```text
-Starting main tracks: 3/3
+Starting main tracks: 3/3, including White
 Starting Credits:     1 unlimited chip
 Starting Yellow:      0/0
 Track max:            6
 Credits:              unlimited chips
 VP pool:              7 per player
 Solo VP pool:         24 total chips
-Scoring:              tableau VP + VP chips + 6-cost bonuses
+Scoring:              tableau VP + VP chips + chosen 6-cost goals
 Free recharge:        0
 Yellow mode:          Alien
 ```
@@ -1043,7 +1066,7 @@ Yellow mode:          Alien
 Current playtest note:
 
 Red readiness is a soft Military brake, not a hard cooldown. In a focused
-stress pass, a Military player with enough Red max could still settle a Military
+stress pass, a Military player with enough Red could still settle a Military
 World every round by preserving or generating enough Credit to recharge current
 Red during Manage Empire. That is acceptable for the first table test because
 it makes Military compete with other recharge and build spending instead of
@@ -1054,7 +1077,7 @@ Watch these table metrics:
 - Military Worlds completed per player.
 - Rounds where Military settled while spending 0 Credits.
 - Credits spent on Red recharge.
-- Red max at game end.
+- Red at game end.
 - Whether normal Worlds' Produce/Ship payoff keeps up with Military tempo.
 
 If Military still runs away, the next clean tuning knob is to make Military

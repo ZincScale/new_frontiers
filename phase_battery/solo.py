@@ -86,6 +86,7 @@ class PhaseBatterySoloGame:
             self.player.dead_rounds += 1
 
         self.game.manage_empire(self.player)
+        self.game.maybe_commit_goals()
 
         return SoloRoundReport(
             self.game.round_number,
@@ -200,6 +201,8 @@ def main():
     completed = []
     dummy_claims = []
     dummy_shipments = []
+    goal_scores = []
+    committed_goals = []
     end_reasons = Counter()
     last_scores = None
     last_reports = None
@@ -213,6 +216,8 @@ def main():
         completed.append(summary["completed_tiles"])
         dummy_claims.append(summary["dummy_claimed_tiles"])
         dummy_shipments.append(summary["dummy_shipped_goods"])
+        goal_scores.append(summary["goal_score"])
+        committed_goals.append(len(summary["committed_goals"]))
         end_reasons[summary["end_reason"]] += 1
         last_scores = final_scores
         last_reports = reports
@@ -225,11 +230,13 @@ def main():
     print(f"Starting credits: {config.starting_credits}")
     print(f"VP pool: {config.vp_pool_per_player or SOLO_VP_POOL_PER_SEAT * SOLO_VP_POOL_SEATS}")
     print("Credits: unlimited chips")
+    print("White: non-Military Settle track")
     print(f"Red grants current: {config.red_grants_current}")
     print(f"Average rounds: {mean(rounds):.1f}")
     print(f"Average score: {mean(scores):.1f}")
     print(f"Average tableau/completed: {mean(tableau):.1f}/{mean(completed):.1f}")
-    print("Scoring: tableau VP + VP chips + 6-cost bonuses")
+    print("Scoring: tableau VP + VP chips + chosen 6-cost goals")
+    print(f"Average goals: {mean(committed_goals):.1f} committed, {mean(goal_scores):.1f} VP")
     print(f"Average dummy churn: {mean(dummy_claims):.1f} tiles, {mean(dummy_shipments):.1f} shipped goods")
     print("End reasons")
     for reason, count in end_reasons.most_common():

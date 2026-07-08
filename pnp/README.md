@@ -28,8 +28,9 @@ The player boards, aid sheets, and Dummy phase cards are formatted for letter pa
 - 1 combined solo guide / campaign aid sheet
 - 5 solo Dummy phase cards
 - printable max markers and setup strips
-- Red is persistent Military level; White is the Credit track
-- multiplayer VP pool is 8/player at 2p and 12/player at 3p+
+- Red is Military value/readiness; White settles non-Military Worlds
+- multiplayer VP pool is currently 7/player
+- six-cost Developments are delayed end-game goals
 
 ## Files
 
@@ -60,7 +61,7 @@ Credits pay Develop/Settle costs and Good markers track produced Goods.
 
 ## Roll Solo Tuning
 
-The Roll Phase Battery solo mode uses a 12-round clock with two Dummy phase
+The Roll Phase Battery solo mode uses a 15-round clock with two Dummy phase
 cards per round. Solo has Easy, Normal, Advanced, and Very Hard threshold tiers:
 Easy targets roughly 90% single-condition success, Normal about 50-60%, and
 Advanced / Very Hard below 50%. Campaign sheets combine named conditions into

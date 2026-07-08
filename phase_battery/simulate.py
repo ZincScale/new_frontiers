@@ -96,15 +96,17 @@ def main():
                 "red_exhausts",
                 "credits_earned",
                 "credits_spent",
+                "goal_score",
                 "completed_tiles",
                 "military_worlds",
                 "normal_worlds",
                 "production_worlds",
             ):
                 metrics[strategy][key] += summary[key]
-            phase_tracks = {color: values for color, values in summary["tracks"].items() if color != "white"}
-            metrics[strategy]["current_capacity"] += sum(current for current, _maximum in phase_tracks.values())
-            metrics[strategy]["max_capacity"] += sum(maximum for _current, maximum in phase_tracks.values())
+            metrics[strategy]["goal_commits"] += int(summary["goal_commit_round"] is not None)
+            metrics[strategy]["committed_goals"] += len(summary["committed_goals"])
+            metrics[strategy]["current_capacity"] += sum(current for current, _maximum in summary["tracks"].values())
+            metrics[strategy]["max_capacity"] += sum(maximum for _current, maximum in summary["tracks"].values())
 
     print(f"Games: {args.games}")
     print(f"Players: {', '.join(args.players)}")
@@ -112,12 +114,14 @@ def main():
     print(f"Starting credits: {config.starting_credits}")
     print(f"Max track capacity: {config.max_track_capacity}")
     print("Credits: unlimited chips")
+    print("White: non-Military Settle track")
     print(f"Free recharge: {config.minimum_recharge}")
     print(f"Yellow mode: {config.yellow_mode}")
     print(f"Red grants current: {config.red_grants_current}")
     print(f"Construction limit: {config.construction_limit}")
     print(f"VP pool per player: {game_vp_pool_per_player(config, len(specs))}")
-    print("Scoring: tableau VP + VP chips + 6-cost bonuses")
+    print(f"End-game goal pool: {config.endgame_goal_pool_extra} + players, penalty {config.endgame_goal_penalty}")
+    print("Scoring: tableau VP + VP chips + chosen 6-cost goals")
     print(f"Average rounds: {mean(rounds):.1f}")
     print()
     print("Wins")
@@ -138,6 +142,8 @@ def main():
             f"red exhausts {metrics[strategy]['red_exhausts'] / denom:.1f}, "
             f"credits earned/spent {metrics[strategy]['credits_earned'] / denom:.1f}/"
             f"{metrics[strategy]['credits_spent'] / denom:.1f}, "
+            f"goals {metrics[strategy]['committed_goals'] / denom:.1f} "
+            f"({metrics[strategy]['goal_score'] / denom:.1f} VP), "
             f"dead rounds {metrics[strategy]['dead_rounds'] / denom:.2f}, "
             f"capacity {metrics[strategy]['current_capacity'] / denom:.1f}/"
             f"{metrics[strategy]['max_capacity'] / denom:.1f}"
