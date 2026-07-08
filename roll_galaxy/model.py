@@ -103,6 +103,7 @@ class Player:
     goods: list[Good] = field(default_factory=list)
     credits: int = 1
     vp_chips: int = 0
+    shipped_goods: int = 0
     selected_phases: list[Phase] = field(default_factory=list)
     dead_rounds: int = 0
     used_pips: int = 0

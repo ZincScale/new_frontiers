@@ -397,10 +397,11 @@ Complete the Development.
 When Settle occurs, use Red for Military Worlds or White pips for normal
 Worlds.
 
-You may complete any World in your Construction Zone if you can pay its full
-cost immediately with Settle pips, or if it is Military and you can meet its
-Military cost and exhaust 1 current Red after settling. You may complete
-multiple Worlds in the same Settle phase.
+You may spend Settle pips into any normal World in your Construction Zone.
+Normal World progress is persistent, just like Development progress. You may
+complete any Military World if you can meet its Military cost and exhaust 1
+current Red after settling. You may complete multiple Worlds in the same Settle
+phase.
 
 For normal Worlds, each World's payment may be any mix of pips:
 
@@ -411,7 +412,8 @@ For each Military World, your Red must be at least the World's cost. Then
 exhaust 1 current Red. The max marker does not spend down; the current Red pip
 does.
 
-If you pay the full cost, complete the World:
+If a normal World's stored progress plus spent Settle pips reaches its full
+cost, complete the World:
 
 1. Move it to your tableau.
 2. Gain any dice listed on the World by pipping up those colors.
@@ -683,20 +685,71 @@ Purple is already full, so you cannot recharge it.
 
 ## Construction Zone And Tableau
 
-Use the normal Construction Zone rules:
+Each player has three separate places for tiles:
 
-- Game Tiles in the Development area are built by Develop pips and may keep pip
-  progress.
-- Game Tiles in the World area are settled by Red Military level/readiness or
-  White Settle pips.
-- Developments complete when stored progress plus current payment reaches cost.
-- Worlds must be completed in one payment.
-- Partial Settle progress is not tracked.
-- Completed tiles move to your tableau.
-- The game end condition still checks tableau size as normal.
+- Tableau: completed tiles. Starting Faction and Home World tiles begin here.
+- Development construction area: unbuilt non-6-cost Development tiles.
+- World construction area: unsettled World tiles.
 
-For this variant, starting Faction and Home World tiles count normally for game
-end and scoring, as in the base game.
+The two construction areas are parallel queues, not stacks. You may build any
+tile in the matching construction area; it does not have to be the top, newest,
+oldest, leftmost, or rightmost tile.
+
+Construction area limits:
+
+- Development construction area limit: 3 tiles.
+- World construction area limit: 3 tiles.
+- Six-cost Development goals are not in either construction area and do not
+  count against either limit.
+
+Explore adds tiles to construction areas:
+
+- Scout for a Development: put the chosen non-6-cost Development into your
+  Development construction area.
+- Scout for a World: put the chosen World into your World construction area.
+- If the matching construction area is full, you cannot add that kind of tile
+  unless a rule first frees space.
+
+Develop construction:
+
+- Develop pips are spent into Development tiles in your Development
+  construction area.
+- Development progress is persistent. Mark stored progress on each
+  Development separately.
+- You may split Develop pips among multiple Development tiles.
+- When a Development's stored progress reaches its cost, complete it
+  immediately: move it from the Development construction area to your tableau
+  and apply converted effects.
+- Multiple Developments can complete in one Develop phase.
+- Credits are not wild Develop workers by default.
+
+Settle construction:
+
+- Normal Worlds are paid with White Settle pips, plus eligible Yellow pips for
+  Alien Technology Worlds.
+- Normal World progress is persistent. Mark stored progress on each World
+  separately.
+- You may split Settle pips among multiple normal Worlds.
+- Military Worlds require current Red at least equal to the World's cost, then
+  exhaust 1 current Red after settling.
+- Military Worlds do not store progress; they settle when Red is high enough.
+- You may settle or progress any World in your World construction area.
+- Multiple Worlds can complete in one Settle phase.
+- When a World completes, move it from the World construction area to your
+  tableau and apply converted effects.
+
+Six-cost Development goals:
+
+- Six-cost Developments are removed from the normal tile bag during setup.
+- They are goal cards, not construction tiles.
+- Candidate and committed goal cards are kept beside the player area.
+- They do not count as tableau tiles, Development construction tiles, completed
+  Developments, or 12-square end-condition tiles.
+- They score only through the goal system at game end.
+
+The tableau end condition checks only tiles in your tableau. Starting Faction
+and Home World tiles count normally for tableau size and scoring, as in the
+base game.
 
 ## Reassign Powers
 
@@ -728,7 +781,7 @@ Act as if you have an extra worker:
 Gain 1 temporary pip in that phase this round.
 
 Reduce a Develop or Settle cost:
-Reduce the combined pips/Credits required by that amount.
+Reduce the pips required by that amount.
 
 Gain Credits:
 Gain Galactic Credits normally.
@@ -776,19 +829,22 @@ Scoring:
 - lose 6 VP for each chosen Development goal whose minimum condition is not
   fulfilled.
 
-Minimum conditions:
+In solo, each six-cost Development goal is tied to a named solo condition. To
+fulfill the goal, meet that named condition's non-score requirement. Then score
+the six-cost Development's converted bonus. If you miss the named condition,
+score `-6 VP` for that committed goal.
 
 ```text
-Free Trade Association   2+ Novelty Worlds.
-Galactic Bankers         Purple max + Credits 6+.
-Galactic Exchange        World colors + track colors 6+.
-Galactic Federation      4+ Developments.
-Galactic Renaissance     8+ completed tiles.
-Galactic Reserves        6+ current non-White pips.
-Mining League            2+ Rare Worlds.
-New Economy              4+ production Worlds.
-New Galactic Order       Red max 5+.
-System Diversification   4+ World colors.
+Free Trade Association   Novelty: 2+ Novelty Worlds.
+Galactic Bankers         Satisfied Populace: ship 4+ Goods.
+Galactic Exchange        Alien Contact: 1+ Alien World.
+Galactic Federation      Developer: 4+ Developments.
+Galactic Renaissance     Builder: 8+ completed tiles.
+Galactic Reserves        Industrial: difficulty's Industrial max-pip target.
+Mining League            Rare Elements: 2+ Rare Worlds.
+New Economy              Production: 4+ production Worlds.
+New Galactic Order       Military: Red max 5+.
+System Diversification   Diverse: 4+ World colors.
 ```
 
 Open playtest wording:

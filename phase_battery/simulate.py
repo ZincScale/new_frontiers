@@ -94,6 +94,7 @@ def main():
                 "dead_rounds",
                 "used_pips",
                 "red_exhausts",
+                "shipped_goods",
                 "credits_earned",
                 "credits_spent",
                 "goal_score",
@@ -140,6 +141,7 @@ def main():
             f"production worlds {metrics[strategy]['production_worlds'] / denom:.1f}, "
             f"used pips {metrics[strategy]['used_pips'] / denom:.1f}, "
             f"red exhausts {metrics[strategy]['red_exhausts'] / denom:.1f}, "
+            f"shipped goods {metrics[strategy]['shipped_goods'] / denom:.1f}, "
             f"credits earned/spent {metrics[strategy]['credits_earned'] / denom:.1f}/"
             f"{metrics[strategy]['credits_spent'] / denom:.1f}, "
             f"goals {metrics[strategy]['committed_goals'] / denom:.1f} "

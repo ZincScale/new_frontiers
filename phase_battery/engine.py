@@ -383,8 +383,12 @@ class PhaseBatteryGame:
                 player.used_pips += 1
                 self._red_exhausts[player.name] += 1
             else:
-                pips = self.spend_build_pips(player, Phase.SETTLE, tile)
+                needed = max(0, tile.cost - build.progress)
+                pips = self.spend_build_pips(player, Phase.SETTLE, tile, needed)
+                build.progress += pips
                 player.used_pips += pips
+                if build.progress < tile.cost:
+                    return
             player.world_stack.remove(build)
             self.complete_tile(player, tile)
 
@@ -433,7 +437,7 @@ class PhaseBatteryGame:
                 if self.can_settle_military(player, tile):
                     candidates.append(build)
                 continue
-            if self.can_pay_normal_world(player, tile):
+            if build.progress >= tile.cost or self.available_build_pips(player, Phase.SETTLE, tile) > 0:
                 candidates.append(build)
         if not candidates:
             return None
@@ -442,8 +446,8 @@ class PhaseBatteryGame:
     def settle_target_value(self, player: Player, build: BuildSlot):
         tile = build.tile
         return (
-            self.strategy_tile_value(player, tile) + tile.vp + len(tile.grants) * 2,
-            -tile.cost,
+            self.strategy_tile_value(player, tile) + tile.vp + len(tile.grants) * 2 + build.progress * 3,
+            -(max(0, tile.cost - build.progress)),
         )
 
     def resolve_worker_phase(self, player: Player, phase: Phase):
@@ -473,8 +477,8 @@ class PhaseBatteryGame:
     def can_pay_develop(self, player: Player, tile: Tile, progress: int = 0) -> bool:
         return progress + self.available_build_pips(player, Phase.DEVELOP, tile) >= tile.cost
 
-    def can_pay_normal_world(self, player: Player, tile: Tile) -> bool:
-        return self.available_build_pips(player, Phase.SETTLE, tile) >= tile.cost
+    def can_pay_normal_world(self, player: Player, tile: Tile, progress: int = 0) -> bool:
+        return progress + self.available_build_pips(player, Phase.SETTLE, tile) >= tile.cost
 
     def can_settle_military(self, player: Player, tile: Tile) -> bool:
         return self.track(player, DieColor.RED).current >= tile.cost
@@ -808,6 +812,7 @@ class PhaseBatteryGame:
             return False
         good = max(candidates, key=lambda item: item.world.vp)
         player.goods.remove(good)
+        player.shipped_goods += 1
         if player.credits <= 2:
             self.gain_credits(player, self.ship_credit_value(good))
             return True
@@ -1005,30 +1010,31 @@ class PhaseBatteryGame:
         world_colors = {world.world_color.strip().lower() for world in worlds if world.world_color.strip()}
         die_tracks = [track for track in player.tracks.values() if track.color is not DieColor.WHITE]
         color_presence = sum(1 for track in die_tracks if track.maximum > 0)
-        current_pips = sum(track.current for track in die_tracks)
+        max_pips = sum(track.maximum for track in die_tracks)
+        alien_worlds = sum(1 for world in worlds if self.is_alien_tile(world))
         rare_worlds = sum(1 for world in worlds if "rare_elemental" in world.tags)
         novelty_worlds = sum(1 for world in worlds if "novelty" in world.tags)
 
         if tile.id == "free_trade_association":
-            return novelty_worlds, 2, "Novelty Worlds"
+            return novelty_worlds, 2, "Novelty"
         if tile.id == "galactic_bankers":
-            return player.tracks[DieColor.PURPLE].maximum + player.credits, 6, "Purple max + Credits"
+            return player.shipped_goods, 4, "Satisfied Populace"
         if tile.id == "galactic_exchange":
-            return len(world_colors) + color_presence, 6, "World colors + track colors"
+            return alien_worlds, 1, "Alien Contact"
         if tile.id == "galactic_federation":
-            return len(developments), 4, "Developments"
+            return len(developments), 4, "Developer"
         if tile.id == "galactic_renaissance":
-            return player.completed_tiles, 8, "completed tiles"
+            return player.completed_tiles, 8, "Builder"
         if tile.id == "galactic_reserves":
-            return current_pips, 6, "current non-White pips"
+            return max_pips, 19, "Industrial"
         if tile.id == "mining_league":
-            return rare_worlds, 2, "Rare Worlds"
+            return rare_worlds, 2, "Rare Elements"
         if tile.id == "new_economy":
-            return len(production_worlds), 4, "production Worlds"
+            return len(production_worlds), 4, "Production"
         if tile.id == "new_galactic_order":
-            return player.tracks[DieColor.RED].maximum, 5, "Red max"
+            return player.tracks[DieColor.RED].maximum, 5, "Military"
         if tile.id == "system_diversification":
-            return len(world_colors), 4, "World colors"
+            return len(world_colors), 4, "Diverse"
         return self.endgame_tile_bonus(player, tile), 1, "converted score"
 
     def endgame_tile_bonus(self, player: Player, tile: Tile) -> int:
@@ -1089,6 +1095,7 @@ class PhaseBatteryGame:
             "tableau": len(player.tableau),
             "credits": player.credits,
             "goods": len(player.goods),
+            "shipped_goods": player.shipped_goods,
             "dead_rounds": player.dead_rounds,
             "used_pips": player.used_pips,
             "red_exhausts": self._red_exhausts[player.name],

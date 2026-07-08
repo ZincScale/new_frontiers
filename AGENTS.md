@@ -51,14 +51,13 @@ Current main-rules direction:
   endgame goal. The other returns to the Development market row, or its reverse
   side can be used as a World. Explore may optionally take another six-cost
   Development goal. A player loses 6 VP per chosen Development goal whose
-  conditions are not fulfilled. Current minimum requirements: Free Trade
-  Association 2 Novelty Worlds; Galactic Bankers Purple max + Credits 6;
-  Galactic Exchange World colors + track colors 6; Galactic Federation 4
-  Developments; Galactic Renaissance 8 completed tiles; Galactic Reserves 6
-  current non-White pips; Mining League 2 Rare Worlds; New Economy 4 production
-  Worlds; New Galactic Order Red max 5; System Diversification 4 World colors.
-  Still clarify whether multiple players may choose the same goal from the
-  `2 + player count` pool.
+  conditions are not fulfilled. In solo, each six-cost goal is tied to a named
+  solo condition: Free Trade Association = Novelty; Galactic Bankers =
+  Satisfied Populace; Galactic Exchange = Alien Contact; Galactic Federation =
+  Developer; Galactic Renaissance = Builder; Galactic Reserves = Industrial;
+  Mining League = Rare Elements; New Economy = Production; New Galactic Order =
+  Military; System Diversification = Diverse. Still clarify whether multiple
+  players may choose the same goal from the `2 + player count` pool.
 - Current playtest read: this is intentionally a soft brake. If Military still
   runs away, the next tuning knob is Red-grant Military Worlds increasing Red
   max only, with current Red gained later through recharge.

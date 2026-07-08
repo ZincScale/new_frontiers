@@ -286,20 +286,34 @@ def test_settle_can_complete_multiple_worlds_in_one_phase():
     assert player.tracks[DieColor.WHITE].current == 1
 
 
-def test_settle_can_skip_blocking_top_world_for_affordable_world():
+def test_settle_pips_create_partial_world_progress():
     game = PhaseBatteryGame([("P1", "settler")], seed=11)
     player = game.players[0]
-    player.tracks[DieColor.WHITE].current = 1
+    player.tracks[DieColor.WHITE].current = 2
     game.sync_credit_track(player)
-    expensive = Tile("w-big", "Large World", TileKind.WORLD, 6, 6)
-    cheap = Tile("w-cheap", "Cheap World", TileKind.WORLD, 1, 1)
-    player.world_stack = [BuildSlot(expensive), BuildSlot(cheap)]
+    world = Tile("w-big", "Large World", TileKind.WORLD, 5, 5)
+    player.world_stack = [BuildSlot(world)]
 
     game.resolve_phase(player, Phase.SETTLE)
 
-    assert player.world_stack == [BuildSlot(expensive)]
-    assert cheap in player.tableau
-    assert expensive not in player.tableau
+    assert player.world_stack == [BuildSlot(world, progress=2)]
+    assert world not in player.tableau
+    assert player.tracks[DieColor.WHITE].current == 0
+
+
+def test_settle_completes_later_from_stored_world_progress():
+    game = PhaseBatteryGame([("P1", "settler")], seed=29)
+    player = game.players[0]
+    player.tracks[DieColor.WHITE].current = 2
+    world = Tile("w-big", "Large World", TileKind.WORLD, 5, 5)
+    player.world_stack = [BuildSlot(world, progress=3)]
+
+    game.resolve_phase(player, Phase.SETTLE)
+
+    assert player.world_stack == []
+    assert world in player.tableau
+    assert player.tracks[DieColor.WHITE].current == 0
+    assert player.used_pips == 2
 
 
 def test_settle_can_complete_multiple_military_worlds_with_red_readiness():
@@ -379,6 +393,7 @@ def test_ship_trades_goods_for_credits_without_vp_chips():
     assert player.goods == []
     assert player.credits == 5
     assert player.vp_chips == 0
+    assert player.shipped_goods == 1
     assert game.score(player) == 4
 
 
@@ -396,6 +411,22 @@ def test_ship_credit_value_uses_good_type():
     assert game.ship_credit_value(
         Tile("alien", "Alien World", TileKind.WORLD, 1, 1, world_color="Alien Technology")
     ) == 6
+
+
+def test_galactic_bankers_goal_uses_satisfied_populace_named_condition():
+    game = PhaseBatteryGame([("P1", "shipper")], seed=30)
+    player = game.players[0]
+    goal = Tile("galactic_bankers", "Galactic Bankers", TileKind.DEVELOPMENT, 6, 6, tags=("end_game",))
+    game.committed_goals[player.name] = [goal]
+    player.shipped_goods = 3
+
+    assert not game.endgame_goal_fulfilled(player, goal)
+    assert game.endgame_goal_score(player) == -6
+
+    player.shipped_goods = 4
+
+    assert game.endgame_goal_fulfilled(player, goal)
+    assert game.player_summary(player)["goal_requirements"]["Galactic Bankers"]["label"] == "Satisfied Populace"
 
 
 def test_solo_dummy_phase_effects_claim_and_ship_without_vp_pool():

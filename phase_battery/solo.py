@@ -201,6 +201,7 @@ def main():
     completed = []
     dummy_claims = []
     dummy_shipments = []
+    player_shipments = []
     goal_scores = []
     committed_goals = []
     end_reasons = Counter()
@@ -216,6 +217,7 @@ def main():
         completed.append(summary["completed_tiles"])
         dummy_claims.append(summary["dummy_claimed_tiles"])
         dummy_shipments.append(summary["dummy_shipped_goods"])
+        player_shipments.append(summary["shipped_goods"])
         goal_scores.append(summary["goal_score"])
         committed_goals.append(len(summary["committed_goals"]))
         end_reasons[summary["end_reason"]] += 1
@@ -235,6 +237,7 @@ def main():
     print(f"Average rounds: {mean(rounds):.1f}")
     print(f"Average score: {mean(scores):.1f}")
     print(f"Average tableau/completed: {mean(tableau):.1f}/{mean(completed):.1f}")
+    print(f"Average shipped goods: {mean(player_shipments):.1f}")
     print("Scoring: tableau VP + VP chips + chosen 6-cost goals")
     print(f"Average goals: {mean(committed_goals):.1f} committed, {mean(goal_scores):.1f} VP")
     print(f"Average dummy churn: {mean(dummy_claims):.1f} tiles, {mean(dummy_shipments):.1f} shipped goods")
