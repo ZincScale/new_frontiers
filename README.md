@@ -22,7 +22,10 @@ does not spend pips. White is the Settle track for non-Military Worlds; Credits
 are unlimited chips like base Roll. Red pips are Military value/readiness:
 settling a Military World requires enough current Red, then exhausts 1 Red pip.
 Six-cost Developments are removed from the normal bag and used as delayed
-end-game goals.
+end-game goals. Printed Cup, Citizenry, and World placement determines whether
+new max capacity becomes ready for free, waits for Credit recharge, or begins
+as a Good. Reassign powers temporarily route current pips without changing
+their max-track color.
 
 Current playtest tuning starts main tracks, including White, at `3/3` and uses
 a VP chip pool of `7` per player.

@@ -154,6 +154,14 @@ class PhaseBatteryGame:
         self.committed_goals: dict[str, list[Tile]] = {player.name: [] for player in self.players}
         self.goal_commit_round: Optional[int] = None
         self._red_exhausts = {player.name: 0 for player in self.players}
+        self._pending_cup_recharges = {
+            player.name: {color: 0 for color in DieColor}
+            for player in self.players
+        }
+        self._cup_recharges = {player.name: 0 for player in self.players}
+        self._unready_die_gains = {player.name: 0 for player in self.players}
+        self._reassign_remaining = {player.name: 0 for player in self.players}
+        self._reassigned_pips = {player.name: 0 for player in self.players}
 
         start_pairs = list(START_FACTION_PAIRS)
         home_worlds = list(HOME_WORLDS)
@@ -195,6 +203,8 @@ class PhaseBatteryGame:
 
     def play_round(self) -> RoundReport:
         self.round_number += 1
+        for player in self.players:
+            self.start_reassign_round(player)
         before_pips = {player.name: player.used_pips for player in self.players}
         before_red = dict(self._red_exhausts)
         before_completed = {player.name: player.completed_tiles for player in self.players}
@@ -229,6 +239,13 @@ class PhaseBatteryGame:
     def phase_selection_count(self) -> int:
         return 2 if len(self.players) <= 2 else 1
 
+    def start_reassign_round(self, player: Player):
+        self._reassign_remaining[player.name] = sum(
+            1
+            for tile in player.tableau
+            if tile.kind is TileKind.DEVELOPMENT and "reassign" in tile.tags
+        )
+
     def choose_phase(self, player: Player) -> Optional[Phase]:
         phases = self.choose_phases(player, 1)
         if not phases:
@@ -243,15 +260,30 @@ class PhaseBatteryGame:
 
     def can_select_phase(self, player: Player, phase: Phase) -> bool:
         if phase is Phase.EXPLORE:
-            return self.available_capacity(player, phase) > 0
+            return self.available_native_capacity(player, phase) > 0
         if phase is Phase.DEVELOP:
-            return bool(player.dev_stack) and self.available_develop_pips(player) > 0
+            return bool(player.dev_stack) and any(
+                self.available_native_build_pips(player, phase, build.tile) > 0
+                for build in player.dev_stack
+            )
         if phase is Phase.SETTLE:
-            return self.best_settle_target(player) is not None
+            return any(
+                self.can_settle_military(player, build.tile)
+                if self.is_military_world(build.tile)
+                else build.progress >= build.tile.cost
+                or self.available_native_build_pips(player, phase, build.tile) > 0
+                for build in player.world_stack
+            )
         if phase is Phase.PRODUCE:
-            return self.producible_world_count(player) > 0 and self.available_capacity(player, phase) > 0
+            return (
+                self.producible_world_count(player) > 0
+                and self.available_native_capacity(player, phase) > 0
+            )
         if phase is Phase.SHIP:
-            return bool(player.goods) and self.available_capacity(player, phase) > 0
+            return (
+                bool(player.goods)
+                and self.available_native_capacity(player, phase) > 0
+            )
         raise ValueError(f"unknown phase: {phase}")
 
     def phase_selection_value(self, player: Player, phase: Phase) -> tuple[int, int]:
@@ -303,20 +335,19 @@ class PhaseBatteryGame:
         raise ValueError(f"unknown phase: {phase}")
 
     def resolve_explore_phase(self, player: Player):
-        while self.track(player, DieColor.BLUE).current > 0:
+        while self.available_capacity(player, Phase.EXPLORE) > 0:
             if self.should_take_extra_goal(player):
-                if not self.spend_one(player, DieColor.BLUE):
+                if self.spend_phase_pip(player, Phase.EXPLORE) is None:
                     return
                 goal = self.take_extra_goal(player)
                 if goal is None:
-                    self.refund_pip(player, DieColor.BLUE)
                     return
                 player.used_pips += 1
                 continue
             scout_kind = self.explore_scout_kind(player)
             if scout_kind is not None:
                 depth = self.explore_search_depth(player)
-                spent = self.spend_color(player, DieColor.BLUE, depth)
+                spent = self.spend_phase_pips(player, Phase.EXPLORE, depth)
                 if not spent:
                     return
                 self.scout_tile(player, scout_kind, search_depth=spent)
@@ -324,7 +355,7 @@ class PhaseBatteryGame:
                 continue
             if player.credits > 2:
                 return
-            if not self.spend_one(player, DieColor.BLUE):
+            if self.spend_phase_pip(player, Phase.EXPLORE) is None:
                 return
             self.gain_credits(player, 2)
             player.used_pips += 1
@@ -345,7 +376,7 @@ class PhaseBatteryGame:
         return None
 
     def explore_search_depth(self, player: Player) -> int:
-        available = self.track(player, DieColor.BLUE).current
+        available = self.available_capacity(player, Phase.EXPLORE)
         if not player.dev_stack and not player.world_stack:
             return min(2, available)
         return min(1, available)
@@ -484,7 +515,16 @@ class PhaseBatteryGame:
         return self.track(player, DieColor.RED).current >= tile.cost
 
     def available_build_pips(self, player: Player, phase: Phase, tile: Tile) -> int:
-        return sum(self.track(player, color).current for color in self.build_colors(player, phase, tile))
+        native_colors = self.build_colors(player, phase, tile)
+        native = self.available_native_build_pips(player, phase, tile)
+        routed = self.available_reassigned_pips(player, native_colors)
+        return native + routed
+
+    def available_native_build_pips(self, player: Player, phase: Phase, tile: Tile) -> int:
+        return sum(
+            self.track(player, color).current
+            for color in self.build_colors(player, phase, tile)
+        )
 
     def spend_build_pips(self, player: Player, phase: Phase, tile: Tile, limit: Optional[int] = None) -> int:
         remaining = tile.cost if limit is None else limit
@@ -497,6 +537,10 @@ class PhaseBatteryGame:
             track.current -= amount
             remaining -= amount
             spent += amount
+        native_colors = self.build_colors(player, phase, tile)
+        while remaining > 0 and self.spend_reassigned_pip(player, native_colors) is not None:
+            remaining -= 1
+            spent += 1
         return spent
 
     def build_colors(self, player: Player, phase: Phase, tile: Tile) -> tuple[DieColor, ...]:
@@ -530,16 +574,71 @@ class PhaseBatteryGame:
         return (PHASE_COLOR[phase],)
 
     def available_capacity(self, player: Player, phase: Phase) -> int:
-        return sum(self.track(player, color).current for color in self.phase_colors(player, phase))
+        native_colors = self.phase_colors(player, phase)
+        native = self.available_native_capacity(player, phase)
+        return native + self.available_reassigned_pips(player, native_colors)
+
+    def available_native_capacity(self, player: Player, phase: Phase) -> int:
+        return sum(
+            self.track(player, color).current
+            for color in self.phase_colors(player, phase)
+        )
 
     def available_settle_pips(self, player: Player) -> int:
         return self.available_capacity(player, Phase.SETTLE)
 
     def spend_phase_pip(self, player: Player, phase: Phase) -> Optional[DieColor]:
-        for color in self.phase_colors(player, phase):
+        native_colors = self.phase_colors(player, phase)
+        for color in native_colors:
             if self.spend_one(player, color):
                 return color
-        return None
+        return self.spend_reassigned_pip(player, native_colors)
+
+    def spend_phase_pips(self, player: Player, phase: Phase, count: int) -> int:
+        spent = 0
+        for _ in range(count):
+            if self.spend_phase_pip(player, phase) is None:
+                break
+            spent += 1
+        return spent
+
+    def available_reassigned_pips(
+        self,
+        player: Player,
+        native_colors: tuple[DieColor, ...],
+    ) -> int:
+        remaining = self._reassign_remaining[player.name]
+        if remaining <= 0:
+            return 0
+        sources = sum(
+            track.current
+            for color, track in player.tracks.items()
+            if color not in native_colors
+        )
+        return min(remaining, sources)
+
+    def spend_reassigned_pip(
+        self,
+        player: Player,
+        native_colors: tuple[DieColor, ...],
+    ) -> Optional[DieColor]:
+        if self._reassign_remaining[player.name] <= 0:
+            return None
+        candidates = [
+            track
+            for color, track in player.tracks.items()
+            if color not in native_colors and track.current > 0
+        ]
+        if not candidates:
+            return None
+        track = min(
+            candidates,
+            key=lambda item: (self.track_value(player, item.color), -item.current),
+        )
+        track.current -= 1
+        self._reassign_remaining[player.name] -= 1
+        self._reassigned_pips[player.name] += 1
+        return track.color
 
     def spend_color(self, player: Player, color: DieColor, count: int) -> int:
         track = self.track(player, color)
@@ -849,31 +948,55 @@ class PhaseBatteryGame:
     def complete_tile(self, player: Player, tile: Tile):
         player.tableau.append(tile)
         player.completed_tiles += 1
+        if "reassign" in tile.tags:
+            self._reassign_remaining[player.name] += 1
         self.apply_tile_immediate_effects(player, tile)
 
     def add_start_tile(self, player: Player, tile: Tile):
         player.tableau.append(tile)
-        self.apply_tile_immediate_effects(player, tile)
+        self.apply_tile_immediate_effects(player, tile, during_setup=True)
 
-    def apply_tile_immediate_effects(self, player: Player, tile: Tile):
+    def apply_tile_immediate_effects(self, player: Player, tile: Tile, during_setup: bool = False):
         for _ in range(tile.die_loss):
             self.lose_die(player, avoid=tile.grants)
+        gained_colors = []
         for color in tile.grants:
-            self.gain_die(player, color)
+            if self.gain_die_from_placement(player, color, tile.placement, during_setup):
+                gained_colors.append(color)
         if tile.immediate_credits:
             self.gain_credits(player, tile.immediate_credits)
-        if tile.placement == "world" and tile.produces and tile.grants:
-            self.add_windfall_good(player, tile, tile.grants[0])
+        if tile.placement == "world" and tile.produces and gained_colors:
+            self.add_windfall_good(player, tile, gained_colors[0])
 
-    def gain_die(self, player: Player, color: DieColor):
+    def gain_die_from_placement(
+        self,
+        player: Player,
+        color: DieColor,
+        placement: str,
+        during_setup: bool = False,
+    ) -> bool:
+        normalized = placement.strip().lower()
+        ready_now = during_setup and normalized == "cup"
+        gained = self.gain_die(player, color, ready=ready_now)
+        if not gained:
+            return False
+        if normalized == "cup" and not during_setup:
+            if color is not DieColor.RED or self.config.red_grants_current:
+                self._pending_cup_recharges[player.name][color] += 1
+        elif normalized in {"", "citizenry", "world"}:
+            self._unready_die_gains[player.name] += 1
+        return True
+
+    def gain_die(self, player: Player, color: DieColor, ready: bool = True) -> bool:
         track = self.track(player, color)
         old_max = track.maximum
         track.maximum = min(self.config.max_track_capacity, track.maximum + 1)
         if color is DieColor.RED and not self.config.red_grants_current:
             track.current = min(track.current, track.maximum)
-            return
-        if track.maximum > old_max:
+            return track.maximum > old_max
+        if ready and track.maximum > old_max:
             track.current = min(track.maximum, track.current + 1)
+        return track.maximum > old_max
 
     def lose_die(self, player: Player, avoid: tuple[DieColor, ...] = ()) -> bool:
         candidates = [
@@ -897,6 +1020,7 @@ class PhaseBatteryGame:
         return True
 
     def manage_empire(self, player: Player):
+        self.apply_pending_cup_recharges(player)
         if self.config.minimum_recharge:
             if self.recharge_best_track(player, self.config.minimum_recharge):
                 player.free_recharged += self.config.minimum_recharge
@@ -909,6 +1033,17 @@ class PhaseBatteryGame:
             self.spend_credits(player, 1)
         if player.credits == 0:
             self.set_credits(player, 1)
+
+    def apply_pending_cup_recharges(self, player: Player):
+        pending = self._pending_cup_recharges[player.name]
+        for color, amount in pending.items():
+            if amount <= 0:
+                continue
+            track = self.track(player, color)
+            recharged = min(amount, track.maximum - track.current)
+            track.current += recharged
+            self._cup_recharges[player.name] += recharged
+            pending[color] = 0
 
     def recharge_best_track(self, player: Player, amount: int) -> bool:
         candidates = [
@@ -1099,6 +1234,9 @@ class PhaseBatteryGame:
             "dead_rounds": player.dead_rounds,
             "used_pips": player.used_pips,
             "red_exhausts": self._red_exhausts[player.name],
+            "cup_recharges": self._cup_recharges[player.name],
+            "unready_die_gains": self._unready_die_gains[player.name],
+            "reassigned_pips": self._reassigned_pips[player.name],
             "credits_earned": player.credits_earned,
             "credits_spent": player.credits_spent,
             "goal_candidates": [tile.name for tile in self.goal_candidates.get(player.name, [])],

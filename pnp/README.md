@@ -29,6 +29,8 @@ The player boards, aid sheets, and Dummy phase cards are formatted for letter pa
 - 5 solo Dummy phase cards
 - printable max markers and setup strips
 - Red is Military value/readiness; White settles non-Military Worlds
+- printed Cup, Citizenry, and World placement controls die readiness
+- Reassign powers temporarily route ready pips without changing track maxima
 - multiplayer VP pool is currently 7/player
 - six-cost Developments are delayed end-game goals
 

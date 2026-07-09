@@ -34,7 +34,8 @@ spend those pips.
 
 Core rule:
 
-> When a tile says to gain a die, pip up that color track.
+> When a tile grants a die, increase that color's max. Its printed location
+> determines when the new pip becomes ready.
 
 There is no Roll Dice step, no Assign Dice step, no Dice Cup, and no Citizenry.
 
@@ -44,7 +45,8 @@ The recommended minimal ruleset is:
 
 - dice colors become deterministic phase batteries;
 - each track has current pips and max pips;
-- gaining a die increases that color's max and current pips by 1;
+- gaining a die increases that color's max; Cup, Citizenry, and World
+  placement determine readiness;
 - Red pips are Military value/readiness;
 - White pips are Settle workers for non-Military Worlds;
 - Military Worlds require enough Red and exhaust 1 current Red after settling;
@@ -58,9 +60,9 @@ The goal is not to make a new Roll for the Galaxy game. It is to keep tile
 building, goods, shipping, credits, and tableau scoring intact while removing
 the roll-and-reassign luck layer.
 
-For the first playtest, do not add free recharge, tile-specific retuning, or a
-new dummy-player system. Those are tuning knobs after the core battery loop is
-tested at the table.
+For the first playtest, do not add general free recharge beyond printed Cup
+placement, tile-specific retuning, or a new dummy-player system. Those are
+tuning knobs after the core battery loop is tested at the table.
 
 There is also a parked mancala dice alternative in
 `docs/roll_mancala_dice_design.md`. It uses the base game's physical dice as
@@ -155,7 +157,8 @@ Then set up starting tiles normally:
 
 1. Give each player one Faction tile.
 2. Give each player one Home World tile.
-3. Apply any starting die gains from those tiles as pips.
+3. Apply starting die gains using their printed locations. Cup pips begin
+   ready; Citizenry and World pips increase max only.
 4. Draw starting Game Tiles into the Construction Zone as usual: one
    Development and one World.
 5. Remove six-cost Developments from the normal tile bag. Reveal or set aside
@@ -167,13 +170,13 @@ Example:
 
 ```text
 Starting Red is 2 Military.
-Your Home World grants one Military die.
+Your Home World grants one Military die to your Cup.
 Military maps to Red.
 Red 2/2 becomes 3/3.
 ```
 
 If a starting tile places a die as a Good on that World, place a Good marker on
-that World and pip up the granted color normally.
+that World, increase the granted color's max, and do not increase current.
 
 ## Round Structure
 
@@ -507,14 +510,22 @@ Purple becomes 0/2.
 
 ## Gaining Dice
 
-Whenever a tile says to gain a die, pip up that die color instead.
+Whenever a tile says to gain a die, increase that die color's max. The printed
+die location determines readiness:
+
+```text
+Cup during setup:  increase max and current immediately.
+Cup during play:   increase max; free-recharge that pip during Manage Empire.
+Citizenry:         increase max only; recharge normally with Credits.
+World as a Good:   increase max only and place a matching Good.
+```
 
 Procedure:
 
 1. Increase that color's max by 1.
-2. Increase that color's current pips by 1.
+2. Apply the printed Cup, Citizenry, or World placement.
 3. The max cannot exceed 6.
-4. Any gain beyond 6 is lost.
+4. Any gain beyond 6 is lost and creates no readiness or Good.
 
 Color conversion:
 
@@ -531,15 +542,22 @@ Consumption       Purple
 Examples:
 
 ```text
-Red is 2/2.
-You gain one Military die.
-Red becomes 3/3.
+Blue is 0/2.
+You gain one Novelty die to your Cup during play.
+Blue becomes 0/3.
+During Manage Empire, it free-recharges to 1/3.
 ```
 
 ```text
 Green is 0/2.
-You gain one Genes die.
-Green becomes 1/3.
+You gain one Genes die to your Citizenry.
+Green becomes 0/3 until recharged with a Credit.
+```
+
+```text
+Brown is 0/2.
+You gain one Rare Elements die on its World.
+Brown becomes 0/3 and that World gains a Brown Good.
 ```
 
 ```text
@@ -548,14 +566,15 @@ You gain one Novelty die.
 Blue stays 6/6. The excess is lost.
 ```
 
-If a tile grants two dice, pip up both colors. If both dice are the same color,
-pip that color twice, still capped at 6.
+If a tile grants two dice, increase both max tracks and apply each printed
+location. If both dice are the same color, increase that max twice, still
+capped at 6.
 
 ## Military / Red Dice
 
 In this variant, Military maps to Red pips as Military value/readiness.
 
-- gaining a Military die increases Red max and current Red by 1;
+- gaining a Military die follows its printed location like any other die;
 - losing a Military die reduces Red max by 1 and caps current Red to the new
   max;
 - Red is checked as the Military value to settle Military Worlds;
@@ -597,7 +616,8 @@ Blue becomes 4/4.
 
 Yellow represents Alien Technology.
 
-Yellow starts at `0/0`. When you gain an Alien Technology die, pip up Yellow.
+Yellow starts at `0/0`. When you gain an Alien Technology die, increase Yellow
+max and apply its printed location.
 
 Current recommended rule:
 
@@ -660,14 +680,17 @@ tile effects that call for Credits.
 
 During Manage Empire:
 
-1. Spend Galactic Credits to recharge colored tracks.
-2. Each Credit recharges 1 current pip on one track.
-3. A track cannot recharge above its max.
-4. You may distribute Credits among tracks however you choose.
-5. If your Credit count is at 0 after Manage Empire, set it to 1 as in the
+1. Apply queued Cup-placement free recharges to their original tracks.
+2. Spend Galactic Credits to recharge colored tracks.
+3. Each Credit recharges 1 current pip on one track.
+4. A track cannot recharge above its max.
+5. You may distribute Credits among tracks however you choose.
+6. If your Credit count is at 0 after Manage Empire, set it to 1 as in the
    base game.
 
-There is no free recharge in the recommended version.
+There is no general free recharge in the recommended version. A die placed in
+the Cup during play receives its one location-based free recharge during Manage
+Empire.
 
 Example:
 
@@ -753,12 +776,28 @@ base game.
 
 ## Reassign Powers
 
-Ignore reassign powers.
+Reassign powers temporarily route ready pips; they never move max capacity
+between tracks.
 
-There is no Assign Dice step, so these powers have no timing window. They mostly
-exist in the base game to repair bad faces, and this variant removes bad faces.
-Development tiles with only reassign text still count for cost, VP, tableau
-size, tags, and end-game bonuses.
+When a selected destination phase resolves:
+
+1. Choose a current pip allowed by the printed reassign power.
+2. Spend it from its original color track.
+3. Use it as one worker in the printed destination phase.
+4. When recharged later, it returns to its original color track.
+
+Each reassign power may be used at most once per round unless its text says
+otherwise. A routed pip does not make a phase eligible for secret selection;
+the phase still needs its native ready pip or must be selected by another
+player. Reassigning Blue to an occurring Develop phase, for example, reduces
+current Blue by 1 and performs one Develop worker action; Brown current and max
+do not change.
+
+Use the source, quantity, destination, and Dictate restrictions printed on the
+Development. The simulator's retained tile data records which Developments
+have reassign powers but not their detailed restrictions, so it approximates
+each non-goal reassign Development as one any-source, any-destination route per
+round.
 
 ## Other Tile Power Conversion
 
@@ -766,16 +805,19 @@ Use these conversions until each tile is individually tuned:
 
 ```text
 Gain/recruit a die:
-Pip up the listed color.
+Increase max; if no location is given, treat it as Citizenry.
 
 Place a die in your Cup:
-Pip up that color.
+Increase max and free-recharge it during Manage Empire.
 
 Place a die in your Citizenry:
-Pip up that color.
+Increase max only.
 
 Place a die on a World as a Good:
-Pip up that color and place a matching Good on that World.
+Increase max only and place a matching Good on that World.
+
+Return a used worker to your Cup instead of Citizenry:
+Queue one free recharge of that worker's original color for Manage Empire.
 
 Act as if you have an extra worker:
 Gain 1 temporary pip in that phase this round.

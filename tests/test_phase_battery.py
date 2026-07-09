@@ -196,7 +196,7 @@ def test_develop_can_skip_blocking_top_card_for_affordable_development():
 
     game.resolve_phase(player, Phase.DEVELOP)
 
-    assert player.dev_stack == [BuildSlot(expensive, progress=1)]
+    assert player.dev_stack == [BuildSlot(expensive)]
     assert cheap in player.tableau
     assert expensive not in player.tableau
 
@@ -374,6 +374,187 @@ def test_red_grants_max_only_option_delays_current_red_gain():
 
     assert player.tracks[DieColor.RED].current == 0
     assert player.tracks[DieColor.RED].maximum == 3
+
+
+def test_cup_die_gain_recharges_for_free_during_manage_empire():
+    game = PhaseBatteryGame([("P1", "balanced")], seed=31)
+    player = game.players[0]
+    player.tracks[DieColor.BLUE].current = 0
+    player.tracks[DieColor.BLUE].maximum = 2
+    player.credits = 0
+    tile = Tile(
+        "cup-grant",
+        "Cup Grant",
+        TileKind.DEVELOPMENT,
+        1,
+        1,
+        grants=(DieColor.BLUE,),
+        placement="cup",
+    )
+
+    game.complete_tile(player, tile)
+
+    assert player.tracks[DieColor.BLUE].maximum == 3
+    assert player.tracks[DieColor.BLUE].current == 0
+
+    game.manage_empire(player)
+
+    assert player.tracks[DieColor.BLUE].current == 1
+    assert game.player_summary(player)["cup_recharges"] == 1
+
+
+def test_citizenry_die_gain_adds_capacity_without_readiness():
+    game = PhaseBatteryGame([("P1", "balanced")], seed=32)
+    player = game.players[0]
+    player.tracks[DieColor.GREEN].current = 0
+    player.tracks[DieColor.GREEN].maximum = 2
+    player.credits = 0
+    before_unready = game.player_summary(player)["unready_die_gains"]
+    tile = Tile(
+        "citizenry-grant",
+        "Citizenry Grant",
+        TileKind.WORLD,
+        1,
+        1,
+        grants=(DieColor.GREEN,),
+        placement="citizenry",
+    )
+
+    game.complete_tile(player, tile)
+    game.manage_empire(player)
+
+    assert player.tracks[DieColor.GREEN].maximum == 3
+    assert player.tracks[DieColor.GREEN].current == 0
+    assert game.player_summary(player)["unready_die_gains"] == before_unready + 1
+
+
+def test_world_die_gain_adds_capacity_and_a_good_but_not_readiness():
+    game = PhaseBatteryGame([("P1", "producer")], seed=33)
+    player = game.players[0]
+    player.tracks[DieColor.BROWN].current = 0
+    player.tracks[DieColor.BROWN].maximum = 2
+    player.goods = []
+    tile = Tile(
+        "windfall",
+        "Windfall World",
+        TileKind.WORLD,
+        1,
+        1,
+        grants=(DieColor.BROWN,),
+        placement="world",
+        world_color="Rare Elemental",
+        produces=True,
+    )
+
+    game.complete_tile(player, tile)
+
+    assert player.tracks[DieColor.BROWN].maximum == 3
+    assert player.tracks[DieColor.BROWN].current == 0
+    assert len(player.goods) == 1
+    assert player.goods[0].world == tile
+
+
+def test_starting_cup_die_is_ready_for_the_first_round():
+    game = PhaseBatteryGame([("P1", "balanced")], seed=34)
+    player = game.players[0]
+    player.tracks[DieColor.PURPLE].current = 0
+    player.tracks[DieColor.PURPLE].maximum = 2
+    tile = Tile(
+        "starting-cup",
+        "Starting Cup",
+        TileKind.WORLD,
+        1,
+        1,
+        grants=(DieColor.PURPLE,),
+        placement="cup",
+    )
+
+    game.add_start_tile(player, tile)
+
+    assert player.tracks[DieColor.PURPLE].maximum == 3
+    assert player.tracks[DieColor.PURPLE].current == 1
+
+
+def test_reassign_power_routes_a_pip_without_changing_track_identity():
+    game = PhaseBatteryGame([("P1", "builder")], seed=35)
+    player = game.players[0]
+    for track in player.tracks.values():
+        track.current = 0
+    player.tracks[DieColor.BLUE].current = 1
+    player.tableau = [
+        Tile("router", "Router", TileKind.DEVELOPMENT, 1, 1, tags=("reassign",))
+    ]
+    target = Tile("target", "Target", TileKind.DEVELOPMENT, 1, 1)
+    player.dev_stack = [BuildSlot(target)]
+    blue_max = player.tracks[DieColor.BLUE].maximum
+    brown_max = player.tracks[DieColor.BROWN].maximum
+    game.start_reassign_round(player)
+
+    game.resolve_phase(player, Phase.DEVELOP)
+
+    assert target in player.tableau
+    assert player.tracks[DieColor.BLUE].current == 0
+    assert player.tracks[DieColor.BLUE].maximum == blue_max
+    assert player.tracks[DieColor.BROWN].maximum == brown_max
+    assert game.player_summary(player)["reassigned_pips"] == 1
+
+
+def test_each_generic_reassign_power_routes_only_one_pip_per_round():
+    game = PhaseBatteryGame([("P1", "builder")], seed=36)
+    player = game.players[0]
+    for track in player.tracks.values():
+        track.current = 0
+    player.tracks[DieColor.BLUE].current = 2
+    player.tableau = [
+        Tile("router", "Router", TileKind.DEVELOPMENT, 1, 1, tags=("reassign",))
+    ]
+    target = Tile("target", "Target", TileKind.DEVELOPMENT, 2, 2)
+    player.dev_stack = [BuildSlot(target)]
+    game.start_reassign_round(player)
+
+    game.resolve_phase(player, Phase.DEVELOP)
+
+    assert player.dev_stack == [BuildSlot(target, progress=1)]
+    assert player.tracks[DieColor.BLUE].current == 1
+    assert game.player_summary(player)["reassigned_pips"] == 1
+
+
+def test_routable_pip_does_not_make_its_destination_phase_eligible():
+    game = PhaseBatteryGame([("P1", "builder")], seed=37)
+    player = game.players[0]
+    for track in player.tracks.values():
+        track.current = 0
+    player.tracks[DieColor.BLUE].current = 1
+    player.tableau = [
+        Tile("router", "Router", TileKind.DEVELOPMENT, 1, 1, tags=("reassign",))
+    ]
+    player.dev_stack = [BuildSlot(Tile("target", "Target", TileKind.DEVELOPMENT, 1, 1))]
+    game.start_reassign_round(player)
+
+    assert not game.can_select_phase(player, Phase.DEVELOP)
+
+
+def test_world_placement_does_not_create_good_when_track_is_at_cap():
+    game = PhaseBatteryGame([("P1", "producer")], seed=38)
+    player = game.players[0]
+    player.goods = []
+    player.tracks[DieColor.GREEN].current = 6
+    player.tracks[DieColor.GREEN].maximum = 6
+    tile = Tile(
+        "capped-windfall",
+        "Capped Windfall",
+        TileKind.WORLD,
+        1,
+        1,
+        grants=(DieColor.GREEN,),
+        placement="world",
+        world_color="Genes",
+        produces=True,
+    )
+
+    game.complete_tile(player, tile)
+
+    assert player.goods == []
 
 
 def test_ship_trades_goods_for_credits_without_vp_chips():

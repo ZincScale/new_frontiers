@@ -30,6 +30,13 @@ Current main-rules direction:
 - White dice/tracks are back as the Settle track for non-Military Worlds. Use
   White pips as Settle workers for non-red Worlds. Credits are unlimited chips
   like base Roll, stored as a scalar count.
+- Preserve printed die location: Cup gains increase max and free-recharge at
+  Manage Empire (starting Cup gains begin ready), Citizenry gains increase max
+  only, and World gains increase max only plus place a Good. Reassign powers
+  temporarily spend a source-color pip as a worker in their printed destination
+  without changing either track's max. The simulator generically allows one
+  any-source route per non-goal reassign Development because its retained tile
+  data lacks the spreadsheet's detailed source/destination restrictions.
 - Ship can Trade for Credits or Consume for VP chips. Current simulator
   heuristic trades when Credits are low, then consumes. Ship pips ship Goods;
   current Trade values are Blue 3, Brown 4, Green 5, Yellow 6.

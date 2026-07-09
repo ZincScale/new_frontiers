@@ -71,6 +71,7 @@ class PhaseBatterySoloGame:
         self.game.round_number += 1
         before_pips = self.player.used_pips
         before_completed = self.player.completed_tiles
+        self.game.start_reassign_round(self.player)
 
         player_phases = self.game.choose_phases(self.player, 2)
         dummy_phases = self.draw_dummy_phases()

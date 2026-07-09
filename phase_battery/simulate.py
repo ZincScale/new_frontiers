@@ -94,6 +94,9 @@ def main():
                 "dead_rounds",
                 "used_pips",
                 "red_exhausts",
+                "cup_recharges",
+                "unready_die_gains",
+                "reassigned_pips",
                 "shipped_goods",
                 "credits_earned",
                 "credits_spent",
@@ -141,6 +144,9 @@ def main():
             f"production worlds {metrics[strategy]['production_worlds'] / denom:.1f}, "
             f"used pips {metrics[strategy]['used_pips'] / denom:.1f}, "
             f"red exhausts {metrics[strategy]['red_exhausts'] / denom:.1f}, "
+            f"cup/unready/reassigned {metrics[strategy]['cup_recharges'] / denom:.1f}/"
+            f"{metrics[strategy]['unready_die_gains'] / denom:.1f}/"
+            f"{metrics[strategy]['reassigned_pips'] / denom:.1f}, "
             f"shipped goods {metrics[strategy]['shipped_goods'] / denom:.1f}, "
             f"credits earned/spent {metrics[strategy]['credits_earned'] / denom:.1f}/"
             f"{metrics[strategy]['credits_spent'] / denom:.1f}, "
