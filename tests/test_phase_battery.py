@@ -1,6 +1,6 @@
 from phase_battery.engine import PhaseBatteryConfig, PhaseBatteryGame
 from phase_battery.solo import PhaseBatterySoloGame
-from roll_galaxy.model import BuildSlot, DieColor, Phase, Tile, TileKind
+from roll_galaxy.model import BuildSlot, DieColor, Good, Phase, Tile, TileKind
 
 
 def test_round_resolves_selected_phases_in_turn_order():
@@ -258,12 +258,12 @@ def test_committed_goal_scores_bonus_when_minimum_is_met():
     goal = Tile("new_economy", "New Economy", TileKind.DEVELOPMENT, 6, 6, tags=("end_game",))
     player.tableau = [
         Tile(f"prod-{index}", f"Production World {index}", TileKind.WORLD, 1, 1, produces=True)
-        for index in range(4)
+        for index in range(3)
     ]
     game.committed_goals[player.name] = [goal]
 
     assert game.endgame_goal_fulfilled(player, goal)
-    assert game.endgame_goal_score(player) == 4
+    assert game.endgame_goal_score(player) == 3
     assert game.player_summary(player)["goal_requirements"]["New Economy"]["fulfilled"]
 
 
@@ -534,6 +534,50 @@ def test_routable_pip_does_not_make_its_destination_phase_eligible():
     assert not game.can_select_phase(player, Phase.DEVELOP)
 
 
+def test_reassign_into_produce_performs_the_normal_produce_action():
+    game = PhaseBatteryGame([("P1", "balanced")], seed=42)
+    player = game.players[0]
+    for track in player.tracks.values():
+        track.current = 0
+    player.tracks[DieColor.BLUE].current = 1
+    world = Tile("produce", "Production World", TileKind.WORLD, 1, 1, world_color="Novelty", produces=True)
+    player.tableau = [
+        world,
+        Tile("router", "Router", TileKind.DEVELOPMENT, 1, 1, tags=("reassign",)),
+    ]
+    player.goods = []
+    game.start_reassign_round(player)
+
+    game.resolve_phase(player, Phase.PRODUCE)
+
+    assert len(player.goods) == 1
+    assert player.goods[0].world == world
+    assert player.goods[0].color is DieColor.GREEN
+    assert player.tracks[DieColor.BLUE].current == 0
+
+
+def test_reassign_into_ship_performs_normal_fixed_value_consume():
+    game = PhaseBatteryGame([("P1", "balanced")], seed=43)
+    player = game.players[0]
+    for track in player.tracks.values():
+        track.current = 0
+    player.tracks[DieColor.BLUE].current = 1
+    player.credits = 3
+    world = Tile("ship", "Shipping World", TileKind.WORLD, 1, 1, world_color="Genes", produces=True)
+    player.tableau = [
+        world,
+        Tile("router", "Router", TileKind.DEVELOPMENT, 1, 1, tags=("reassign",)),
+    ]
+    player.goods = [Good(world, DieColor.GREEN)]
+    game.start_reassign_round(player)
+
+    game.resolve_phase(player, Phase.SHIP)
+
+    assert player.goods == []
+    assert player.vp_chips == 1
+    assert player.tracks[DieColor.BLUE].current == 0
+
+
 def test_world_placement_does_not_create_good_when_track_is_at_cap():
     game = PhaseBatteryGame([("P1", "producer")], seed=38)
     player = game.players[0]
@@ -557,6 +601,22 @@ def test_world_placement_does_not_create_good_when_track_is_at_cap():
     assert player.goods == []
 
 
+def test_produce_spends_one_green_pip_per_empty_colored_world():
+    game = PhaseBatteryGame([("P1", "producer")], seed=40)
+    player = game.players[0]
+    first = Tile("first", "First World", TileKind.WORLD, 1, 1, world_color="Novelty", produces=True)
+    second = Tile("second", "Second World", TileKind.WORLD, 1, 1, world_color="Genes", produces=True)
+    gray = Tile("gray", "Gray World", TileKind.WORLD, 1, 1, world_color="gray", produces=False)
+    player.tableau = [first, second, gray]
+    player.goods = []
+    player.tracks[DieColor.GREEN].current = 3
+
+    game.resolve_phase(player, Phase.PRODUCE)
+
+    assert {good.world for good in player.goods} == {first, second}
+    assert player.tracks[DieColor.GREEN].current == 1
+
+
 def test_ship_trades_goods_for_credits_without_vp_chips():
     game = PhaseBatteryGame([("P1", "producer")], seed=13)
     player = game.players[0]
@@ -578,7 +638,7 @@ def test_ship_trades_goods_for_credits_without_vp_chips():
     assert game.score(player) == 4
 
 
-def test_ship_credit_value_uses_good_type():
+def test_ship_credit_value_uses_world_color_not_good_color():
     game = PhaseBatteryGame([("P1", "producer")], seed=15)
 
     assert game.ship_credit_value(Tile("plain", "Plain World", TileKind.WORLD, 1, 1)) == 1
@@ -592,8 +652,23 @@ def test_ship_credit_value_uses_good_type():
     assert game.ship_credit_value(
         Tile("alien", "Alien World", TileKind.WORLD, 1, 1, world_color="Alien Technology")
     ) == 6
+    novelty = Tile("novelty-good", "Novelty World", TileKind.WORLD, 1, 1, world_color="Novelty")
+
+    assert game.ship_credit_value(Good(novelty, DieColor.GREEN)) == 3
 
 
+def test_consume_is_fixed_at_one_vp_without_color_matching():
+    game = PhaseBatteryGame([("P1", "shipper")], seed=41)
+    player = game.players[0]
+    world = Tile("genes", "Genes World", TileKind.WORLD, 1, 1, world_color="Genes", produces=True)
+    player.goods = [Good(world, DieColor.GREEN)]
+    player.credits = 3
+    player.tracks[DieColor.PURPLE].current = 1
+
+    game.resolve_phase(player, Phase.SHIP)
+
+    assert player.vp_chips == 1
+    assert player.goods == []
 def test_galactic_bankers_goal_uses_satisfied_populace_named_condition():
     game = PhaseBatteryGame([("P1", "shipper")], seed=30)
     player = game.players[0]

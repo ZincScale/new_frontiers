@@ -448,19 +448,13 @@ Red becomes 3/4.
 
 ## Produce
 
-When Produce occurs, spend Green pips.
+When Produce occurs, spend Green pips one at a time.
 
-Each pip produces one Good on an eligible non-gray World in your tableau.
+For each Green pip spent, choose one empty non-gray World in your tableau and
+place one Good marker on it.
 
-Instead of placing a worker die as the Good, place a Good marker, cube, or spare
-die on the World.
-
-The Good's color is the color of the pip spent:
-
-```text
-Green pip = Green Good
-Yellow pip = Yellow Good, only if using Yellow for Alien Produce
-```
+The Green pip is the Produce worker; the Good is represented by a marker, cube,
+or spare die. Do not derive a separate Good color from the Green pip.
 
 Each World can hold one Good unless a tile power says otherwise.
 
@@ -480,31 +474,25 @@ When Ship occurs, spend Purple pips.
 
 Each pip Ships one Good. For each shipped Good, choose Trade or Consume.
 
-Trade removes the Good and gains Galactic Credits by World/good type:
+Trade removes the Good and gains Galactic Credits based only on the World's
+color:
 
-- Blue/Novelty Good: 3 Credits.
-- Brown/Rare Elements Good: 4 Credits.
-- Green/Genes Good: 5 Credits.
-- Yellow/Alien Technology Good: 6 Credits.
+- Blue/Novelty World: 3 Credits.
+- Brown/Rare Elements World: 4 Credits.
+- Green/Genes World: 5 Credits.
+- Yellow/Alien Technology World: 6 Credits.
 - Credits are unlimited chips.
 
-Consume removes the Good and claims VP chips from the pool. The current
-prototype uses the base Consume value plus converted matching bonuses:
-
-- 1 VP chip for consuming a Good.
-- +1 VP chip if the Good color matches the World color, or the Good is wild.
-- +1 VP chip if the Ship pip color matches the World color, or the Ship pip is
-  Purple.
-
-Purple is the normal Ship color.
+Consume removes the Good and claims exactly 1 VP chip from the pool. There are
+no Good-color or Shipper-color matching bonuses in this variant.
 
 Example:
 
 ```text
 Purple is 2/2.
 You have two Goods.
-Spend 1 Purple to Trade one Novelty Good for 3 Credits.
-Spend 1 Purple to Consume the other Good for VP chips.
+Spend 1 Purple to Trade a Good from a Novelty World for 3 Credits.
+Spend 1 Purple to Consume the other Good for 1 VP chip.
 Purple becomes 0/2.
 ```
 
@@ -517,7 +505,7 @@ die location determines readiness:
 Cup during setup:  increase max and current immediately.
 Cup during play:   increase max; free-recharge that pip during Manage Empire.
 Citizenry:         increase max only; recharge normally with Credits.
-World as a Good:   increase max only and place a matching Good.
+World as a Good:   increase max only and place a Good marker.
 ```
 
 Procedure:
@@ -557,7 +545,7 @@ Green becomes 0/3 until recharged with a Credit.
 ```text
 Brown is 0/2.
 You gain one Rare Elements die on its World.
-Brown becomes 0/3 and that World gains a Brown Good.
+Brown becomes 0/3 and that World gains a Good marker.
 ```
 
 ```text
@@ -793,6 +781,15 @@ player. Reassigning Blue to an occurring Develop phase, for example, reduces
 current Blue by 1 and performs one Develop worker action; Brown current and max
 do not change.
 
+For Produce and Ship, Reassign substitutes only the pip being spent:
+
+- routing an allowed pip to Produce performs one normal Produce action and
+  places one Good marker on a chosen empty non-gray World;
+- routing an allowed pip to Ship performs one normal Ship action: Trade using
+  the World color or Consume for exactly 1 VP;
+- the routed pip's source color does not change the Good, Trade value, or
+  Consume value.
+
 Use the source, quantity, destination, and Dictate restrictions printed on the
 Development. The simulator's retained tile data records which Developments
 have reassign powers but not their detailed restrictions, so it approximates
@@ -814,7 +811,7 @@ Place a die in your Citizenry:
 Increase max only.
 
 Place a die on a World as a Good:
-Increase max only and place a matching Good on that World.
+Increase max only and place a Good marker on that World.
 
 Return a used worker to your Cup instead of Citizenry:
 Queue one free recharge of that worker's original color for Manage Empire.
@@ -884,7 +881,7 @@ Galactic Federation      Developer: 4+ Developments.
 Galactic Renaissance     Builder: 8+ completed tiles.
 Galactic Reserves        Industrial: difficulty's Industrial max-pip target.
 Mining League            Rare Elements: 2+ Rare Worlds.
-New Economy              Production: 4+ production Worlds.
+New Economy              Production: 3+ production Worlds.
 New Galactic Order       Military: Red max 5+.
 System Diversification   Diverse: 4+ World colors.
 ```
@@ -941,6 +938,11 @@ one of those conditions, you must:
 2. have committed the matching six-cost Development goal this game;
 3. fulfill that goal's named-condition requirement.
 
+For a campaign game, select the six-cost goal that matches the campaign
+condition being attempted. Random goal availability does not determine whether
+that campaign condition can be attempted. The selected goal still follows the
+normal commitment timing and scoring rules.
+
 The committed six-cost goal also scores normally: if fulfilled, score its
 converted bonus; if missed, lose 6 VP. Score-only conditions do not require a
 six-cost Development. Colonizer and Discovery are not currently tied to a
@@ -949,16 +951,16 @@ six-cost Development and use only their printed condition.
 If you cannot mark a new condition, you lose the campaign. If you mark all four
 conditions after four successive games, you win the campaign.
 
-Choose a solo difficulty before the first game. These first-pass thresholds are
-calibrated for the 15-round solo cap, two player phase selections, two Dummy
-phase cards, starting colored tracks at 3/3, and a 24-chip solo VP pool:
+Choose a solo difficulty before the first game. These thresholds are calibrated
+for the 15-round solo cap, two player phase selections, two Dummy phase cards,
+starting colored tracks at 3/3, a 24-chip solo VP pool, and fixed 1-VP Consume:
 
 ```text
 Difficulty  Great  Triumphant  Epic  Named  Industrial
-Easy        24+    30+         36+   26+    17+ max pips
-Normal      30+    36+         42+   32+    19+ max pips
-Advanced    36+    42+         48+   38+    21+ max pips
-Very Hard   42+    48+         54+   44+    23+ max pips
+Easy        22+    26+         30+   24+    17+ max pips
+Normal      32+    36+         40+   32+    19+ max pips
+Advanced    38+    42+         46+   38+    21+ max pips
+Very Hard   44+    48+         52+   44+    23+ max pips
 ```
 
 Named win conditions:
@@ -974,7 +976,7 @@ Satisfied Populace
             Named VP, Galactic Bankers, and ship 4+ Goods this game.
 Industrial  Named VP, Galactic Reserves, and have the difficulty's Industrial
             max pips.
-Production  Named VP, New Economy, and have 4+ production Worlds.
+Production  Named VP, New Economy, and have 3+ production Worlds.
 Diverse     Named VP, System Diversification, and have 4+ different World
             colors.
 Novelty     Named VP, Free Trade Association, and have 2+ Novelty Worlds.

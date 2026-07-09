@@ -65,7 +65,7 @@ Credits pay Develop/Settle costs and Good markers track produced Goods.
 
 The Roll Phase Battery solo mode uses a 15-round clock with two Dummy phase
 cards per round. Solo has Easy, Normal, Advanced, and Very Hard threshold tiers:
-Easy targets roughly 90% single-condition success, Normal about 50-60%, and
-Advanced / Very Hard below 50%. Campaign sheets combine named conditions into
-arcs such as Outreach, Industrial Base, Sector Survey, Alien Contact, and
-Mastery.
+Easy removes most VP pressure but still requires each condition's structural
+goal, Normal named conditions average roughly 60% in simulation, and Advanced /
+Very Hard are below 50%. Campaign sheets combine named conditions into arcs
+such as Outreach, Industrial Base, Sector Survey, Alien Contact, and Mastery.

@@ -36,10 +36,17 @@ Current main-rules direction:
   temporarily spend a source-color pip as a worker in their printed destination
   without changing either track's max. The simulator generically allows one
   any-source route per non-goal reassign Development because its retained tile
-  data lacks the spreadsheet's detailed source/destination restrictions.
+  data lacks the spreadsheet's detailed source/destination restrictions. A
+  routed Produce or Ship pip performs the ordinary destination action; its
+  source color does not alter the Good, Trade value, or Consume value.
+- Produce spends Green pips one at a time. Each Green pip places one Good marker
+  on a chosen empty non-gray World; each World holds at most one Good unless a
+  tile power says otherwise. Keep this basic action separate from Reassign and
+  from the later Ship resolution.
 - Ship can Trade for Credits or Consume for VP chips. Current simulator
-  heuristic trades when Credits are low, then consumes. Ship pips ship Goods;
-  current Trade values are Blue 3, Brown 4, Green 5, Yellow 6.
+  heuristic trades when Credits are low, then consumes. Trade value comes only
+  from the World color: Blue 3, Brown 4, Green 5, Yellow 6. Consume is a fixed
+  1 VP chip with no Good-color or Shipper-color matching bonuses.
 - Solo uses the same low-player selected-phase model: the player selects two
   eligible phases, Dummy phase cards add selected phases and resolve their
   Dummy effects, and only selected phases occur. Current solo cap is 15 rounds
@@ -65,9 +72,15 @@ Current main-rules direction:
   Mining League = Rare Elements; New Economy = Production; New Galactic Order =
   Military; System Diversification = Diverse. To mark one of those solo
   campaign conditions, the player must score the named VP threshold, commit the
-  matching six-cost goal, and fulfill that goal's requirement. Still clarify
-  whether multiple players may choose the same goal from the
-  `2 + player count` pool.
+  matching six-cost goal, and fulfill that goal's requirement. In campaign
+  play, select the six-cost goal to match the condition being attempted; random
+  goal availability is not a difficulty gate. Production currently requires 3
+  production Worlds. Still clarify whether multiple players may choose the same
+  goal from the `2 + player count` pool.
+- Retuned solo thresholds for fixed 1-VP Consume are: Easy
+  Great/Triumphant/Epic/Named 22/26/30/24, Normal 32/36/40/32, Advanced
+  38/42/46/38, and Very Hard 44/48/52/44. Industrial max-pip targets remain
+  17/19/21/23.
 - Current playtest read: this is intentionally a soft brake. If Military still
   runs away, the next tuning knob is Red-grant Military Worlds increasing Red
   max only, with current Red gained later through recharge.

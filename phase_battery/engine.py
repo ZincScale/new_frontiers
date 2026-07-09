@@ -900,7 +900,8 @@ class PhaseBatteryGame:
         if not candidates:
             return False
         world = max(candidates, key=lambda tile: tile.vp)
-        player.goods.append(Good(world, spent_color))
+        marker_color = DieColor.YELLOW if spent_color is DieColor.YELLOW else DieColor.GREEN
+        player.goods.append(Good(world, marker_color))
         return True
 
     def ship(self, player: Player, spent_color: DieColor) -> bool:
@@ -909,39 +910,31 @@ class PhaseBatteryGame:
             candidates = [good for good in candidates if self.is_alien_tile(good.world)]
         if not candidates:
             return False
-        good = max(candidates, key=lambda item: item.world.vp)
+        trading = player.credits <= 2
+        if trading:
+            good = max(candidates, key=self.ship_credit_value)
+        else:
+            good = max(candidates, key=lambda item: item.world.vp)
         player.goods.remove(good)
         player.shipped_goods += 1
-        if player.credits <= 2:
+        if trading:
             self.gain_credits(player, self.ship_credit_value(good))
             return True
-        vp = 1
-        if good.color is self.world_color(good.world) or good.color is DieColor.WHITE:
-            vp += 1
-        if spent_color is self.world_color(good.world) or spent_color is DieColor.PURPLE:
-            vp += 1
-        claimed = min(vp, self.vp_pool)
+        claimed = min(1, self.vp_pool)
         player.vp_chips += claimed
         self.vp_pool -= claimed
         return True
 
     def ship_credit_value(self, item: Tile | Good) -> int:
         world = item.world if isinstance(item, Good) else item
-        good_color = item.color if isinstance(item, Good) else self.world_color(world)
-        if good_color is DieColor.BLUE:
+        world_color = self.world_color(world)
+        if world_color is DieColor.BLUE:
             return 3
-        if good_color is DieColor.BROWN:
+        if world_color is DieColor.BROWN:
             return 4
-        if good_color is DieColor.GREEN:
+        if world_color is DieColor.GREEN:
             return 5
-        if good_color is DieColor.YELLOW:
-            return 6
-        normalized = world.world_color.strip().lower()
-        if normalized == "novelty":
-            return 3
-        if normalized in {"rare elemental", "rare elements", "genes"}:
-            return 4 if normalized in {"rare elemental", "rare elements"} else 5
-        if normalized == "alien technology" or self.is_alien_tile(world):
+        if world_color is DieColor.YELLOW:
             return 6
         return 1
 
@@ -1165,7 +1158,7 @@ class PhaseBatteryGame:
         if tile.id == "mining_league":
             return rare_worlds, 2, "Rare Elements"
         if tile.id == "new_economy":
-            return len(production_worlds), 4, "Production"
+            return len(production_worlds), 3, "Production"
         if tile.id == "new_galactic_order":
             return player.tracks[DieColor.RED].maximum, 5, "Military"
         if tile.id == "system_diversification":
