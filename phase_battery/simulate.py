@@ -38,7 +38,6 @@ def main():
     parser.add_argument("--vp-pool-per-player", type=int, default=None)
     parser.add_argument("--max-rounds", type=int, default=40)
     parser.add_argument("--construction-limit", type=int, default=3)
-    parser.add_argument("--red-grants-max-only", action="store_true")
     parser.add_argument("--fixed-seats", action="store_true")
     parser.add_argument(
         "--players",
@@ -65,7 +64,6 @@ def main():
         vp_pool_per_player=args.vp_pool_per_player,
         max_rounds=args.max_rounds,
         construction_limit=args.construction_limit,
-        red_grants_current=not args.red_grants_max_only,
     )
 
     wins = Counter()
@@ -93,7 +91,6 @@ def main():
                 "goods",
                 "dead_rounds",
                 "used_pips",
-                "red_exhausts",
                 "cup_recharges",
                 "unready_die_gains",
                 "reassigned_pips",
@@ -102,8 +99,7 @@ def main():
                 "credits_spent",
                 "goal_score",
                 "completed_tiles",
-                "military_worlds",
-                "normal_worlds",
+                "worlds",
                 "production_worlds",
             ):
                 metrics[strategy][key] += summary[key]
@@ -118,10 +114,9 @@ def main():
     print(f"Starting credits: {config.starting_credits}")
     print(f"Max track capacity: {config.max_track_capacity}")
     print("Credits: unlimited chips")
-    print("White: non-Military Settle track")
+    print("Red: Settle workers for all Worlds")
     print(f"Free recharge: {config.minimum_recharge}")
     print(f"Yellow mode: {config.yellow_mode}")
-    print(f"Red grants current: {config.red_grants_current}")
     print(f"Construction limit: {config.construction_limit}")
     print(f"VP pool per player: {game_vp_pool_per_player(config, len(specs))}")
     print(f"End-game goal pool: {config.endgame_goal_pool_extra} + players, penalty {config.endgame_goal_penalty}")
@@ -139,11 +134,9 @@ def main():
             f"  {strategy}: score {totals[strategy] / denom:.1f}, "
             f"tableau {metrics[strategy]['tableau'] / denom:.1f}, "
             f"completed {metrics[strategy]['completed_tiles'] / denom:.1f}, "
-            f"military/normal worlds {metrics[strategy]['military_worlds'] / denom:.1f}/"
-            f"{metrics[strategy]['normal_worlds'] / denom:.1f}, "
+            f"worlds {metrics[strategy]['worlds'] / denom:.1f}, "
             f"production worlds {metrics[strategy]['production_worlds'] / denom:.1f}, "
             f"used pips {metrics[strategy]['used_pips'] / denom:.1f}, "
-            f"red exhausts {metrics[strategy]['red_exhausts'] / denom:.1f}, "
             f"cup/unready/reassigned {metrics[strategy]['cup_recharges'] / denom:.1f}/"
             f"{metrics[strategy]['unready_die_gains'] / denom:.1f}/"
             f"{metrics[strategy]['reassigned_pips'] / denom:.1f}, "
@@ -165,7 +158,7 @@ def main():
     for report in (last_reports or [])[-5:]:
         print(
             f"  R{report.round_number}: used {report.used_pips}, "
-            f"red {report.red_exhausts}, scores {report.scores}"
+            f"scores {report.scores}"
         )
 
 

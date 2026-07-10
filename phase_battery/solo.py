@@ -183,7 +183,6 @@ def main():
     parser.add_argument("--free-recharge", type=int, default=0)
     parser.add_argument("--yellow-mode", choices=("ship", "alien"), default="alien")
     parser.add_argument("--construction-limit", type=int, default=3)
-    parser.add_argument("--red-grants-max-only", action="store_true")
     args = parser.parse_args()
 
     config = PhaseBatteryConfig(
@@ -193,7 +192,6 @@ def main():
         minimum_recharge=args.free_recharge,
         yellow_mode=args.yellow_mode,
         construction_limit=args.construction_limit,
-        red_grants_current=not args.red_grants_max_only,
     )
 
     scores = []
@@ -233,8 +231,7 @@ def main():
     print(f"Starting credits: {config.starting_credits}")
     print(f"VP pool: {config.vp_pool_per_player or SOLO_VP_POOL_PER_SEAT * SOLO_VP_POOL_SEATS}")
     print("Credits: unlimited chips")
-    print("White: non-Military Settle track")
-    print(f"Red grants current: {config.red_grants_current}")
+    print("Red: Settle workers for all Worlds")
     print(f"Average rounds: {mean(rounds):.1f}")
     print(f"Average score: {mean(scores):.1f}")
     print(f"Average tableau/completed: {mean(tableau):.1f}/{mean(completed):.1f}")

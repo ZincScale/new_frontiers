@@ -412,7 +412,7 @@ body {
 
 .marker-grid {
   display: grid;
-  grid-template-columns: repeat(7, 0.7in);
+  grid-template-columns: repeat(6, 0.7in);
   gap: 0.12in;
 }
 

@@ -21,17 +21,17 @@ def test_round_resolves_selected_phases_in_turn_order():
     assert set(report.phases).issubset(set((Phase.EXPLORE, Phase.DEVELOP, Phase.SETTLE, Phase.PRODUCE, Phase.SHIP)))
 
 
-def test_credits_are_unlimited_chips_and_white_is_settle_track():
+def test_credits_are_unlimited_chips_and_red_is_the_only_settle_track():
     game = PhaseBatteryGame([("P1", "builder")], seed=16)
     player = game.players[0]
 
     game.set_credits(player, 40)
 
     assert player.credits == 40
-    assert DieColor.WHITE in player.tracks
-    assert game.track(player, DieColor.WHITE).current == 3
-    assert game.track(player, DieColor.WHITE).maximum == 3
-    assert game.player_summary(player)["tracks"]["white"] == (3, 3)
+    assert DieColor.WHITE not in player.tracks
+    assert game.track(player, DieColor.RED).current >= 3
+    assert game.track(player, DieColor.RED).maximum >= 3
+    assert "white" not in game.player_summary(player)["tracks"]
 
 
 def test_player_with_no_ready_pips_selects_no_phase():
@@ -46,7 +46,7 @@ def test_player_with_no_ready_pips_selects_no_phase():
     assert game.selected_phases() == ()
 
 
-def test_two_player_game_selects_two_eligible_phases_per_player():
+def test_two_player_game_selects_one_eligible_phase_per_player():
     game = PhaseBatteryGame([("P1", "builder"), ("P2", "producer")], seed=24)
     p1, p2 = game.players
     for player in game.players:
@@ -65,8 +65,37 @@ def test_two_player_game_selects_two_eligible_phases_per_player():
     p2.tableau = [prod, stocked]
     game.add_windfall_good(p2, stocked, DieColor.GREEN)
 
+    assert game.phase_selection_count() == 1
+    selected = set(game.selected_phases())
+    assert len(selected & {Phase.EXPLORE, Phase.DEVELOP}) == 1
+    assert len(selected & {Phase.PRODUCE, Phase.SHIP}) == 1
+
+
+def test_solo_game_selects_two_eligible_phases():
+    game = PhaseBatteryGame([("P1", "builder")], seed=24)
+
     assert game.phase_selection_count() == 2
-    assert game.selected_phases() == (Phase.EXPLORE, Phase.DEVELOP, Phase.PRODUCE, Phase.SHIP)
+
+
+def test_starting_specialization_adds_one_ready_blue_or_brown_pip():
+    no_specialization = PhaseBatteryConfig(starting_specialization=False)
+    builder_game = PhaseBatteryGame([("Builder", "builder")], seed=27)
+    base_builder_game = PhaseBatteryGame(
+        [("Builder", "builder")], seed=27, config=no_specialization
+    )
+    explorer_game = PhaseBatteryGame([("Explorer", "novelty")], seed=28)
+    base_explorer_game = PhaseBatteryGame(
+        [("Explorer", "novelty")], seed=28, config=no_specialization
+    )
+    builder = builder_game.players[0]
+    base_builder = base_builder_game.players[0]
+    explorer = explorer_game.players[0]
+    base_explorer = base_explorer_game.players[0]
+
+    assert builder.tracks[DieColor.BROWN].maximum == base_builder.tracks[DieColor.BROWN].maximum + 1
+    assert builder.tracks[DieColor.BROWN].current == base_builder.tracks[DieColor.BROWN].current + 1
+    assert explorer.tracks[DieColor.BLUE].maximum == base_explorer.tracks[DieColor.BLUE].maximum + 1
+    assert explorer.tracks[DieColor.BLUE].current == base_explorer.tracks[DieColor.BLUE].current + 1
 
 
 def test_three_player_game_selects_one_eligible_phase_per_player():
@@ -90,19 +119,52 @@ def test_explore_requires_ready_blue_pip_to_select():
     assert game.choose_phase(player) is Phase.DEVELOP
 
 
-def test_military_world_requires_red_max_and_exhausts_current_red():
+def test_explore_scout_gets_one_bonus_candidate():
+    game = PhaseBatteryGame([("P1", "novelty")], seed=26)
+    player = game.players[0]
+    player.dev_stack = []
+    player.world_stack = [BuildSlot(Tile("w", "Queued World", TileKind.WORLD, 1, 1))]
+    player.tracks[DieColor.BLUE].current = 1
+    ordinary = Tile("d-ordinary", "Ordinary", TileKind.DEVELOPMENT, 1, 1)
+    blue = Tile(
+        "d-blue",
+        "Blue Grant",
+        TileKind.DEVELOPMENT,
+        2,
+        2,
+        grants=(DieColor.BLUE,),
+    )
+    game.tile_bag = [ordinary, blue]
+
+    game.resolve_phase(player, Phase.EXPLORE)
+
+    assert [slot.tile for slot in player.dev_stack] == [blue]
+    assert player.tracks[DieColor.BLUE].current == 0
+
+
+def test_red_grant_world_pays_its_full_cost_with_red_settle_pips():
     game = PhaseBatteryGame([("P1", "military")], seed=2)
     player = game.players[0]
     player.tracks[DieColor.RED].current = 3
     player.tracks[DieColor.RED].maximum = 3
-    player.world_stack = [BuildSlot(Tile("rebel-test", "Rebel Test World", TileKind.WORLD, 3, 3, grants=()))]
+    world = Tile(
+        "gray-red",
+        "Gray Red-Grant World",
+        TileKind.WORLD,
+        3,
+        3,
+        grants=(DieColor.RED,),
+        placement="citizenry",
+        world_color="gray",
+    )
+    player.world_stack = [BuildSlot(world)]
 
     game.resolve_phase(player, Phase.SETTLE)
 
     assert player.world_stack == []
-    assert player.tracks[DieColor.RED].current == 2
-    assert player.tracks[DieColor.RED].maximum == 3
-    assert game.player_summary(player)["red_exhausts"] == 1
+    assert world in player.tableau
+    assert player.tracks[DieColor.RED].current == 0
+    assert player.tracks[DieColor.RED].maximum == 4
 
 
 def test_develop_pips_create_partial_progress_without_spending_credits():
@@ -153,16 +215,17 @@ def test_completed_development_does_not_create_special_credits():
     player.tracks[DieColor.BROWN].current = 1
     tile = Tile("d-credit", "Credit Development", TileKind.DEVELOPMENT, 1, 1)
     player.dev_stack = [BuildSlot(tile)]
+    earned_before = player.credits_earned
 
     game.resolve_phase(player, Phase.DEVELOP)
 
     assert tile in player.tableau
     assert player.credits == 0
-    assert player.credits_earned == 0
+    assert player.credits_earned == earned_before
 
     game.manage_empire(player)
 
-    assert player.credits_earned == 0
+    assert player.credits_earned == earned_before
 
 
 def test_develop_can_complete_multiple_developments_in_one_phase():
@@ -275,6 +338,8 @@ def test_settle_can_complete_multiple_worlds_in_one_phase():
     first = Tile("w1", "World 1", TileKind.WORLD, 1, 1, world_color="Novelty")
     second = Tile("w2", "World 2", TileKind.WORLD, 1, 1, world_color="Genes")
     player.world_stack = [BuildSlot(first), BuildSlot(second)]
+    player.tracks[DieColor.RED].current = 3
+    player.tracks[DieColor.RED].maximum = 3
 
     game.resolve_phase(player, Phase.SETTLE)
 
@@ -283,13 +348,13 @@ def test_settle_can_complete_multiple_worlds_in_one_phase():
     assert second in player.tableau
     assert player.credits == 2
     assert player.credits_spent == 0
-    assert player.tracks[DieColor.WHITE].current == 1
+    assert player.tracks[DieColor.RED].current == 1
 
 
 def test_settle_pips_create_partial_world_progress():
     game = PhaseBatteryGame([("P1", "settler")], seed=11)
     player = game.players[0]
-    player.tracks[DieColor.WHITE].current = 2
+    player.tracks[DieColor.RED].current = 2
     game.sync_credit_track(player)
     world = Tile("w-big", "Large World", TileKind.WORLD, 5, 5)
     player.world_stack = [BuildSlot(world)]
@@ -298,13 +363,13 @@ def test_settle_pips_create_partial_world_progress():
 
     assert player.world_stack == [BuildSlot(world, progress=2)]
     assert world not in player.tableau
-    assert player.tracks[DieColor.WHITE].current == 0
+    assert player.tracks[DieColor.RED].current == 0
 
 
 def test_settle_completes_later_from_stored_world_progress():
     game = PhaseBatteryGame([("P1", "settler")], seed=29)
     player = game.players[0]
-    player.tracks[DieColor.WHITE].current = 2
+    player.tracks[DieColor.RED].current = 2
     world = Tile("w-big", "Large World", TileKind.WORLD, 5, 5)
     player.world_stack = [BuildSlot(world, progress=3)]
 
@@ -312,40 +377,8 @@ def test_settle_completes_later_from_stored_world_progress():
 
     assert player.world_stack == []
     assert world in player.tableau
-    assert player.tracks[DieColor.WHITE].current == 0
+    assert player.tracks[DieColor.RED].current == 0
     assert player.used_pips == 2
-
-
-def test_settle_can_complete_multiple_military_worlds_with_red_readiness():
-    game = PhaseBatteryGame([("P1", "military")], seed=12)
-    player = game.players[0]
-    player.tracks[DieColor.RED].current = 4
-    player.tracks[DieColor.RED].maximum = 4
-    first = Tile("rebel-1", "Rebel World 1", TileKind.WORLD, 2, 2, grants=())
-    second = Tile("rebel-2", "Rebel World 2", TileKind.WORLD, 3, 3, grants=())
-    player.world_stack = [BuildSlot(first), BuildSlot(second)]
-
-    game.resolve_phase(player, Phase.SETTLE)
-
-    assert player.world_stack == []
-    assert first in player.tableau
-    assert second in player.tableau
-    assert player.tracks[DieColor.RED].current == 2
-    assert game.player_summary(player)["red_exhausts"] == 2
-
-
-def test_military_world_blocks_without_enough_current_red_even_with_level():
-    game = PhaseBatteryGame([("P1", "military")], seed=3)
-    player = game.players[0]
-    player.tracks[DieColor.RED].current = 2
-    player.tracks[DieColor.RED].maximum = 3
-    world = Tile("rebel-test", "Rebel Test World", TileKind.WORLD, 3, 3, grants=())
-    player.world_stack = [BuildSlot(world)]
-
-    game.resolve_phase(player, Phase.SETTLE)
-
-    assert player.world_stack == [BuildSlot(world)]
-    assert game.player_summary(player)["red_exhausts"] == 0
 
 
 def test_red_can_recharge_with_credits():
@@ -361,19 +394,6 @@ def test_red_can_recharge_with_credits():
     assert player.tracks[DieColor.RED].current == 1
     assert player.credits == 1
     assert player.credits_spent == 1
-
-
-def test_red_grants_max_only_option_delays_current_red_gain():
-    config = PhaseBatteryConfig(red_grants_current=False)
-    game = PhaseBatteryGame([("P1", "military")], seed=5, config=config)
-    player = game.players[0]
-    player.tracks[DieColor.RED].current = 0
-    player.tracks[DieColor.RED].maximum = 2
-
-    game.gain_die(player, DieColor.RED)
-
-    assert player.tracks[DieColor.RED].current == 0
-    assert player.tracks[DieColor.RED].maximum == 3
 
 
 def test_cup_die_gain_recharges_for_free_during_manage_empire():
