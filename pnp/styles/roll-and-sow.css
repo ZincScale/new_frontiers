@@ -165,18 +165,11 @@
   text-align: right;
 }
 
-.playtest-lines {
-  display: grid;
-  gap: 0.08in;
-  margin-top: 0.07in;
-}
-
-.playtest-lines span {
-  display: block;
-  min-height: 0.18in;
-  border-bottom: 1px solid rgba(43, 48, 56, 0.45);
-  color: var(--muted);
-  font-size: 7.6pt;
+.compact-example {
+  margin-bottom: 0;
+  padding-left: 0.18in;
+  font-size: 7.5pt;
+  line-height: 1.2;
 }
 
 .goal-sheet {

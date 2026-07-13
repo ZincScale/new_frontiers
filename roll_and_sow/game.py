@@ -10,7 +10,7 @@ from roll_galaxy.model import DieColor, Good, PHASE_ORDER, Phase, Tile, TileKind
 from roll_galaxy.tiles import HOME_WORLDS, NON_START_TILES, START_FACTION_PAIRS
 
 from .model import PHASE_SECTION, SECTION_ORDER, SECTION_PHASE, Section
-from .roll_and_sow_powers import (
+from .powers import (
     EXTRA_EXPLORE_WORKERS,
     EXTRA_SHIP_WORKERS,
     REASSIGN_RULES,

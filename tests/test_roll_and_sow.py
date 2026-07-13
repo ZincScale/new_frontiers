@@ -2,8 +2,8 @@ import pytest
 
 from roll_galaxy.model import DieColor, Good, Phase, Tile, TileKind
 from roll_galaxy.tiles import NON_START_TILES
-from roll_mancala.model import SECTION_ORDER, Section
-from roll_mancala.roll_and_sow import RollAndSowConfig, RollAndSowGame, SowConstruction
+from roll_and_sow.game import RollAndSowConfig, RollAndSowGame, SowConstruction
+from roll_and_sow.model import SECTION_ORDER, Section
 
 
 def empty_player(player):

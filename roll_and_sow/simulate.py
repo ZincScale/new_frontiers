@@ -4,7 +4,7 @@ import argparse
 from collections import Counter, defaultdict
 from statistics import mean
 
-from .roll_and_sow import RollAndSowConfig, RollAndSowGame
+from .game import RollAndSowConfig, RollAndSowGame
 
 
 def parse_players(values: list[str]):
@@ -19,7 +19,7 @@ def parse_players(values: list[str]):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Test the activate-use-sow Roll mancala loop.")
+    parser = argparse.ArgumentParser(description="Simulate the Roll & Sow activate-use-sow loop.")
     parser.add_argument("--games", type=int, default=100)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument(

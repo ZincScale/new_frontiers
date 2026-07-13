@@ -1,4 +1,4 @@
-"""Structured Roll tile-power conversions for the roll-and-sow experiment.
+"""Structured Roll tile-power conversions for Roll & Sow.
 
 The source is ``Roll_for_the_Galaxy_all_tiles.xls``. The generated Tile records
 retain phase tags but not their full text, so the rules that affect this engine

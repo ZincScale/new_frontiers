@@ -11,24 +11,16 @@ Open the desired HTML file in a browser and print at 100% scale.
 - 4 Rival difficulty cards
 - 7 reference / solo procedure cards
 
-### Legacy Roll Mancala Dice Variant
-
-- parked no-roll design with 4 Mancala Phase player boards
-- 1 combined rules / solo aid sheet
-- 1 combined campaign / tile-text aid sheet
-- 5 solo Dummy phase cards
-- five-section boards with off-board Spent storage
-
-The player boards, aid sheets, and Dummy phase cards are formatted for letter paper.
-
-### Roll & Sow Mechanism Test
+### Roll & Sow
 
 - 4 activate-use-sow player boards
-- 1 quick-reference and playtest sheet
+- 1 quick-reference sheet with setup, full round sequence, and worked example
 - 10 six-cost goal reference cards with minimums and converted printed bonuses
 - five phase bowls that retain rolled die faces
 - Citizenry recruitment and printed die-location reminders
 - provisional solo procedure
+
+The complete rules are in `../docs/roll_and_sow_rules.pdf`.
 
 ### Roll Phase Battery Variant
 
@@ -46,9 +38,7 @@ The player boards, aid sheets, and Dummy phase cards are formatted for letter pa
 ## Files
 
 - `print-and-play.html`: Tiny Galaxy printable card sheets.
-- `roll-mancala.html`: legacy no-roll mancala boards and references.
-- `roll-mancala.pdf`: generated legacy mancala print-and-play PDF.
-- `roll-and-sow.html`: experimental Roll & Sow boards and quick reference.
+- `roll-and-sow.html`: Roll & Sow boards, quick reference, and goal cards.
 - `roll-and-sow.pdf`: generated Roll & Sow print-and-play PDF.
 - `roll-phase-battery.html`: Roll phase battery boards, aid sheets, and Dummy cards.
 - `roll-phase-battery.pdf`: generated Roll phase battery print-and-play PDF.
@@ -67,10 +57,6 @@ as balance changes.
 - Print at actual size / 100%.
 - Turn off "fit to page" if your print dialog shrinks the layout.
 - Cut along the card borders or crop marks.
-
-For the Roll mancala boards, place physical dice in the five phase sections.
-Keep Spent dice off board. Die faces do not matter. Dice are mancala stones;
-Credits pay Develop/Settle costs and Good markers track produced Goods.
 
 For Roll & Sow, die faces do matter. Roll new Cup dice immediately into their
 face-matching bowl. When a phase activates, use any desired dice and sow every

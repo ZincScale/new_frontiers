@@ -1,9 +1,22 @@
-# Roll for the Galaxy: Roll & Sow Prototype
+# Roll for the Galaxy: Roll & Sow
 
-Status: experimental mechanism test for 1-4 players. This does not replace the
-main Phase Battery rules unless a later playtest adopts it.
+Complete playtest rules for 1-4 players.
 
-## What This Prototype Tests
+## Using This Package
+
+Roll & Sow is a variant for owners of **Roll for the Galaxy**. Use the base
+game's dice, tiles, screens, phase tiles, Credits, Goods, and VP chips. Print
+`pnp/roll-and-sow.pdf` at actual size / 100%:
+
+- pages 1-2 contain four player boards (one half-page board per player);
+- page 3 is the table quick reference and worked example;
+- page 4 contains all ten six-cost goal cards.
+
+For a first game, print one board per player, place the quick reference where
+everyone can see it, and cut out the goal cards. This document is the complete
+rules reference; when it differs from base Roll, this document wins.
+
+## The Game In One Minute
 
 Roll & Sow keeps Roll's dice, tiles, Credits, Goods, construction, and phase
 powers. It changes what happens after dice are rolled:
@@ -14,26 +27,39 @@ powers. It changes what happens after dice are rolled:
 4. useful dice are spent as workers;
 5. every unused die is sown clockwise into later bowls.
 
-The intended tension is that another player can activate your bowl before you
-want it activated. You may benefit from their phase, but your unused dice will
-move and change your future choices.
+The tension is that another player can activate your bowl before you want it
+activated. You may benefit from their phase, but every unused die moves and
+changes your future choices. Your basic decision each phase is therefore:
+
+```text
+use a die now -> commit it to the normal worker destination
+sow it instead -> preserve it, but move it to a later phase bowl
+```
 
 ## Components
 
-Use the base Roll for the Galaxy components, plus one printed Roll & Sow board
-per player. Each board has five bowls in this order:
+From the base game, use:
+
+- all dice (the physical Dice Cups are not needed because Cup gains roll
+  immediately);
+- ordinary non-start tiles, starting Factions, and Home Worlds;
+- player screens and the five phase tiles or equivalent secret markers;
+- Credit markers and VP chips. Dice placed on Worlds are the Goods.
+
+From the printable package, use one Roll & Sow board per player, the shared
+quick reference, and the ten goal cards. Each board has five bowls in this
+order:
 
 ```text
 Explore -> Develop -> Settle -> Produce -> Ship -> Explore
 ```
 
-Use the normal player screens and phase tiles. A player needs a way to select a
-phase secretly without moving a die out of its bowl; place the matching phase
-tile or a phase marker behind the screen.
+A player needs a way to select a phase secretly without moving a die out of its
+bowl. Place the matching phase tile or an equivalent marker behind the screen.
 
-Remove all six-cost Developments from the normal tile supply. They are delayed
-end-game goals, not construction tiles. Keep their physical tiles near the
-shared goal reference.
+Remove all ten six-cost Developments from the normal tile supply. They are
+delayed end-game goals, not construction tiles. Use either their physical tiles
+or the printed goal cards as the shared goal pool; do not mix both sets.
 
 ## Setup
 
@@ -52,6 +78,10 @@ shared goal reference.
 6. Make a VP-chip pool of 7 chips per player.
 7. Randomize the ordinary tiles. Keep a face-down discard pile beside the bag.
    Keep unrevealed six-cost goals separate from this bag.
+
+Give each player enough table space for a tableau, up to 3 Developments and 3
+Worlds under construction, Citizenry dice, and dice committed as construction
+progress or Goods. Randomly choose a start player.
 
 Starting-tile dice are in addition to the 5 White dice. A printed Cup gain is
 rolled immediately. A Citizenry gain begins in Citizenry. A World gain begins
@@ -136,6 +166,26 @@ Example: Develop is selected. Mira activates 3 dice in Develop but needs only 1
 to complete a Development. That die goes to Citizenry with any older progress
 dice. She sows the other 2 dice: one into Settle and one into Produce. If Settle
 or Produce is also selected this round, the newly sown die will activate there.
+
+## Worked Round Example
+
+Mira has 3 dice in Develop and 1 in Ship. Sol has 1 die in Develop, 2 in Settle,
+and 1 in Produce. Mira secretly selects Develop; Sol selects Settle. Both phases
+will occur, in Develop-then-Settle order.
+
+1. **Develop activates for everyone.** Mira picks up all 3 Develop dice. She
+   spends 1 to finish a Development and sows the other 2: first to Settle, then
+   to Produce. Sol picks up his 1 Develop die. He does not want to commit it, so
+   he sows it into Settle.
+2. **Settle activates for everyone.** Mira's newly sown Settle die is already
+   there, so she may spend it on a World or sow it onward. Sol now activates his
+   2 original Settle dice plus the die just sown from Develop. He spends 2 to
+   finish a World and sows the last die into Produce.
+3. Produce was not selected, so every die now in Produce waits for a future
+   round. The players proceed to Manage Empire.
+
+Notice the interaction: Mira caused Sol's Develop bowl to move, while Sol's
+phase choice let both players use dice that had just been sown into Settle.
 
 ## Phase Actions
 
@@ -240,6 +290,38 @@ because construction is already parallel and a Scout may already choose either
 side. Backup Planning should be read as one unrestricted Reassign for this
 prototype because Dictate is not separately modeled.
 
+## Common Questions And Edge Cases
+
+**Can I activate only part of a bowl?** No. Pick up every die in the bowl, then
+choose which to use and sow all the rest.
+
+**Must I use at least one die?** No. You may sow the entire activated bowl.
+
+**Can a sown die act twice in one phase?** No. A bowl activates once when its
+phase occurs. A die sown backward around the loop into an already resolved bowl
+waits until a later round.
+
+**What if two players select the same phase?** It occurs once. Everyone
+activates that bowl once.
+
+**What if my selected bowl is emptied by Reassign?** Your selection still calls
+that phase. When it occurs, printed powers still trigger and you simply have no
+physical dice to activate there.
+
+**What if my bowls are empty?** Select nothing. During Manage Empire, recruit
+if possible and use mandatory Recall if a die is committed as progress or a
+Good. If every owned die is in Citizenry and you cannot recruit more, the
+minimum-Credit rule raises you to 1 Credit for the next round.
+
+**Does die color determine its action?** No. Its current bowl determines its
+phase action. Color matters only to printed tile powers and goal scoring.
+
+**Does the order of unused dice matter?** Yes. You choose the sowing order, so
+different colors may land in different future bowls.
+
+**Can several players mark the same goal?** Yes. Candidate selection is
+non-exclusive in this playtest.
+
 ## Six-Cost End-Game Goals
 
 Goal cards remain outside the tableau and construction rows. They do not grant
@@ -284,9 +366,9 @@ Development.
 The 10-die Industrial minimum is the Roll & Sow conversion of Phase Battery's
 max-pip requirement. It is a playtest value, not printed Roll text.
 
-## Provisional Solo Test
+## Solo Play
 
-Solo is included only as a loop test; its difficulty has not been tuned.
+Solo uses the same game loop, but its difficulty has not yet been tuned.
 
 1. Set up one player, a 24-chip VP pool, and the normal 3-card shared goal pool.
 2. Shuffle one card for each of the five phases.

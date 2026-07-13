@@ -62,9 +62,8 @@ For the first playtest, do not add general free recharge beyond printed Cup
 placement, tile-specific retuning, or a new dummy-player system. Those are
 tuning knobs after the core battery loop is tested at the table.
 
-There is also a parked mancala dice alternative in
-`docs/roll_mancala_dice_design.md`. It uses the base game's physical dice as
-mancala stones. That design is not part of this ruleset.
+The separate rolled-dice alternative is Roll & Sow, documented in
+`docs/roll_and_sow_rules.md`. It is not part of this ruleset.
 
 ## Components
 

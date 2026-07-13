@@ -7,12 +7,12 @@ variant:
 - print-and-play reference: `pnp/roll-phase-battery.html`
 - simulator: `phase_battery/`
 
-Avoid changing or reasoning from these older/parked variants unless the user
+Avoid changing or reasoning from these other variants unless the user
 explicitly asks for them:
 
-- `roll_mancala/`
-- `docs/roll_mancala_dice_design.md`
-- `pnp/roll-mancala.html`
+- `roll_and_sow/`
+- `docs/roll_and_sow_rules.md`
+- `pnp/roll-and-sow.html`
 - `roll_galaxy/`
 
 Current main-rules direction:
@@ -101,8 +101,8 @@ Adjacent design context, not part of the active Phase Battery rules:
 - A July 2026 playtest found Phase Battery too resource-rich, too permissive,
   too multiplayer-solitaire, and poor at circulating Explore tiles. An
   explicitly reopened experimental alternative lives in
-  `roll_mancala/roll_and_sow.py` with its runner in
-  `roll_mancala/simulate_roll_and_sow.py`. Its table rules are
+  `roll_and_sow/game.py` with its runner in
+  `roll_and_sow/simulate.py`. Its table rules are
   `docs/roll_and_sow_rules.md` and its printable boards are
   `pnp/roll-and-sow.html`. It starts with 5 White dice: roll 3
   into face-matching phase bowls and put 2 in Citizenry. Secretly select a
