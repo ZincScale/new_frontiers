@@ -1,8 +1,9 @@
-# Roll for the Galaxy: Mancala Dice Variant
+# Roll for the Galaxy: Legacy Mancala Dice Variant
 
-This is the primary Roll prototype in this repository. It replaces the Dice Cup,
-roll, and assignment steps with a five-section mancala loop. The archived
-phase-battery rules remain in `docs/roll_phase_battery_rules.md`.
+This is the parked no-roll mancala-stones design. The reopened rolled-die
+activate-use-sow prototype is documented in `docs/roll_and_sow_rules.md`, with
+print materials in `pnp/roll-and-sow.html`. This legacy design replaces the
+Dice Cup, roll, and assignment steps with a five-section mancala loop.
 
 Use the physical dice from the base box as mancala stones. Die faces do not
 matter. Die color is still identity for gained dice, lost dice, color bonuses,

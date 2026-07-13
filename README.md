@@ -60,6 +60,28 @@ python3 -m phase_battery.solo --games 100 --strategy balanced
 
 ## Roll For The Galaxy Mancala Dice Variant
 
+The reopened **Roll & Sow** mechanism test keeps normal rolled die faces, then
+stores dice in five phase bowls. A selected phase activates that bowl for every
+player; used dice follow their normal worker lifecycle and unused dice sow
+clockwise. Six-cost Developments are delayed goals with printed end-game bonus
+conversions and a -6 VP failure risk. It supports 1-4 players and is not yet the
+adopted main ruleset.
+
+Rules and print-and-play:
+
+- `docs/roll_and_sow_rules.md`
+- `docs/roll_and_sow_rules.pdf`
+- `pnp/roll-and-sow.html`
+- `pnp/roll-and-sow.pdf`
+
+Run its multiplayer simulator:
+
+```bash
+python3 -m roll_mancala.simulate_roll_and_sow --games 100 --players P1:balanced P2:builder P3:producer P4:shipper
+```
+
+The files below describe the older, parked no-roll mancala-stones design.
+
 The parked mancala Roll prototype replaces the Dice Cup, roll, and assign steps
 with a five-section mancala loop:
 

@@ -1,0 +1,255 @@
+.sow-board-sheet {
+  display: grid;
+  grid-template-rows: repeat(2, 4.95in);
+  gap: 0.22in;
+}
+
+.roll-sow-board {
+  grid-template-rows: auto 1fr auto auto;
+}
+
+.roll-sow-board header {
+  background: #243d49;
+}
+
+.roll-sow-board header strong {
+  color: #dcebf0;
+  font-size: 8pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.roll-sow-board .mancala-loop {
+  grid-template-rows: repeat(3, 0.92in);
+  padding: 0.08in 0.16in 0.03in;
+}
+
+.roll-sow-board .mancala-loop::before {
+  inset: 0.16in 0.34in 0.08in;
+}
+
+.roll-sow-board .pit {
+  min-height: 0.92in;
+  padding: 0.06in 0.08in;
+}
+
+.roll-sow-board .pit h2 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 11.6pt;
+}
+
+.roll-sow-board .pit h2 span {
+  color: var(--muted);
+  font-size: 6.7pt;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.roll-sow-board .pit .bowl {
+  min-height: 0.37in;
+  margin: 0.025in 0;
+  font-size: 7.1pt;
+}
+
+.roll-sow-board .pit .note {
+  font-size: 6.8pt;
+}
+
+.sow-hub {
+  display: grid;
+  z-index: 2;
+  grid-column: 3 / span 2;
+  grid-row: 2;
+  align-self: center;
+  min-height: 0.72in;
+  place-items: center;
+  border: 1.5px solid #263f47;
+  border-radius: 50%;
+  background: #fff;
+  color: #263f47;
+  font-size: 7pt;
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.sow-hub b {
+  display: block;
+  font-size: 10pt;
+}
+
+.sow-zones {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1.7fr;
+  gap: 0.08in;
+  padding: 0.03in 0.18in 0.08in;
+}
+
+.sow-zone {
+  min-height: 0.48in;
+  padding: 0.055in 0.08in;
+  border: 1px solid rgba(43, 48, 56, 0.45);
+  border-radius: 0.05in;
+  background: #fff;
+}
+
+.sow-zone h3,
+.sow-zone p {
+  margin: 0;
+}
+
+.sow-zone h3 {
+  color: #263f47;
+  font-size: 8pt;
+  text-transform: uppercase;
+}
+
+.sow-zone p {
+  color: var(--muted);
+  font-size: 6.8pt;
+  font-weight: 800;
+}
+
+.sow-zone.citizenry {
+  border-style: dashed;
+}
+
+.roll-sow-board footer {
+  grid-template-columns: 1.2fr 1.5fr 1.3fr;
+  padding: 0.07in 0.18in 0.1in;
+  font-size: 7.4pt;
+}
+
+.sow-flow {
+  color: #263f47;
+  font-weight: 900;
+}
+
+.sow-aid .aid-title {
+  background: #243d49;
+}
+
+.sow-aid .callout {
+  padding: 0.08in 0.1in;
+  border: 1.5px solid #263f47;
+  border-radius: 0.05in;
+  background: #eef4f5;
+  color: #263f47;
+  font-size: 9pt;
+  font-weight: 900;
+}
+
+.sow-aid .phase-table {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.035in 0.08in;
+  margin: 0;
+  font-size: 8.5pt;
+}
+
+.sow-aid .phase-table dt,
+.sow-aid .phase-table dd {
+  margin: 0;
+}
+
+.sow-aid .phase-table dt {
+  font-weight: 900;
+}
+
+.sow-aid .phase-table dd:last-of-type {
+  color: var(--muted);
+  font-weight: 800;
+  text-align: right;
+}
+
+.playtest-lines {
+  display: grid;
+  gap: 0.08in;
+  margin-top: 0.07in;
+}
+
+.playtest-lines span {
+  display: block;
+  min-height: 0.18in;
+  border-bottom: 1px solid rgba(43, 48, 56, 0.45);
+  color: var(--muted);
+  font-size: 7.6pt;
+}
+
+.goal-sheet {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 0.1in;
+}
+
+.goal-card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  overflow: hidden;
+  border: 1.5px solid var(--line);
+  border-radius: 0.07in;
+  background: var(--paper);
+}
+
+.goal-card header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.08in;
+  padding: 0.07in 0.1in;
+  background: #243d49;
+  color: #fff;
+}
+
+.goal-card h2,
+.goal-card header span,
+.goal-card p {
+  margin: 0;
+}
+
+.goal-card h2 {
+  font-size: 11pt;
+}
+
+.goal-card header span {
+  font-size: 6.5pt;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.goal-card .minimum {
+  padding: 0.06in 0.1in;
+  border-bottom: 1px solid rgba(43, 48, 56, 0.25);
+  color: #8c302b;
+  font-size: 8pt;
+  font-weight: 900;
+}
+
+.goal-card .bonus {
+  padding: 0.06in 0.1in 0.03in;
+  color: #263f47;
+  font-size: 8.2pt;
+  font-weight: 800;
+}
+
+.goal-card .conversion {
+  padding: 0.03in 0.1in 0.06in;
+  color: var(--muted);
+  font-size: 6.8pt;
+  font-weight: 800;
+}
+
+.goal-card footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.05in;
+  padding: 0.05in 0.1in;
+  border-top: 1px solid rgba(43, 48, 56, 0.25);
+  color: var(--muted);
+  font-size: 6.8pt;
+  font-weight: 900;
+}

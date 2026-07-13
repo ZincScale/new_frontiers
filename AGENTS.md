@@ -96,5 +96,63 @@ Current main-rules direction:
 - Parked larger-expansion ideas: all phases every round, no VP pool, Ship as
   Credits only, and special Development-completion Credit rewards.
 
+Adjacent design context, not part of the active Phase Battery rules:
+
+- A July 2026 playtest found Phase Battery too resource-rich, too permissive,
+  too multiplayer-solitaire, and poor at circulating Explore tiles. An
+  explicitly reopened experimental alternative lives in
+  `roll_mancala/roll_and_sow.py` with its runner in
+  `roll_mancala/simulate_roll_and_sow.py`. Its table rules are
+  `docs/roll_and_sow_rules.md` and its printable boards are
+  `pnp/roll-and-sow.html`. It starts with 5 White dice: roll 3
+  into face-matching phase bowls and put 2 in Citizenry. Secretly select a
+  nonempty bowl; every selected phase activates that bowl for every player.
+  Use dice first, then sow all unused dice clockwise. Cup gains roll into a
+  bowl immediately; Citizenry dice cost 1 Credit to recruit and roll. Explore
+  sees 4 candidates with the first die and +1 per extra die, using a discard
+  cycle for rejected tiles. Manage Empire retains Recall from base Roll; when
+  all five bowls are empty, recalling one construction/Good die and rolling it
+  into a bowl is mandatory to prevent lockout. This is an experiment, not yet the adopted main
+  ruleset. The experiment now converts applicable persistent powers and exact
+  Reassign restrictions from `Roll_for_the_Galaxy_all_tiles.xls`. Six-cost
+  Developments use a shared `2 + player count` candidate pool, commit at half
+  the VP pool or 6 completed tiles, score converted printed end-game bonuses,
+  and suffer -6 VP when their minimum is missed. Multiple players may mark the
+  same shared candidate in this experiment. Galactic Reserves uses a provisional
+  10-owned-dice Industrial minimum; a 1,000-game 4p sensitivity run raised its
+  fulfillment from about 33% at 12 dice to about 75% at 10 dice. Goal cards
+  grant no phase power, face VP, or tableau square. Advanced Logistics and Improved
+  Reconnaissance are inert under the parallel-construction abstraction, and
+  Backup Planning still uses a generic one-route approximation because Dictate
+  is not separately modeled. The design supports 1-4 players maximum; solo
+  phase support is still provisional. With goals enabled, 200-game automated
+  samples after adding mandatory anti-lockout Recall averaged 19.8 rounds at
+  solo (180/200 reached the round cap), 23.3 at 2p, 22.0 at 3p, and 18.7 at 4p.
+  A separate 1,000-game 4p goal audit found Galactic Bankers/Federation
+  generally safe and positive, while New Galactic Order, System
+  Diversification, and Galactic Renaissance had materially higher failure
+  rates. These are AI pacing and risk signals, not human balance validation.
+- `New_Frontiers_Tile_List_ver_1_2.xlsx` and `New_frontiers_rules.pdf` are local
+  untracked reference files. The workbook lists 40 unique Development entries,
+  60 Worlds, and 16 starting-colony faces. New Frontiers has 56 physical
+  Development tiles because some designs have multiple copies. Roll has 55
+  non-start Development designs, but this variant removes 10 six-cost goals
+  from the normal bag, leaving 45 ordinary Development designs.
+- A candidate New Frontiers / Starry Rift military balance rule is an
+  **Occupation Cost**: to conquer a Military World, meet its Military strength,
+  place its printed colonists, and pay 1 Credit per colonist placed.
+  Specialized Rebel/Xeno/Uplift/Alien Military helps meet strength but never
+  reduces this recurring cost. Apply the same cost to Xeno Worlds; do not add
+  extra colonists because the shared colonist supply is also an end timer,
+  especially in solo. If tuning is needed, test a flat 1 Credit when too harsh
+  or `colonists + 1` Credits when too weak. This proposal has not been adopted
+  into any ruleset.
+- Literal Wingspan-style row-running is currently rejected for Roll: its tiles
+  mainly grant immediate effects, passive modifiers, Goods storage, or scoring,
+  so repeatedly "running" a World or tile has no native meaning and would
+  require rewriting the tile set. Wingspan-like spatial organization may still
+  be useful as a phase-power index plus a separately organized galaxy, but it
+  should not activate completed tiles as a chain in the minimal variant.
+
 When preserving context for future sessions, prefer updating this file with
 short durable project assumptions rather than relying on chat history.
