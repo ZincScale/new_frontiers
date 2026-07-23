@@ -93,6 +93,18 @@ Current main-rules direction:
 
 Adjacent design context, not part of the active Phase Battery rules:
 
+- The active Atiwa Living Landscape experiment is
+  `docs/atiwa_open_commitments_v0_3.md`. Reveal player count plus 1 public Open
+  Commitments after setup and let all players race to claim them; each player
+  may claim at most 2 per game. The provisional rewards are 7/4/2 VP for
+  first/second/third; in 2p skip the middle reward, so first receives 7 and
+  second receives 2. Fourth place scores nothing. Claims should be action-timed
+  and publicly verifiable, and their main purpose is to stretch players into
+  different playstyles by changing which Terrain cards, Locations,
+  arrangements, and worker actions they value. Solo provisionally maps the
+  three rewards to claims by the end of rounds III/V/VII. Test v0.3 alone;
+  v0.1 scoring modules and v0.2 benefit-plus-constraint powers remain
+  comparison baselines.
 - `New_Frontiers_Tile_List_ver_1_2.xlsx` and `New_frontiers_rules.pdf` are local
   untracked reference files. The workbook lists 40 unique Development entries,
   60 Worlds, and 16 starting-colony faces. New Frontiers has 56 physical

@@ -1,5 +1,11 @@
 # Living Landscape: Stewardship Commitments Prototype
 
+> **Previous experiment:** This v0.2 benefit-plus-constraint prototype remains
+> a comparison baseline. The active design experiment is the public,
+> declining-reward Open Commitment race in
+> `docs/atiwa_open_commitments_v0_3.md`. Do not combine the two modules during
+> initial testing.
+
 ## Design Contract
 
 - **Status:** Experimental rules prototype; synthetic-model testing only
@@ -17,6 +23,46 @@ or print-and-play files are revised.
 The experiment tests one proposition: a personal Commitment can make a different
 Atiwa engine competitive by granting a narrow benefit while closing the most
 obvious normal use of the resources it improves.
+
+## Design Benchmark: Fields of Arle
+
+*Fields of Arle* and its *Tea & Trade* expansion are useful benchmarks for the
+kind of strategic variety Living Landscape should create, but not for the
+amount of machinery it should add.
+
+*Fields of Arle* produces different strategies from a broad economic sandbox:
+players begin symmetrically, then diverge through seasonal actions and their
+investments in tools, land, animals, buildings, vehicles, goods, and travel.
+*Tea & Trade* broadens that network with tea, ships, trade, fishing, ditches,
+and additional buildings. It primarily adds routes and connections rather than
+assigning players restrictive roles.
+
+Atiwa has a much narrower and more strongly coupled ecological engine. Adding
+general bonuses for trees, bats, goats, gold, or trained families would tend to
+strengthen the same successful engine rather than produce Arle-like variety.
+Living Landscape must therefore create variety more surgically:
+
+- Each Commitment should alter a resource conversion or spatial rule, not add
+  an end-game scoring target.
+- Its benefit should affect at least two kinds of decisions, such as worker
+  placement, token placement, feeding, or maintenance.
+- Its restriction should create a recurring opportunity cost that cannot be
+  ignored by following ordinary efficient play.
+- A Commitment should enable a strategic lane without prescribing a complete
+  victory script; players must remain able to combine adjacent systems and
+  respond to the Terrain display.
+- Landscape Priorities should later vary which lanes are attractive in a
+  particular game, much as a variable building supply changes the value of
+  investments in Fields of Arle.
+
+Do not add an Atiwa equivalent of Tea as a universal action booster. In Atiwa's
+tighter economy, a broadly useful accelerator would likely reinforce the
+strongest base-game route and smooth away the distinctions between
+Commitments.
+
+The expansion target is therefore not a compressed version of Fields of Arle.
+It is at least five genuinely different solutions to Atiwa's existing feeding,
+capacity, and ecology problem, delivered with low component and rules overhead.
 
 ## Module Structure
 
@@ -179,14 +225,20 @@ first pressure points for human testing:
 - Pastoral Cooperative gains one additional recurring food-demand reduction
   per goat. The restriction matters only in games where goats would otherwise
   be sacrificed, so this Commitment may be too efficient for players who
-  already preserve goats.
+  already preserve goats. It fails the benchmark if it merely improves the
+  ordinary goat strategy without creating a consequential tradeoff.
 - Distributed Settlement Planner saves only one gold per Location while the
   two-family cap can require several additional Location purchases. The
   benefit may be too small; test a one-tree discount only if the gold version
-  consistently traps its player.
+  consistently traps its player. Its broad-settlement concept is sound, but
+  the enabling benefit must support the extra Location actions and costs.
 - Bat Conservationist saves one bat on the first fruit bat action of each
   round, at most seven bat movements over the game. Its main value is earlier
-  access to the action, not token production.
+  access to the action, not token production. Because efficient base-game play
+  already tends to preserve bats, both its benefit and restriction may support
+  the normal bat engine instead of opening a different route.
 - Forest Reserve Keeper affects exactly one Terrain card. Its value depends
   heavily on the number of blank spaces in the actual Terrain deck, which is
-  not available in the current references.
+  not available in the current references. It is the strongest current example
+  of the benchmark because it changes capacity, sequencing, and resource
+  liquidity at the same time.

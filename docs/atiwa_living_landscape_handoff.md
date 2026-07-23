@@ -8,10 +8,34 @@ extra points for the base game's existing trained-family, gold, nature-icon,
 or fruit-bat engines.
 
 The v0.1 scoring-only design remains in
-`docs/atiwa_living_landscape_design.md` as a baseline. The active experiment is
-the v0.2 draft in `docs/atiwa_stewardship_commitments_v0_2.md`.
+`docs/atiwa_living_landscape_design.md` as a baseline. The v0.2
+benefit-plus-constraint experiment remains in
+`docs/atiwa_stewardship_commitments_v0_2.md`.
 
-The v0.2 structure is:
+The active design experiment is the v0.3 Open Commitment race in
+`docs/atiwa_open_commitments_v0_3.md`:
+
+- reveal player count plus 1 public Open Commitments after normal setup;
+- every player may race to complete any of them but may claim at most 2;
+- the provisional claim ladder is 7/4/2 VP for first, second, and third;
+- in a two-player game, skip the middle reward so first scores 7 VP and second
+  scores 2 VP;
+- claims are permanent and use action-timed, objectively verifiable
+  conditions;
+- fourth place scores nothing;
+- solo replaces claim order with a provisional round III/V/VII timing race;
+- test this module without v0.1 Landscape Priorities or v0.2 personal powers.
+
+The extra public goal preserves a pivot lane after a player loses a race, while
+the 2-claim cap keeps the module from overwhelming normal Atiwa scoring.
+
+The purpose of Open Commitments is not simply to distribute expansion points.
+The visible races should stretch players into different playstyles by changing
+which Terrain cards, Locations, token arrangements, and worker actions they
+value. Claim order should create interaction, goal chasing, denial, and pivot
+decisions without adding direct resource theft.
+
+The earlier v0.2 structure was:
 
 - public Landscape Priorities eventually provide non-reinforcing spatial
   conditions shared by all players;
@@ -21,6 +45,41 @@ The v0.2 structure is:
   restriction;
 - Commitments currently provide no end-game VP;
 - the first tests isolate Commitments without Landscape Priorities.
+
+## Fields of Arle Benchmark
+
+*Fields of Arle* and *Tea & Trade* are benchmarks for strategic variety, not
+for expansion size or complexity. Arle creates divergent play through a broad
+shared sandbox of seasonal actions, tools, land, animals, buildings, vehicles,
+goods, and travel. *Tea & Trade* adds further connected routes rather than
+strongly constrained player roles.
+
+Atiwa's ecological economy is much narrower, so Living Landscape must create
+variety by altering conversions and spatial rules instead of adding general
+bonuses to the normal tree, bat, goat, gold, and trained-family engine. The
+durable target is at least five genuinely different solutions to Atiwa's
+feeding, capacity, and ecology problem with low rules and component overhead.
+
+Commitments should affect multiple kinds of decisions, impose a recurring
+opportunity cost, and enable a strategic lane without dictating a complete
+victory script. Later Landscape Priorities should vary which lanes are
+attractive in each game. Do not add a universal Tea-like action accelerator;
+in Atiwa it would likely reinforce the strongest base-game route and reduce
+the distinctions between Commitments.
+
+## Black Forest and Tea Garden: Puerh Benchmarks
+
+*Black Forest* strengthens the public-engine lesson from Fields of Arle:
+strategies should emerge in response to visible, variable opportunities that
+change conversions, timing, space, and competition. Living Landscape should
+borrow that setup-responsive divergence without adding another production
+subsystem.
+
+The Imperial Decrees in *Tea Garden: Puerh* are the direct structural benchmark
+for v0.3. Open achievements create a race because later claimants receive fewer
+points. The Atiwa experiment uses that declining-reward interaction to make
+players monitor opponents and chase different goals through the existing
+worker-placement and tableau systems.
 
 ## Five Prototype Commitments
 
@@ -63,18 +122,27 @@ package compiles, and `git diff --check` is clean.
 ## Initial Findings
 
 - Pastoral Cooperative may be too efficient when a player already preserves
-  goats.
+  goats; its restriction may fail to create a real opportunity cost.
 - Distributed Settlement Planner may provide too little benefit for its
   two-family cap; a one-tree rather than one-gold discount is the first
   fallback to test.
-- Wildlife Warden and Bat Conservationist each have a seven-round maximum
-  trigger.
+- Wildlife Warden is a strong example because it redirects wildlife into
+  orchard infrastructure while removing its emergency-food use.
+- Bat Conservationist has a seven-round maximum trigger, but may simply
+  accelerate the normal bat engine because efficient players already preserve
+  bats.
 - Forest Reserve Keeper is sensitive to the official deck's blank-space
-  distribution.
+  distribution. It is the strongest current benchmark because it changes
+  capacity, sequencing, and resource liquidity together.
 - Synthetic Terrain is suitable for legality, capacity, and extreme-value
   checks only; it is not an exact Atiwa balance model.
 
 ## Next Required Input
+
+The next design task is to outline at least eight Open Commitments with
+distinct playstyle lanes and action-timed claim conditions. Do not convert the
+five v0.2 powers mechanically; their intended routes may inspire race goals,
+but every v0.3 card must stand on its own as a public achievement.
 
 Exact-deck simulation needs a transcription of all 36 official Terrain cards.
 Use one CSV row per distinct card with this header:

@@ -1,5 +1,9 @@
 # Living Landscape: Unofficial Atiwa Fan Expansion
 
+> **Baseline experiment:** This v0.1 scoring-only design is preserved for
+> comparison. The active design experiment is the public, declining-reward
+> Open Commitment race in `docs/atiwa_open_commitments_v0_3.md`.
+
 ## Design Contract
 
 - **Status:** Design complete for text-only prototype; not yet playtested
