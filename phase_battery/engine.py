@@ -105,7 +105,7 @@ WORLD_FIRST_STRATEGIES = {
 
 @dataclass(frozen=True)
 class PhaseBatteryConfig:
-    starting_capacity: int = 3
+    starting_capacity: int = 1
     starting_credits: int = 1
     max_track_capacity: int = 6
     max_credits: Optional[int] = None
@@ -115,11 +115,11 @@ class PhaseBatteryConfig:
     vp_pool_per_player: Optional[int] = None
     max_rounds: int = 40
     construction_limit: int = 3
-    scout_bonus_candidates: int = 1
+    scout_bonus_candidates: int = 3
     starting_tile_pool_extra: int = 2
-    starting_specialization: bool = True
     endgame_goal_pool_extra: int = 2
     endgame_goal_penalty: int = 6
+    industrial_goal_requirement: int = 9
 
 
 @dataclass(frozen=True)
@@ -177,8 +177,6 @@ class PhaseBatteryGame:
             for tile in start_pair:
                 self.add_start_tile(player, tile)
             self.add_start_tile(player, home_world)
-            if self.config.starting_specialization:
-                self.apply_starting_specialization(player)
             self.scout_tile(player, TileKind.DEVELOPMENT)
             self.scout_tile(player, TileKind.WORLD)
 
@@ -691,12 +689,6 @@ class PhaseBatteryGame:
             + tile.immediate_credits
         )
 
-    def apply_starting_specialization(self, player: Player):
-        color = DieColor.BROWN if player.strategy == "builder" else DieColor.BLUE
-        track = self.track(player, color)
-        track.maximum = min(self.config.max_track_capacity, track.maximum + 1)
-        track.current = min(track.maximum, track.current + 1)
-
     def is_endgame_goal(self, tile: Tile) -> bool:
         return tile.kind is TileKind.DEVELOPMENT and "end_game" in tile.tags
 
@@ -736,6 +728,11 @@ class PhaseBatteryGame:
         if self.goal_commit_round is not None:
             return
         if self.vp_pool > self.starting_vp_pool // 2 and all(player.completed_tiles < 6 for player in self.players):
+            return
+        self.commit_goals()
+
+    def commit_goals(self):
+        if self.goal_commit_round is not None:
             return
         self.goal_commit_round = self.round_number
         for player in self.players:
@@ -1155,15 +1152,15 @@ class PhaseBatteryGame:
         if tile.id == "galactic_federation":
             return len(developments), 4, "Developer"
         if tile.id == "galactic_renaissance":
-            return player.completed_tiles, 8, "Builder"
+            return player.completed_tiles, 7, "Builder"
         if tile.id == "galactic_reserves":
-            return max_pips, 19, "Industrial"
+            return max_pips, self.config.industrial_goal_requirement, "Industrial"
         if tile.id == "mining_league":
             return rare_worlds, 2, "Rare Elements"
         if tile.id == "new_economy":
             return len(production_worlds), 3, "Production"
         if tile.id == "new_galactic_order":
-            return player.tracks[DieColor.RED].maximum, 5, "Military"
+            return player.tracks[DieColor.RED].maximum, 3, "Military"
         if tile.id == "system_diversification":
             return len(world_colors), 4, "Diverse"
         return self.endgame_tile_bonus(player, tile), 1, "converted score"

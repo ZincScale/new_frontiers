@@ -1,34 +1,31 @@
 # Dice-Galaxy Prototypes
 
-This repository contains a Python rules prototype for a small-box dice galaxy
-game with a generic die-face upgrade system, plus Roll for the Galaxy variant
-prototypes.
+This repository contains the main Phase Battery way to play Roll for the
+Galaxy, plus a Python rules prototype for a small-box dice galaxy game with a
+generic die-face upgrade system.
 
 ## Roll For The Galaxy Phase Battery Variant
 
-The active Roll prototype is being backed up to a minimal no-roll variant:
-keep phase selection, but replace rolled dice with deterministic phase
-batteries. Selected phases resolve in normal order:
+Phase Battery is the main Roll for the Galaxy variant. It keeps secret phase
+selection but replaces rolled dice with deterministic phase batteries.
+Selected phases resolve in normal order:
 
 ```text
 Explore -> Develop -> Settle -> Produce -> Ship
 ```
 
 Players may only select a phase if they have at least one ready pip for that
-phase. In solo and 2p games, each player selects two eligible phases; at 3p+
-each player selects one eligible phase. During selected phases, players act in
-turn order, spending usable pips or passing. Selecting a phase
-does not spend pips. White is the Settle track for non-Military Worlds; Credits
-are unlimited chips like base Roll. Red pips are Military value/readiness:
-settling a Military World requires enough current Red, then exhausts 1 Red pip.
-Six-cost Developments are removed from the normal bag and used as delayed
-end-game goals. Printed Cup, Citizenry, and World placement determines whether
-new max capacity becomes ready for free, waits for Credit recharge, or begins
-as a Good. Reassign powers temporarily route current pips without changing
-their max-track color.
+phase. Solo selects two eligible phases; every multiplayer game, including 2p,
+has each player select one. During selected phases, players act in turn order,
+spending usable pips or passing. Selecting a phase does not spend pips.
 
-Current playtest tuning starts main tracks, including White, at `3/3` and uses
-a VP chip pool of `7` per player.
+Blue, Brown, Red, Green, and Purple begin at `1/1`; Yellow begins at `0/0`.
+There is no White track. Red pays the full construction cost of every World.
+Credits are unlimited chips like base Roll, and the VP pool contains `7` chips
+per player. Scout spends N Blue to inspect N + 3 candidates and keep one.
+Six-cost Developments are delayed end-game goals. Printed Cup, Citizenry, and
+World placement determines whether new capacity begins ready, waits for Credit
+recharge, or begins as a Good.
 
 Rules draft:
 
@@ -46,38 +43,10 @@ Run the active multiplayer simulator:
 python3 -m phase_battery.simulate --games 100 --players P1:balanced P2:builder P3:settler P4:producer P5:shipper
 ```
 
-Compare the stricter Red tuning knob:
-
-```bash
-python3 -m phase_battery.simulate --games 100 --red-grants-max-only --players P1:mining P2:producer P3:military P4:alien P5:builder
-```
-
 Run the active solo simulator:
 
 ```bash
-python3 -m phase_battery.solo --games 100 --strategy balanced
-```
-
-## Roll For The Galaxy: Roll & Sow
-
-The **Roll & Sow** playtest edition keeps normal rolled die faces, then
-stores dice in five phase bowls. A selected phase activates that bowl for every
-player; used dice follow their normal worker lifecycle and unused dice sow
-clockwise. Six-cost Developments are delayed goals with printed end-game bonus
-conversions and a -6 VP failure risk. It supports 1-4 players and is not yet the
-adopted main ruleset.
-
-Complete rules and print-and-play materials:
-
-- `docs/roll_and_sow_rules.md`
-- `docs/roll_and_sow_rules.pdf`
-- `pnp/roll-and-sow.html`
-- `pnp/roll-and-sow.pdf`
-
-Run its multiplayer simulator:
-
-```bash
-python3 -m roll_and_sow.simulate --games 100 --players P1:balanced P2:builder P3:producer P4:shipper
+python3 -m phase_battery.solo --games 100 --strategy balanced --difficulty normal
 ```
 
 Run the parked phase-battery predecessor simulator:

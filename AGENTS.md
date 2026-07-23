@@ -7,13 +7,8 @@ variant:
 - print-and-play reference: `pnp/roll-phase-battery.html`
 - simulator: `phase_battery/`
 
-Avoid changing or reasoning from these other variants unless the user
-explicitly asks for them:
-
-- `roll_and_sow/`
-- `docs/roll_and_sow_rules.md`
-- `pnp/roll-and-sow.html`
-- `roll_galaxy/`
+Avoid changing or reasoning from the archived `roll_galaxy/` predecessor unless
+the user explicitly asks for it.
 
 Current main-rules direction:
 
@@ -27,7 +22,8 @@ Current main-rules direction:
   consume pips; pips are workers spent only when the selected phase resolves.
 - Unselected phases do not occur.
 - VP chip pool is back. Current playtest tuning uses 7 VP chips per player and
-  starting colored tracks at 3/3.
+  starting Blue, Brown, Red, Green, and Purple tracks at 1/1. Yellow starts
+  at 0/0.
 - There is no White track because the tile set has no White die grants. Red is
   the single Settle track: every World spends Red pips equal to its cost and
   may store progress. Roll has no Military World type; gray, Rebel, and
@@ -52,24 +48,24 @@ Current main-rules direction:
   1 VP chip with no Good-color or Shipper-color matching bonuses.
 - Solo uses the same low-player selected-phase model: the player selects two
   eligible phases, Dummy phase cards add selected phases and resolve their
-  Dummy effects, and only selected phases occur. Current solo cap is 15 rounds
-  with a 24-chip VP pool: 12 for the player and 12 for the Dummy seat.
+  Dummy effects, and only selected phases occur. Current solo cap is 20 rounds
+  with a 24-chip VP pool: 12 for the player and 12 for the Dummy seat. If the
+  normal goal trigger has not occurred, commit a six-cost goal at the end of
+  round 10.
 - Construction cards are parallel, not top-only. Developments can store pip
   progress from Brown or eligible Yellow. Multiple Developments can complete in
   one Develop phase. Multiple Worlds can complete in one Settle phase. Explore
-  pips inspect one more tile than the number spent; Develop pips develop;
+  pips inspect three more tiles than the number spent; Develop pips develop;
   Produce pips produce Goods on planets; Ship pips ship Goods.
-- Scout spends N Blue to inspect N+1 candidates of one type and keep one. As a
+- Scout spends N Blue to inspect N+3 candidates of one type and keep one. As a
   separate Explore action, spend 1 Blue to take another six-cost Development
   goal; before commitment it is another candidate, afterward it is another
   committed goal.
 - Choose six-cost goal candidates before setup tiles. Reveal player count + 2
   Faction tiles and the same number of Home Worlds, then draft one of each in
   reverse turn order so players can build a synergistic starting tableau.
-- After the starting-tile draft and its printed gains, each player specializes
-  in Blue Explore or Brown Develop: increase that track's max and current by 1.
-  This is a ready starting pip. Solo Industrial thresholds have not yet been
-  retuned for this +1 starting max.
+- There is no separate starting specialization. Starting-tile printed gains
+  provide the initial asymmetry on top of the five main tracks at 1/1.
 - Remove six-cost Developments from the normal bag. They are now endgame-goal
   candidates: reveal/set aside 2 + player count six-cost Developments, each
   player chooses 2, then after half the VP chips are gone or someone has 6
@@ -89,49 +85,17 @@ Current main-rules direction:
   goal availability is not a difficulty gate. Production currently requires 3
   production Worlds. Still clarify whether multiple players may choose the same
   goal from the `2 + player count` pool.
-- Retuned solo thresholds for fixed 1-VP Consume are: Easy
-  Great/Triumphant/Epic/Named 22/26/30/24, Normal 32/36/40/32, Advanced
-  38/42/46/38, and Very Hard 44/48/52/44. Industrial max-pip targets remain
-  17/19/21/23.
+- Retuned solo thresholds for the 1/1 baseline and fixed 1-VP Consume are:
+  Easy Great/Triumphant/Epic/Named 22/26/30/24, Normal 32/36/40/32,
+  Advanced 38/42/46/38, and Very Hard 44/48/52/44. Industrial max-pip
+  targets are 7/9/11/14. Builder requires 7 completed tiles, Military requires
+  Red max 3, and Discovery requires Blue max 3; other named structural targets
+  are unchanged.
 - Parked larger-expansion ideas: all phases every round, no VP pool, Ship as
   Credits only, and special Development-completion Credit rewards.
 
 Adjacent design context, not part of the active Phase Battery rules:
 
-- A July 2026 playtest found Phase Battery too resource-rich, too permissive,
-  too multiplayer-solitaire, and poor at circulating Explore tiles. An
-  explicitly reopened experimental alternative lives in
-  `roll_and_sow/game.py` with its runner in
-  `roll_and_sow/simulate.py`. Its table rules are
-  `docs/roll_and_sow_rules.md` and its printable boards are
-  `pnp/roll-and-sow.html`. It starts with 5 White dice: roll 3
-  into face-matching phase bowls and put 2 in Citizenry. Secretly select a
-  nonempty bowl; every selected phase activates that bowl for every player.
-  Use dice first, then sow all unused dice clockwise. Cup gains roll into a
-  bowl immediately; Citizenry dice cost 1 Credit to recruit and roll. Explore
-  sees 4 candidates with the first die and +1 per extra die, using a discard
-  cycle for rejected tiles. Manage Empire retains Recall from base Roll; when
-  all five bowls are empty, recalling one construction/Good die and rolling it
-  into a bowl is mandatory to prevent lockout. This is an experiment, not yet the adopted main
-  ruleset. The experiment now converts applicable persistent powers and exact
-  Reassign restrictions from `Roll_for_the_Galaxy_all_tiles.xls`. Six-cost
-  Developments use a shared `2 + player count` candidate pool, commit at half
-  the VP pool or 6 completed tiles, score converted printed end-game bonuses,
-  and suffer -6 VP when their minimum is missed. Multiple players may mark the
-  same shared candidate in this experiment. Galactic Reserves uses a provisional
-  10-owned-dice Industrial minimum; a 1,000-game 4p sensitivity run raised its
-  fulfillment from about 33% at 12 dice to about 75% at 10 dice. Goal cards
-  grant no phase power, face VP, or tableau square. Advanced Logistics and Improved
-  Reconnaissance are inert under the parallel-construction abstraction, and
-  Backup Planning still uses a generic one-route approximation because Dictate
-  is not separately modeled. The design supports 1-4 players maximum; solo
-  phase support is still provisional. With goals enabled, 200-game automated
-  samples after adding mandatory anti-lockout Recall averaged 19.8 rounds at
-  solo (180/200 reached the round cap), 23.3 at 2p, 22.0 at 3p, and 18.7 at 4p.
-  A separate 1,000-game 4p goal audit found Galactic Bankers/Federation
-  generally safe and positive, while New Galactic Order, System
-  Diversification, and Galactic Renaissance had materially higher failure
-  rates. These are AI pacing and risk signals, not human balance validation.
 - `New_Frontiers_Tile_List_ver_1_2.xlsx` and `New_frontiers_rules.pdf` are local
   untracked reference files. The workbook lists 40 unique Development entries,
   60 Worlds, and 16 starting-colony faces. New Frontiers has 56 physical

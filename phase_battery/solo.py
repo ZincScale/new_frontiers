@@ -11,9 +11,40 @@ from roll_galaxy.model import PHASE_ORDER, Phase, Tile, TileKind
 from .engine import PhaseBatteryConfig, PhaseBatteryGame
 
 
-SOLO_ROUNDS = 15
+SOLO_ROUNDS = 20
+SOLO_GOAL_COMMIT_ROUND = 10
 SOLO_VP_POOL_PER_SEAT = 12
 SOLO_VP_POOL_SEATS = 2
+SOLO_DIFFICULTIES = {
+    "easy": {
+        "great": 22,
+        "triumphant": 26,
+        "epic": 30,
+        "named": 24,
+        "industrial": 7,
+    },
+    "normal": {
+        "great": 32,
+        "triumphant": 36,
+        "epic": 40,
+        "named": 32,
+        "industrial": 9,
+    },
+    "advanced": {
+        "great": 38,
+        "triumphant": 42,
+        "epic": 46,
+        "named": 38,
+        "industrial": 11,
+    },
+    "very_hard": {
+        "great": 44,
+        "triumphant": 48,
+        "epic": 52,
+        "named": 44,
+        "industrial": 14,
+    },
+}
 
 
 @dataclass
@@ -42,12 +73,17 @@ class PhaseBatterySoloGame:
         seed: Optional[int] = None,
         config: Optional[PhaseBatteryConfig] = None,
         dummy_count: int = 2,
+        difficulty: str = "normal",
     ):
+        if difficulty not in SOLO_DIFFICULTIES:
+            raise ValueError(f"unknown solo difficulty: {difficulty}")
         self.dummy_count = dummy_count
+        self.difficulty = difficulty
         base_config = config or PhaseBatteryConfig()
         solo_config = replace(
             base_config,
             max_rounds=SOLO_ROUNDS,
+            industrial_goal_requirement=SOLO_DIFFICULTIES[difficulty]["industrial"],
             vp_pool_per_player=base_config.vp_pool_per_player
             if config is not None and base_config.vp_pool_per_player is not None
             else SOLO_VP_POOL_PER_SEAT * SOLO_VP_POOL_SEATS,
@@ -88,6 +124,8 @@ class PhaseBatterySoloGame:
 
         self.game.manage_empire(self.player)
         self.game.maybe_commit_goals()
+        if self.game.round_number >= SOLO_GOAL_COMMIT_ROUND:
+            self.game.commit_goals()
 
         return SoloRoundReport(
             self.game.round_number,
@@ -159,14 +197,28 @@ class PhaseBatterySoloGame:
         summary["dummy_goods"] = self.dummy.goods
         summary["dummy_shipped_goods"] = self.dummy.shipped_goods
         summary["end_reason"] = self.end_reason()
+        summary["difficulty"] = self.difficulty
+        summary["difficulty_thresholds"] = SOLO_DIFFICULTIES[self.difficulty]
         return summary
 
     def final_scores(self):
         return [("You", self.game.score(self.player), self.summary())]
 
 
-def run_one(strategy: str, seed: int, config: PhaseBatteryConfig, dummy_count: int):
-    game = PhaseBatterySoloGame(strategy=strategy, seed=seed, config=config, dummy_count=dummy_count)
+def run_one(
+    strategy: str,
+    seed: int,
+    config: PhaseBatteryConfig,
+    dummy_count: int,
+    difficulty: str = "normal",
+):
+    game = PhaseBatterySoloGame(
+        strategy=strategy,
+        seed=seed,
+        config=config,
+        dummy_count=dummy_count,
+        difficulty=difficulty,
+    )
     scores, reports = game.play()
     return game, scores, reports
 
@@ -177,8 +229,13 @@ def main():
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--strategy", default="balanced")
     parser.add_argument("--dummy-count", type=int, default=2)
+    parser.add_argument(
+        "--difficulty",
+        choices=tuple(SOLO_DIFFICULTIES),
+        default="normal",
+    )
     parser.add_argument("--max-track-capacity", type=int, default=6)
-    parser.add_argument("--starting-capacity", type=int, default=3)
+    parser.add_argument("--starting-capacity", type=int, default=1)
     parser.add_argument("--starting-credits", type=int, default=1)
     parser.add_argument("--free-recharge", type=int, default=0)
     parser.add_argument("--yellow-mode", choices=("ship", "alien"), default="alien")
@@ -208,7 +265,13 @@ def main():
     last_reports = None
 
     for index in range(args.games):
-        game, final_scores, reports = run_one(args.strategy, args.seed + index, config, args.dummy_count)
+        game, final_scores, reports = run_one(
+            args.strategy,
+            args.seed + index,
+            config,
+            args.dummy_count,
+            args.difficulty,
+        )
         summary = final_scores[0][2]
         scores.append(final_scores[0][1])
         rounds.append(summary["rounds"])
@@ -225,8 +288,10 @@ def main():
 
     print(f"Games: {args.games}")
     print(f"Strategy: {args.strategy}")
+    print(f"Difficulty: {args.difficulty}")
     print(f"Dummy phase cards: {args.dummy_count}")
     print(f"Round cap: {SOLO_ROUNDS}")
+    print(f"Goal commitment deadline: round {SOLO_GOAL_COMMIT_ROUND}")
     print(f"Construction limit: {config.construction_limit}")
     print(f"Starting credits: {config.starting_credits}")
     print(f"VP pool: {config.vp_pool_per_player or SOLO_VP_POOL_PER_SEAT * SOLO_VP_POOL_SEATS}")
@@ -237,6 +302,7 @@ def main():
     print(f"Average tableau/completed: {mean(tableau):.1f}/{mean(completed):.1f}")
     print(f"Average shipped goods: {mean(player_shipments):.1f}")
     print("Scoring: tableau VP + VP chips + chosen 6-cost goals")
+    print(f"Thresholds: {SOLO_DIFFICULTIES[args.difficulty]}")
     print(f"Average goals: {mean(committed_goals):.1f} committed, {mean(goal_scores):.1f} VP")
     print(f"Average dummy churn: {mean(dummy_claims):.1f} tiles, {mean(dummy_shipments):.1f} shipped goods")
     print("End reasons")

@@ -62,9 +62,6 @@ For the first playtest, do not add general free recharge beyond printed Cup
 placement, tile-specific retuning, or a new dummy-player system. Those are
 tuning knobs after the core battery loop is tested at the table.
 
-The separate rolled-dice alternative is Roll & Sow, documented in
-`docs/roll_and_sow_rules.md`. It is not part of this ruleset.
-
 ## Components
 
 Use all normal Roll for the Galaxy components except the Dice Cups.
@@ -135,11 +132,11 @@ Set up the base game normally, with these changes:
 4. Set starting tracks:
 
 ```text
-Blue    3/3
-Brown   3/3
-Red     3/3
-Green   3/3
-Purple  3/3
+Blue    1/1
+Brown   1/1
+Red     1/1
+Green   1/1
+Purple  1/1
 Credits 1 unlimited chip
 Yellow  0/0
 ```
@@ -158,10 +155,7 @@ Then draft goals and starting tiles:
    starting tiles from the game.
 4. Apply starting die gains using their printed locations. Cup pips begin
    ready; Citizenry and World pips increase max only.
-5. Choose a starting specialization: Blue Explore or Brown Develop. Increase
-   the chosen track's max and current by 1. This is a ready starting pip. With
-   no printed gain in that color, the chosen track begins round 1 at `4/4`.
-6. Draw starting Game Tiles into the Construction Zone as usual: one
+5. Draw starting Game Tiles into the Construction Zone as usual: one
    Development and one World.
 
 Unused six-cost goals are left out unless an Explore effect later adds them.
@@ -169,10 +163,10 @@ Unused six-cost goals are left out unless an Explore effect later adds them.
 Example:
 
 ```text
-Starting Red is 2 Military.
+Starting Red is 1/1.
 Your Home World grants one Military die to your Cup.
 Military maps to Red.
-Red 2/2 becomes 3/3.
+Red 1/1 becomes 2/2.
 ```
 
 If a starting tile places a die as a Good on that World, place a Good marker on
@@ -292,11 +286,12 @@ When Explore occurs, spend Blue pips.
 Explore can Scout or Stock.
 
 Scout is a single-tile action. Spend one or more Explore pips, then look through
-one more candidate tile of the needed type than the number of pips spent. In
-other words, spending `N` Blue searches `N + 1` candidates. Keep one tile and
+three more candidate tiles of the needed type than the number of pips spent. In
+other words, spending `N` Blue searches `N + 3` candidates. Keep one tile and
 put it on the matching construction area. Return the other candidates to the
-tile supply. The bonus candidate makes Blue-grant tiles reachable from the
-starting `3/3` Explore track without increasing every track's starting max.
+tile supply. The three bonus candidates make Blue-grant tiles reachable from the
+starting `1/1` Explore track while still giving a one-pip Scout a meaningful
+choice.
 
 Instead of Scouting or Stocking, spend 1 Blue pip to take one additional
 six-cost Development goal from the goals left out during setup. Keep it in your
@@ -339,7 +334,7 @@ Blue is 2/2.
 Your Development area has one tile.
 Your World area is empty.
 You spend 2 Blue to Scout for a World.
-Look through 3 World candidates.
+Look through 5 World candidates.
 Keep 1 World and put it in your World construction area.
 Blue becomes 0/2.
 ```
@@ -865,11 +860,12 @@ Free Trade Association   Novelty: 2+ Novelty Worlds.
 Galactic Bankers         Satisfied Populace: ship 4+ Goods.
 Galactic Exchange        Alien Contact: 1+ Alien World.
 Galactic Federation      Developer: 4+ Developments.
-Galactic Renaissance     Builder: 8+ completed tiles.
-Galactic Reserves        Industrial: difficulty's Industrial max-pip target.
+Galactic Renaissance     Builder: 7+ completed tiles.
+Galactic Reserves        Industrial: difficulty's Industrial max-pip target
+                         (Normal goal requirement: 9).
 Mining League            Rare Elements: 2+ Rare Worlds.
 New Economy              Production: 3+ production Worlds.
-New Galactic Order       Military: Red max 5+.
+New Galactic Order       Military: Red max 3+.
 System Diversification   Diverse: 4+ World colors.
 ```
 
@@ -911,7 +907,7 @@ Setup:
 3. Shuffle the five Dummy phase cards into a face-down deck.
 4. Choose one campaign sheet.
 5. Use a 24 VP-chip pool: 12 for you and 12 for the Dummy seat.
-6. Play exactly 15 rounds, unless your tableau reaches 12 or more tile squares
+6. Play exactly 20 rounds, unless your tableau reaches 12 or more tile squares
    first.
 
 Each campaign sheet has four win conditions. Play four games in a row. At the
@@ -935,19 +931,24 @@ converted bonus; if missed, lose 6 VP. Score-only conditions do not require a
 six-cost Development. Colonizer and Discovery are not currently tied to a
 six-cost Development and use only their printed condition.
 
+If the normal six-cost commitment trigger has not occurred by the end of round
+10, commit one candidate goal then. This midpoint deadline ensures every solo
+campaign attempt has time to resolve its required goal.
+
 If you cannot mark a new condition, you lose the campaign. If you mark all four
 conditions after four successive games, you win the campaign.
 
 Choose a solo difficulty before the first game. These thresholds are calibrated
-for the 15-round solo cap, two player phase selections, two Dummy phase cards,
-starting colored tracks at 3/3, a 24-chip solo VP pool, and fixed 1-VP Consume:
+for the 1/1 starting tracks, 20-round solo cap, two player phase selections, two
+Dummy phase cards, `N + 3` Scout, a 24-chip solo VP pool, and fixed 1-VP
+Consume:
 
 ```text
 Difficulty  Great  Triumphant  Epic  Named  Industrial
-Easy        22+    26+         30+   24+    17+ max pips
-Normal      32+    36+         40+   32+    19+ max pips
-Advanced    38+    42+         46+   38+    21+ max pips
-Very Hard   44+    48+         52+   44+    23+ max pips
+Easy        22+    26+         30+   24+    7+ max pips
+Normal      32+    36+         40+   32+    9+ max pips
+Advanced    38+    42+         46+   38+    11+ max pips
+Very Hard   44+    48+         52+   44+    14+ max pips
 ```
 
 Named win conditions:
@@ -956,7 +957,7 @@ Named win conditions:
 Great       Score the difficulty's Great VP. No six-cost goal required.
 Triumphant  Score the difficulty's Triumphant VP. No six-cost goal required.
 Epic        Score the difficulty's Epic VP. No six-cost goal required.
-Builder     Named VP, Galactic Renaissance, and complete 8+ tiles.
+Builder     Named VP, Galactic Renaissance, and complete 7+ tiles.
 Developer   Named VP, Galactic Federation, and have 4+ Developments.
 Colonizer   Named VP and have 5+ Worlds. No six-cost goal required.
 Satisfied Populace
@@ -971,8 +972,8 @@ Rare Elements
             Named VP, Mining League, and have 2+ Rare Worlds.
 Alien Contact
             Named VP, Galactic Exchange, and have 1+ Alien World.
-Military    Named VP, New Galactic Order, and have Red 5.
-Discovery   Named VP and have Blue max 5. No six-cost goal required.
+Military    Named VP, New Galactic Order, and have Red max 3.
+Discovery   Named VP and have Blue max 3. No six-cost goal required.
 ```
 
 Campaign sheets:
@@ -1038,7 +1039,7 @@ exist only to keep the bag moving at a multiplayer-like pace.
 
 Solo end conditions:
 
-- the 15-round limit is reached;
+- the 20-round limit is reached;
 - your tableau reaches 12 or more tile squares.
 
 Finish the round, then check your campaign sheet. Mark one satisfied unmarked
@@ -1049,7 +1050,7 @@ Solo example:
 ```text
 Campaign: Outreach.
 Unmarked conditions: Great, Colonizer, Builder, Discovery.
-On Normal difficulty, you finish with 35 VP, 8 completed tiles, and Blue max 5.
+On Normal difficulty, you finish with 35 VP, 7 completed tiles, and Blue max 3.
 You may mark Great, Builder, or Discovery, but not Colonizer unless you also
 have 5+ Worlds. Mark exactly one condition.
 
@@ -1079,11 +1080,11 @@ Ship: Dummy has 1 Good, so set Dummy Goods to 0.
 Initial tracks:
 
 ```text
-Blue    2/2
-Brown   2/2
-Red     2/2
-Green   2/2
-Purple  2/2
+Blue    1/1
+Brown   1/1
+Red     1/1
+Green   1/1
+Purple  1/1
 Credits 1
 Yellow  0/0
 ```
@@ -1091,7 +1092,7 @@ Yellow  0/0
 Your Home World grants one Military die:
 
 ```text
-Red 2/2 -> 3/3
+Red 1/1 -> 2/2
 ```
 
 Round 1 phase order:
@@ -1103,48 +1104,46 @@ Explore, Develop, Settle, Produce, Ship
 Explore:
 
 ```text
-Spend 2 Blue to Scout for a World.
-Look through 3 World candidates.
+Spend 1 Blue to Scout for a World.
+Look through 4 World candidates.
 Keep 1 World.
-Blue 2/2 -> 0/2.
+Blue 1/1 -> 0/1.
 ```
 
 Develop:
 
 ```text
-Spend 2 Brown on a cost-2 Development.
-Brown 2/2 -> 0/2.
-Complete the Development.
+Spend 1 Brown on a cost-2 Development.
+Brown 1/1 -> 0/1.
+Store 1 pip of progress on the Development.
 ```
 
 Settle:
 
 ```text
 One gray World costs 3.
-Red is 3/3.
-Spend 3 Red to complete it.
-Red 3/3 -> 0/3.
-Complete the World.
-The World grants one Genes die.
-Green 2/2 -> 3/3.
+Red is 2/2.
+Spend 2 Red on it.
+Red 2/2 -> 0/2.
+Store 2 pips of progress on the World.
 ```
 
 Manage Empire:
 
 ```text
 Credits 1.
-Recharge Brown 0/2 -> 1/2.
+Recharge Brown 0/1 -> 1/1.
 Credits would become 0, so reset to 1.
 ```
 
 End of round tracks:
 
 ```text
-Blue    1/2
-Brown   1/2
-Red     0/3
-Green   3/3
-Purple  2/2
+Blue    0/1
+Brown   1/1
+Red     0/2
+Green   1/1
+Purple  1/1
 Credits 1
 Yellow  0/0
 ```
@@ -1154,7 +1153,7 @@ Yellow  0/0
 Use these defaults:
 
 ```text
-Starting main tracks: Blue, Brown, Red, Green, and Purple at 3/3
+Starting main tracks: Blue, Brown, Red, Green, and Purple at 1/1
 Starting Credits:     1 unlimited chip
 Starting Yellow:      0/0
 Track max:            6

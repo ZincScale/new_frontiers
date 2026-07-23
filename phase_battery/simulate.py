@@ -31,7 +31,7 @@ def main():
     parser.add_argument("--games", type=int, default=100)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--max-track-capacity", type=int, default=6)
-    parser.add_argument("--starting-capacity", type=int, default=3)
+    parser.add_argument("--starting-capacity", type=int, default=1)
     parser.add_argument("--starting-credits", type=int, default=1)
     parser.add_argument("--free-recharge", type=int, default=0)
     parser.add_argument("--yellow-mode", choices=("ship", "alien"), default="alien")

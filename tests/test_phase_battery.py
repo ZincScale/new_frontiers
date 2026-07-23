@@ -1,5 +1,10 @@
 from phase_battery.engine import PhaseBatteryConfig, PhaseBatteryGame
-from phase_battery.solo import PhaseBatterySoloGame
+from phase_battery.solo import (
+    SOLO_DIFFICULTIES,
+    SOLO_GOAL_COMMIT_ROUND,
+    SOLO_ROUNDS,
+    PhaseBatterySoloGame,
+)
 from roll_galaxy.model import BuildSlot, DieColor, Good, Phase, Tile, TileKind
 
 
@@ -29,8 +34,8 @@ def test_credits_are_unlimited_chips_and_red_is_the_only_settle_track():
 
     assert player.credits == 40
     assert DieColor.WHITE not in player.tracks
-    assert game.track(player, DieColor.RED).current >= 3
-    assert game.track(player, DieColor.RED).maximum >= 3
+    assert game.track(player, DieColor.RED).current >= 1
+    assert game.track(player, DieColor.RED).maximum >= 1
     assert "white" not in game.player_summary(player)["tracks"]
 
 
@@ -77,25 +82,21 @@ def test_solo_game_selects_two_eligible_phases():
     assert game.phase_selection_count() == 2
 
 
-def test_starting_specialization_adds_one_ready_blue_or_brown_pip():
-    no_specialization = PhaseBatteryConfig(starting_specialization=False)
-    builder_game = PhaseBatteryGame([("Builder", "builder")], seed=27)
-    base_builder_game = PhaseBatteryGame(
-        [("Builder", "builder")], seed=27, config=no_specialization
-    )
-    explorer_game = PhaseBatteryGame([("Explorer", "novelty")], seed=28)
-    base_explorer_game = PhaseBatteryGame(
-        [("Explorer", "novelty")], seed=28, config=no_specialization
-    )
-    builder = builder_game.players[0]
-    base_builder = base_builder_game.players[0]
-    explorer = explorer_game.players[0]
-    base_explorer = base_explorer_game.players[0]
+def test_main_tracks_start_with_one_ready_pip_before_tile_gains():
+    game = PhaseBatteryGame([("P1", "builder")], seed=27)
+    player = game.make_player("Fresh", "builder")
 
-    assert builder.tracks[DieColor.BROWN].maximum == base_builder.tracks[DieColor.BROWN].maximum + 1
-    assert builder.tracks[DieColor.BROWN].current == base_builder.tracks[DieColor.BROWN].current + 1
-    assert explorer.tracks[DieColor.BLUE].maximum == base_explorer.tracks[DieColor.BLUE].maximum + 1
-    assert explorer.tracks[DieColor.BLUE].current == base_explorer.tracks[DieColor.BLUE].current + 1
+    for color in (
+        DieColor.BLUE,
+        DieColor.BROWN,
+        DieColor.RED,
+        DieColor.GREEN,
+        DieColor.PURPLE,
+    ):
+        assert player.tracks[color].current == 1
+        assert player.tracks[color].maximum == 1
+    assert player.tracks[DieColor.YELLOW].current == 0
+    assert player.tracks[DieColor.YELLOW].maximum == 0
 
 
 def test_three_player_game_selects_one_eligible_phase_per_player():
@@ -119,13 +120,15 @@ def test_explore_requires_ready_blue_pip_to_select():
     assert game.choose_phase(player) is Phase.DEVELOP
 
 
-def test_explore_scout_gets_one_bonus_candidate():
+def test_explore_scout_gets_three_bonus_candidates():
     game = PhaseBatteryGame([("P1", "novelty")], seed=26)
     player = game.players[0]
     player.dev_stack = []
     player.world_stack = [BuildSlot(Tile("w", "Queued World", TileKind.WORLD, 1, 1))]
     player.tracks[DieColor.BLUE].current = 1
-    ordinary = Tile("d-ordinary", "Ordinary", TileKind.DEVELOPMENT, 1, 1)
+    ordinary_1 = Tile("d-ordinary-1", "Ordinary 1", TileKind.DEVELOPMENT, 1, 1)
+    ordinary_2 = Tile("d-ordinary-2", "Ordinary 2", TileKind.DEVELOPMENT, 1, 1)
+    ordinary_3 = Tile("d-ordinary-3", "Ordinary 3", TileKind.DEVELOPMENT, 1, 1)
     blue = Tile(
         "d-blue",
         "Blue Grant",
@@ -134,7 +137,7 @@ def test_explore_scout_gets_one_bonus_candidate():
         2,
         grants=(DieColor.BLUE,),
     )
-    game.tile_bag = [ordinary, blue]
+    game.tile_bag = [ordinary_1, ordinary_2, ordinary_3, blue]
 
     game.resolve_phase(player, Phase.EXPLORE)
 
@@ -756,9 +759,60 @@ def test_solo_play_returns_summary():
     assert solo.game.round_number <= solo.game.config.max_rounds
 
 
-def test_solo_defaults_to_twenty_four_vp_chips():
+def test_solo_defaults_to_rebased_clock_thresholds_and_twenty_four_vp_chips():
     solo = PhaseBatterySoloGame(seed=26)
 
     assert solo.player.credits == 1
+    assert solo.game.config.max_rounds == SOLO_ROUNDS == 20
     assert solo.game.vp_pool_per_player == 24
     assert solo.game.vp_pool == 24
+    assert solo.difficulty == "normal"
+    assert SOLO_DIFFICULTIES["normal"] == {
+        "great": 32,
+        "triumphant": 36,
+        "epic": 40,
+        "named": 32,
+        "industrial": 9,
+    }
+
+
+def test_solo_commits_a_goal_by_round_ten():
+    solo = PhaseBatterySoloGame(seed=42)
+    solo.game.round_number = SOLO_GOAL_COMMIT_ROUND - 1
+    solo.player.dev_stack = []
+    solo.player.world_stack = []
+
+    solo.play_round()
+
+    assert solo.game.goal_commit_round == SOLO_GOAL_COMMIT_ROUND
+    assert len(solo.game.committed_goals[solo.player.name]) == 1
+
+
+def test_goal_requirements_match_rebased_solo_structure_targets():
+    game = PhaseBatteryGame([("P1", "balanced")], seed=43)
+    player = game.players[0]
+    goals = {tile.id: tile for tile in game.endgame_goal_market}
+    for tile in game.extra_endgame_goals:
+        goals[tile.id] = tile
+
+    assert game.endgame_goal_requirement(
+        player, goals["galactic_renaissance"]
+    )[1] == 7
+    assert game.endgame_goal_requirement(
+        player, goals["galactic_reserves"]
+    )[1] == 9
+    assert game.endgame_goal_requirement(
+        player, goals["new_galactic_order"]
+    )[1] == 3
+
+    easy_solo = PhaseBatterySoloGame(seed=44, difficulty="easy")
+    easy_goals = {
+        tile.id: tile
+        for tile in (
+            easy_solo.game.endgame_goal_market
+            + easy_solo.game.extra_endgame_goals
+        )
+    }
+    assert easy_solo.game.endgame_goal_requirement(
+        easy_solo.player, easy_goals["galactic_reserves"]
+    )[1] == 7
