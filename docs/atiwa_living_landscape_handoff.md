@@ -144,34 +144,12 @@ distinct playstyle lanes and action-timed claim conditions. Do not convert the
 five v0.2 powers mechanically; their intended routes may inspire race goals,
 but every v0.3 card must stand on its own as a public achievement.
 
-Exact-deck simulation needs a transcription of all 36 official Terrain cards.
-Use one CSV row per distinct card with this header:
-
-```csv
-id,name,copies,printed_vp,nature_icons,top_middle,top_right,middle_left,middle_center,middle_right,bottom_left,bottom_center,bottom_right,notes
-```
-
-Space codes:
-
-```text
-B      blank
-X      blocked/non-space
-W      wild animal
-T      tree
-F      fruit
-BAT    fruit bat
-G      goat
-H      normal house
-HU     uninhabitable house
-T+W    tree that can hold a wild animal
-T+BAT  tree that can hold a fruit bat
-```
-
-Preserve card orientation and exact space position because pollution fills
-spaces in positional order. Use `?` plus a note rather than guessing an
-unclear symbol. After the CSV is supplied, validate its IDs, total physical
-card count, codes, positions, copies, and known special spaces before replacing
-the synthetic deck in balance simulations.
+The official component input needed for that work is specified in
+`docs/atiwa_component_transcription_requirements.md`. Transcribe the action
+board, all player-count extensions, and the six action-space tiles first so
+the initial Commitment conditions can reflect real worker-space competition.
+The complete Terrain and Location listings are required before exact-deck
+simulation or representative balance claims.
 
 ## Workspace State
 
