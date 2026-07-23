@@ -4,13 +4,6 @@ Open the desired HTML file in a browser and print at 100% scale.
 
 ## Contents
 
-### Tiny Galaxy Upgrade Module
-
-- 12 upgrade cards
-- 4 Rival Empire profile cards
-- 4 Rival difficulty cards
-- 7 reference / solo procedure cards
-
 ### Roll Phase Battery Variant
 
 - 4 deterministic phase-track boards
@@ -27,17 +20,9 @@ Open the desired HTML file in a browser and print at 100% scale.
 
 ## Files
 
-- `print-and-play.html`: Tiny Galaxy printable card sheets.
 - `roll-phase-battery.html`: Roll phase battery boards, aid sheets, and Dummy cards.
 - `roll-phase-battery.pdf`: generated Roll phase battery print-and-play PDF.
-- `styles/cards.css`: print layout and card styling.
 - `styles/roll.css`: Roll variant print layout.
-- `assets/source/upgrade-art-sheet.png`: 12-panel representative upgrade art.
-- `assets/source/upgrade-art-sheet-v1.png`: earlier 6-panel art sheet kept for reference.
-- `assets/source/rival-art-sheet.png`: representative rival art.
-
-The card text is HTML, not embedded in the art, so rules can be edited quickly
-as balance changes.
 
 ## Print Notes
 

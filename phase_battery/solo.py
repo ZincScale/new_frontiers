@@ -6,9 +6,8 @@ from dataclasses import dataclass, replace
 from statistics import mean
 from typing import Optional
 
-from roll_galaxy.model import PHASE_ORDER, Phase, Tile, TileKind
-
 from .engine import PhaseBatteryConfig, PhaseBatteryGame
+from .model import PHASE_ORDER, Phase, Tile, TileKind
 
 
 SOLO_ROUNDS = 20

@@ -4,8 +4,8 @@ import random
 from dataclasses import dataclass
 from typing import Iterable, Optional
 
-from roll_galaxy.model import BuildSlot, CapacityTrack, DieColor, Good, PHASE_ORDER, Phase, Player, Tile, TileKind
-from roll_galaxy.tiles import HOME_WORLDS, NON_START_TILES, START_FACTION_PAIRS
+from .model import BuildSlot, CapacityTrack, DieColor, Good, PHASE_ORDER, Phase, Player, Tile, TileKind
+from .tiles import HOME_WORLDS, NON_START_TILES, START_FACTION_PAIRS
 
 
 PHASE_COLOR: dict[Phase, DieColor] = {

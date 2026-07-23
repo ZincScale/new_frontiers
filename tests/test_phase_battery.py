@@ -5,7 +5,7 @@ from phase_battery.solo import (
     SOLO_ROUNDS,
     PhaseBatterySoloGame,
 )
-from roll_galaxy.model import BuildSlot, DieColor, Good, Phase, Tile, TileKind
+from phase_battery.model import BuildSlot, DieColor, Good, Phase, Tile, TileKind
 
 
 def test_round_resolves_selected_phases_in_turn_order():

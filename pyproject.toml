@@ -1,6 +1,6 @@
 [project]
-name = "dice-galaxy-upgrades"
+name = "roll-phase-battery"
 version = "0.1.0"
-description = "Digital prototype for a small-box dice-galaxy upgrade module"
+description = "Deterministic no-roll variant for Roll for the Galaxy"
 requires-python = ">=3.9"
 dependencies = []

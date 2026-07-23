@@ -7,9 +7,6 @@ variant:
 - print-and-play reference: `pnp/roll-phase-battery.html`
 - simulator: `phase_battery/`
 
-Avoid changing or reasoning from the archived `roll_galaxy/` predecessor unless
-the user explicitly asks for it.
-
 Current main-rules direction:
 
 - Goal: stay close to base Roll for the Galaxy, but remove player dice rolling
